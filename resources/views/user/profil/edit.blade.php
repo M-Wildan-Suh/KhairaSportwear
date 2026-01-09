@@ -3,291 +3,430 @@
 @section('title', 'Edit Profil - SportWear')
 
 @section('content')
-<div class="container py-5">
+<div class="min-h-screen bg-gray-50 py-8">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('user.dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Profil</li>
-        </ol>
-    </nav>
-    
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-lg-3 mb-4" data-aos="fade-right">
-            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px;">
-                <div class="card-body">
-                    <!-- User Profile -->
-                    <div class="text-center mb-4">
-                        <div class="avatar-container position-relative mx-auto mb-3">
-                            <img src="{{ $user->avatar_url }}" 
-                                 alt="{{ $user->name }}"
-                                 class="avatar-img rounded-circle"
-                                 id="avatarPreview"
-                                 style="width: 120px; height: 120px; object-fit: cover;">
-                            <button class="btn btn-primary btn-sm avatar-edit-btn" onclick="openAvatarModal()">
-                                <i class="fas fa-camera"></i>
-                            </button>
+    <div class="container mx-auto px-4 lg:px-8 mb-8">
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{{ route('home') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-primary">
+                        <i class="fas fa-home mr-2"></i>
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                        <a href="{{ route('user.dashboard') }}" class="ml-3 text-sm font-medium text-gray-700 hover:text-primary">
+                            Dashboard
+                        </a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                        <span class="ml-3 text-sm font-medium text-primary">Profil</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container mx-auto px-4 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-24">
+                    <!-- Profile Card -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden mb-6" data-aos="fade-right">
+                        <div class="p-6 text-center">
+                            <!-- Avatar -->
+                            <div class="relative mx-auto mb-4">
+                                <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-lg">
+                                    <img src="{{ $user->avatar_url }}" 
+                                         alt="{{ $user->name }}"
+                                         id="avatarPreview"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <button onclick="openAvatarModal()"
+                                        class="absolute bottom-2 right-2 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-lg hover:bg-primary-dark transition-colors duration-200">
+                                    <i class="fas fa-camera text-sm"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- User Info -->
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">{{ $user->name }}</h3>
+                            <p class="text-gray-600 text-sm mb-3">{{ $user->email }}</p>
+                            
+                            <!-- Member Since -->
+                            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                <i class="fas fa-user-plus text-xs"></i>
+                                <span>Member sejak {{ $statistics['member_since'] }}</span>
+                            </div>
                         </div>
-                        <h5 class="font-weight-bold mb-1">{{ $user->name }}</h5>
-                        <p class="text-muted small mb-0">{{ $user->email }}</p>
-                        <span class="badge bg-success mt-2">Member sejak {{ $statistics['member_since'] }}</span>
+                        
+                        <!-- Navigation -->
+                        <div class="border-t border-gray-200">
+                            <nav class="p-4">
+                                <ul class="space-y-2">
+                                    <li>
+                                        <a href="{{ route('user.profil.edit') }}" 
+                                           class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl font-medium">
+                                            <i class="fas fa-user"></i>
+                                            <span>Profil Saya</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('user.profil.security') }}" 
+                                           class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors duration-200">
+                                            <i class="fas fa-shield-alt"></i>
+                                            <span>Keamanan</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('user.transaksi.index') }}" 
+                                           class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors duration-200">
+                                            <i class="fas fa-receipt"></i>
+                                            <span>Transaksi</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('user.sewa.aktif') }}" 
+                                           class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors duration-200">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span>Sewa Aktif</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('user.notifikasi.index') }}" 
+                                           class="flex items-center justify-between gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors duration-200">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fas fa-bell"></i>
+                                                <span>Notifikasi</span>
+                                            </div>
+                                            @if($user->getUnreadNotificationsCount() > 0)
+                                            <span class="px-2 py-1 bg-red-500 text-white text-xs rounded-full">
+                                                {{ $user->getUnreadNotificationsCount() }}
+                                            </span>
+                                            @endif
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                     
-                    <!-- Navigation -->
-                    <div class="profile-nav">
-                        <div class="list-group list-group-flush">
-                            <a href="{{ route('user.profil.edit') }}" 
-                               class="list-group-item list-group-item-action border-0 py-3 active">
-                                <i class="fas fa-user me-2"></i> Profil Saya
-                            </a>
-                            <a href="{{ route('user.profil.security') }}" 
-                               class="list-group-item list-group-item-action border-0 py-3">
-                                <i class="fas fa-shield-alt me-2"></i> Keamanan
-                            </a>
-                            <a href="{{ route('user.transaksi.index') }}" 
-                               class="list-group-item list-group-item-action border-0 py-3">
-                                <i class="fas fa-receipt me-2"></i> Transaksi
-                            </a>
-                            <a href="{{ route('user.sewa.aktif') }}" 
-                               class="list-group-item list-group-item-action border-0 py-3">
-                                <i class="fas fa-calendar-alt me-2"></i> Sewa Aktif
-                            </a>
-                            <a href="{{ route('user.notifikasi.index') }}" 
-                               class="list-group-item list-group-item-action border-0 py-3">
-                                <i class="fas fa-bell me-2"></i> Notifikasi
-                                @if($user->getUnreadNotificationsCount() > 0)
-                                <span class="badge bg-danger float-end">{{ $user->getUnreadNotificationsCount() }}</span>
-                                @endif
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Main Content -->
-        <div class="col-lg-9">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-left">
-                <div>
-                    <h1 class="h2 font-weight-bold mb-1">Profil Saya</h1>
-                    <p class="text-muted mb-0">Kelola informasi profil Anda</p>
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('user.dashboard') }}" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-left me-2"></i> Kembali
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Stats Cards -->
-            <div class="row mb-4" data-aos="fade-up">
-                <div class="col-md-3 col-6 mb-3">
-                    <div class="stat-card bg-white border rounded-3 p-3 text-center shadow-sm">
-                        <div class="stat-icon mb-2">
-                            <i class="fas fa-shopping-cart fa-2x text-primary"></i>
-                        </div>
-                        <h4 class="mb-1">{{ $statistics['total_transactions'] }}</h4>
-                        <p class="text-muted small mb-0">Total Transaksi</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <div class="stat-card bg-white border rounded-3 p-3 text-center shadow-sm">
-                        <div class="stat-icon mb-2">
-                            <i class="fas fa-wallet fa-2x text-success"></i>
-                        </div>
-                        <h4 class="mb-1">Rp {{ number_format($statistics['total_spent'], 0, ',', '.') }}</h4>
-                        <p class="text-muted small mb-0">Total Pengeluaran</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <div class="stat-card bg-white border rounded-3 p-3 text-center shadow-sm">
-                        <div class="stat-icon mb-2">
-                            <i class="fas fa-calendar-check fa-2x text-info"></i>
-                        </div>
-                        <h4 class="mb-1">{{ $statistics['active_rentals'] }}</h4>
-                        <p class="text-muted small mb-0">Sewa Aktif</p>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <div class="stat-card bg-white border rounded-3 p-3 text-center shadow-sm">
-                        <div class="stat-icon mb-2">
-                            <i class="fas fa-flag-checkered fa-2x text-warning"></i>
-                        </div>
-                        <h4 class="mb-1">{{ $statistics['completed_rentals'] }}</h4>
-                        <p class="text-muted small mb-0">Sewa Selesai</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Profile Form -->
-            <div class="row" data-aos="fade-up" data-aos-delay="100">
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-header bg-white border-0 pt-4">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-user-edit me-2"></i>
-                                Informasi Pribadi
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <form id="profileForm">
-                                @csrf
-                                
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control" id="name" 
-                                                   name="name" value="{{ $user->name }}" required>
-                                            <label for="name">Nama Lengkap</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="email" class="form-control" id="email" 
-                                                   name="email" value="{{ $user->email }}" required>
-                                            <label for="email">Email</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="tel" class="form-control" id="phone" 
-                                                   name="phone" value="{{ $user->phone }}" required>
-                                            <label for="phone">Nomor Telepon</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control" id="member_since" 
-                                                   value="Member sejak {{ $statistics['member_since'] }}" disabled>
-                                            <label for="member_since">Bergabung</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-12">
-                                        <div class="form-floating">
-                                            <textarea class="form-control" id="address" 
-                                                      name="address" style="height: 100px" required>{{ $user->address }}</textarea>
-                                            <label for="address">Alamat Lengkap</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="d-flex justify-content-end gap-2 mt-4">
-                                    <button type="reset" class="btn btn-outline-secondary">
-                                        <i class="fas fa-redo me-2"></i> Reset
-                                    </button>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save me-2"></i> Simpan Perubahan
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Account Status -->
-                <div class="col-lg-4">
-                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-header bg-white border-0 pt-4">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-user-check me-2"></i>
-                                Status Akun
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="account-status">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="status-icon bg-success rounded-circle p-2 me-3">
-                                        <i class="fas fa-check text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Email Terverifikasi</h6>
-                                        <small class="text-muted">{{ $user->email }}</small>
-                                    </div>
-                                </div>
-                                
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="status-icon bg-primary rounded-circle p-2 me-3">
-                                        <i class="fas fa-user text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Tipe Akun</h6>
-                                        <small class="text-muted">{{ $user->role === 'admin' ? 'Administrator' : 'Pelanggan' }}</small>
-                                    </div>
-                                </div>
-                                
-                                <div class="d-flex align-items-center">
-                                    <div class="status-icon bg-info rounded-circle p-2 me-3">
-                                        <i class="fas fa-shield-alt text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Keamanan</h6>
-                                        <small class="text-muted">Password terakhir diubah {{ $user->updated_at->diffForHumans() }}</small>
-                                    </div>
-                                </div>
+                    <!-- Quick Stats -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6" data-aos="fade-right" data-aos-delay="100">
+                        <h4 class="text-lg font-bold text-gray-900 mb-4">Ringkasan Akun</h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Tipe Akun</span>
+                                <span class="font-semibold text-gray-900">{{ $user->role === 'admin' ? 'Administrator' : 'Pelanggan' }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Email Status</span>
+                                <span class="inline-flex items-center gap-1 text-green-600 font-semibold">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Terverifikasi</span>
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Keamanan</span>
+                                <span class="text-gray-900">{{ $user->updated_at->diffForHumans() }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Recent Activity -->
-            <div class="card border-0 shadow-sm rounded-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="card-header bg-white border-0 pt-4">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-history me-2"></i>
-                        Aktivitas Terbaru
-                    </h5>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3 space-y-8">
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-aos="fade-left">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 mb-2">Profil Saya</h1>
+                        <p class="text-gray-600">Kelola informasi profil dan akun Anda</p>
+                    </div>
+                    <a href="{{ route('user.dashboard') }}" 
+                       class="flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-200">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Kembali ke Dashboard</span>
+                    </a>
                 </div>
-                <div class="card-body">
-                    @if($recentActivities->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Transaksi</th>
-                                    <th>Tanggal</th>
-                                    <th>Status</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($recentActivities as $activity)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="activity-icon bg-{{ $activity->tipe === 'penjualan' ? 'success' : 'info' }} rounded-circle p-2 me-3">
-                                                <i class="fas fa-{{ $activity->tipe === 'penjualan' ? 'shopping-cart' : 'calendar-alt' }} text-white"></i>
-                                            </div>
-                                            <div>
-                                                <div class="font-weight-bold">{{ $activity->kode_transaksi }}</div>
-                                                <small class="text-muted">{{ $activity->tipe === 'penjualan' ? 'Pembelian' : 'Penyewaan' }}</small>
-                                            </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-aos="fade-up">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-300">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ $statistics['total_transactions'] }}</p>
+                                <p class="text-sm text-gray-600">Total Transaksi</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-300">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-wallet text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($statistics['total_spent'], 0, ',', '.') }}</p>
+                                <p class="text-sm text-gray-600">Total Pengeluaran</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-300">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-cyan-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ $statistics['active_rentals'] }}</p>
+                                <p class="text-sm text-gray-600">Sewa Aktif</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-300">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-flag-checkered text-amber-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ $statistics['completed_rentals'] }}</p>
+                                <p class="text-sm text-gray-600">Sewa Selesai</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Form -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+                    <!-- Form Header -->
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-user-edit text-primary"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-900">Informasi Pribadi</h2>
+                        </div>
+                    </div>
+
+                    <!-- Form Body -->
+                    <div class="p-6">
+                        <form id="profileForm">
+                            @csrf
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Name -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Nama Lengkap
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-user text-gray-400"></i>
                                         </div>
-                                    </td>
-                                    <td>{{ $activity->created_at->format('d/m/Y H:i') }}</td>
-                                    <td>
-                                        @include('components.status-badge', ['status' => $activity->status])
-                                    </td>
-                                    <td class="font-weight-bold">Rp {{ number_format($activity->total_bayar, 0, ',', '.') }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                        <input type="text" 
+                                               id="name"
+                                               name="name"
+                                               value="{{ $user->name }}"
+                                               class="pl-10 w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
+                                               required>
+                                    </div>
+                                </div>
+
+                                <!-- Email -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Email
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-envelope text-gray-400"></i>
+                                        </div>
+                                        <input type="email" 
+                                               id="email"
+                                               name="email"
+                                               value="{{ $user->email }}"
+                                               class="pl-10 w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
+                                               required>
+                                    </div>
+                                </div>
+
+                                <!-- Phone -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Nomor Telepon
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-phone text-gray-400"></i>
+                                        </div>
+                                        <input type="tel" 
+                                               id="phone"
+                                               name="phone"
+                                               value="{{ $user->phone }}"
+                                               class="pl-10 w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
+                                               required>
+                                    </div>
+                                </div>
+
+                                <!-- Member Since -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Bergabung
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-calendar text-gray-400"></i>
+                                        </div>
+                                        <input type="text" 
+                                               value="Member sejak {{ $statistics['member_since'] }}"
+                                               class="pl-10 w-full rounded-xl border-gray-300 bg-gray-50"
+                                               disabled>
+                                    </div>
+                                </div>
+
+                                <!-- Address -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Alamat Lengkap
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute top-3 left-3 pointer-events-none">
+                                            <i class="fas fa-map-marker-alt text-gray-400"></i>
+                                        </div>
+                                        <textarea id="address"
+                                                  name="address"
+                                                  rows="3"
+                                                  class="pl-10 w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
+                                                  required>{{ $user->address }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
+                                <button type="reset" 
+                                        class="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center gap-2">
+                                    <i class="fas fa-redo"></i>
+                                    <span>Reset</span>
+                                </button>
+                                <button type="submit" 
+                                        id="saveProfileBtn"
+                                        class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
+                                    <i class="fas fa-save"></i>
+                                    <span>Simpan Perubahan</span>
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    @else
-                    <div class="text-center py-4">
-                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Belum ada aktivitas</h5>
-                        <p class="text-muted">Mulai berbelanja untuk melihat aktivitas Anda</p>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+                    <!-- Activity Header -->
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-history text-purple-600"></i>
+                                </div>
+                                <h2 class="text-xl font-bold text-gray-900">Aktivitas Terbaru</h2>
+                            </div>
+                            <a href="{{ route('user.transaksi.index') }}" 
+                               class="text-sm text-primary font-semibold hover:text-primary-dark transition-colors duration-200">
+                                Lihat Semua
+                            </a>
+                        </div>
                     </div>
-                    @endif
+
+                    <!-- Activity Body -->
+                    <div class="p-6">
+                        @if($recentActivities->count() > 0)
+                        <div class="space-y-4">
+                            @foreach($recentActivities as $activity)
+                            <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
+                                <!-- Activity Icon -->
+                                <div class="w-12 h-12 rounded-xl {{ $activity->tipe === 'penjualan' ? 'bg-green-100' : 'bg-blue-100' }} flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-{{ $activity->tipe === 'penjualan' ? 'shopping-cart' : 'calendar-alt' }} {{ $activity->tipe === 'penjualan' ? 'text-green-600' : 'text-blue-600' }}"></i>
+                                </div>
+                                
+                                <!-- Activity Details -->
+                                <div class="flex-1">
+                                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+                                        <div>
+                                            <h4 class="font-bold text-gray-900">{{ $activity->kode_transaksi }}</h4>
+                                            <p class="text-sm text-gray-600">
+                                                {{ $activity->tipe === 'penjualan' ? 'Pembelian' : 'Penyewaan' }} • 
+                                                {{ $activity->created_at->format('d F Y, H:i') }}
+                                            </p>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-lg font-bold text-gray-900">
+                                                Rp {{ number_format($activity->total_bayar, 0, ',', '.') }}
+                                            </span>
+                                            {!! $activity->status_badge !!}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Activity Items -->
+                                    @if($activity->detailTransaksis->count() > 0)
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <div class="flex flex-wrap gap-2">
+                                            @foreach($activity->detailTransaksis->take(3) as $detail)
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs bg-gray-200 text-gray-800">
+                                                {{ $detail->produk->nama }} ({{ $detail->quantity }})
+                                            </span>
+                                            @endforeach
+                                            @if($activity->detailTransaksis->count() > 3)
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs bg-gray-200 text-gray-800">
+                                                +{{ $activity->detailTransaksis->count() - 3 }} lainnya
+                                            </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @else
+                        <!-- Empty State -->
+                        <div class="text-center py-12">
+                            <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                                <i class="fas fa-history text-gray-400 text-3xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">Belum Ada Aktivitas</h3>
+                            <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                                Mulai berbelanja atau menyewa alat olahraga untuk melihat aktivitas Anda di sini
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                <a href="{{ route('user.produk.index') }}" 
+                                   class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200">
+                                    <i class="fas fa-store mr-2"></i>
+                                    Mulai Belanja
+                                </a>
+                                <a href="{{ route('user.sewa.index') }}" 
+                                   class="px-6 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-200">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    Sewa Alat
+                                </a>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -295,39 +434,94 @@
 </div>
 
 <!-- Avatar Modal -->
-<div class="modal fade" id="avatarModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ubah Foto Profil</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div id="avatarModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-4 mx-auto p-4 w-full max-w-md">
+        <div class="bg-white rounded-2xl shadow-xl">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-gray-900">Ubah Foto Profil</h3>
+                    <button onclick="closeAvatarModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
             </div>
-            <div class="modal-body">
-                <div class="text-center mb-4">
-                    <img src="{{ $user->avatar_url }}" 
-                         alt="Avatar Preview" 
-                         class="rounded-circle mb-3"
-                         id="avatarModalPreview"
-                         style="width: 150px; height: 150px; object-fit: cover;">
+            
+            <!-- Modal Body -->
+            <div class="p-6">
+                <!-- Current Avatar Preview -->
+                <div class="text-center mb-6">
+                    <div class="w-40 h-40 mx-auto rounded-full overflow-hidden border-4 border-white shadow-lg mb-4">
+                        <img src="{{ $user->avatar_url }}" 
+                             alt="Avatar Preview" 
+                             id="avatarModalPreview"
+                             class="w-full h-full object-cover">
+                    </div>
+                    <p class="text-sm text-gray-600">Foto profil Anda saat ini</p>
                 </div>
                 
+                <!-- Upload Form -->
                 <form id="avatarForm">
                     @csrf
-                    <div class="mb-3">
-                        <label class="form-label">Pilih Foto Baru</label>
-                        <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
-                        <div class="form-text">Format: JPG, PNG (maks. 2MB)</div>
+                    
+                    <!-- File Upload -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">
+                            Pilih Foto Baru
+                        </label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-primary transition-colors duration-200">
+                            <div class="space-y-1 text-center">
+                                <i class="fas fa-cloud-upload-alt text-gray-400 text-4xl mx-auto mb-3"></i>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="avatar" class="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-dark focus-within:outline-none">
+                                        <span>Upload file</span>
+                                        <input id="avatar" 
+                                               name="avatar" 
+                                               type="file" 
+                                               class="sr-only" 
+                                               accept="image/*">
+                                    </label>
+                                    <p class="pl-1">atau drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">
+                                    PNG, JPG maksimal 2MB
+                                </p>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-upload me-2"></i> Upload Foto
-                        </button>
+                    <!-- Info Box -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-500 text-lg mt-0.5"></i>
+                            <div class="text-sm text-blue-700">
+                                <p class="font-medium mb-1">Tips foto profil yang baik:</p>
+                                <ul class="space-y-1">
+                                    <li>• Gunakan foto wajah yang jelas</li>
+                                    <li>• Format PNG atau JPG</li>
+                                    <li>• Ukuran maksimal 2MB</li>
+                                    <li>• Rasio 1:1 (persegi)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3">
                         @if($user->avatar)
-                        <button type="button" class="btn btn-outline-danger" onclick="deleteAvatar()">
-                            <i class="fas fa-trash me-2"></i> Hapus Foto
+                        <button type="button" 
+                                onclick="deleteAvatar()"
+                                class="flex-1 px-4 py-3 border-2 border-red-600 text-red-600 font-semibold rounded-xl hover:bg-red-600 hover:text-white transition-all duration-200 flex items-center justify-center gap-2">
+                            <i class="fas fa-trash"></i>
+                            <span>Hapus Foto</span>
                         </button>
                         @endif
+                        <button type="submit" 
+                                id="uploadAvatarBtn"
+                                class="flex-1 px-4 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
+                            <i class="fas fa-upload"></i>
+                            <span>Upload Foto</span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -338,330 +532,354 @@
 
 @push('styles')
 <style>
-.sticky-top {
+/* Custom animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+[data-aos] {
+    animation-duration: 0.6s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: both;
+}
+
+/* Sticky sidebar */
+.sticky {
     position: sticky;
-    z-index: 1020;
+    z-index: 20;
 }
 
-.avatar-container {
-    width: 120px;
-    height: 120px;
-}
-
-.avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border: 4px solid white;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.avatar-edit-btn {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-}
-
-.profile-nav .list-group-item {
-    transition: all 0.3s ease;
-    border-radius: 8px !important;
-    margin-bottom: 5px;
-}
-
-.profile-nav .list-group-item:hover,
-.profile-nav .list-group-item.active {
-    background: rgba(43, 108, 176, 0.1);
-    color: var(--primary);
-    padding-left: 1.5rem;
-}
-
-.stat-card {
-    transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-}
-
-.stat-icon {
-    transition: all 0.3s ease;
-}
-
-.stat-card:hover .stat-icon {
+/* Avatar hover effect */
+.avatar-edit-btn:hover {
     transform: scale(1.1);
 }
 
-.status-icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Form input focus styles */
+input:focus, textarea:focus {
+    outline: none;
+    ring: 2px;
 }
 
-.activity-icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* File upload hover effect */
+.border-dashed:hover {
+    border-color: #2B6CB0;
 }
 
-.form-floating > .form-control {
-    height: calc(3.5rem + 2px);
-    padding: 1rem 0.75rem;
+/* Activity item hover effect */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.form-floating > label {
-    padding: 1rem 0.75rem;
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth transitions */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading spinner */
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-// Profile form submission
-document.getElementById('profileForm').addEventListener('submit', function(e) {
+// Initialize AOS
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 600,
+            once: true,
+            offset: 100
+        });
+    }
+});
+
+// Profile Form Submission
+document.getElementById('profileForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
+    const submitBtn = document.getElementById('saveProfileBtn');
+    const originalContent = submitBtn.innerHTML;
     
     // Show loading
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
+    submitBtn.innerHTML = `
+        <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <span>Menyimpan...</span>
+    `;
     submitBtn.disabled = true;
     
-    fetch('{{ route("user.profil.update") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(Object.fromEntries(formData))
-    })
-    .then(response => response.json())
-    .then(data => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+    try {
+        const response = await fetch('{{ route("user.profil.update") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(Object.fromEntries(formData))
+        });
+        
+        const data = await response.json();
         
         if (data.success) {
-            // Update avatar if changed
-            if (data.user.avatar) {
-                document.getElementById('avatarPreview').src = data.user.avatar_url;
-                document.getElementById('avatarModalPreview').src = data.user.avatar_url;
-            }
+            // Update sidebar user info
+            const userNameElements = document.querySelectorAll('h3.text-xl, .profile-nav h3');
+            userNameElements.forEach(el => {
+                if (el.textContent.includes('{{ $user->name }}')) {
+                    el.textContent = el.textContent.replace('{{ $user->name }}', data.user.name);
+                }
+            });
             
-            // Update user info in sidebar
-            document.querySelector('.profile-nav h5').textContent = data.user.name;
-            document.querySelector('.profile-nav p').textContent = data.user.email;
-            
-            Toast.fire({
+            // Show success message
+            await Swal.fire({
                 icon: 'success',
-                title: data.message
+                title: 'Berhasil!',
+                text: data.message,
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
             });
         } else {
-            Swal.fire('Error', data.message, 'error');
+            throw new Error(data.message);
         }
-    })
-    .catch(error => {
-        submitBtn.innerHTML = originalText;
+    } catch (error) {
+        await Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menyimpan',
+            text: error.message || 'Terjadi kesalahan saat menyimpan profil',
+            confirmButtonColor: '#2B6CB0'
+        });
+    } finally {
+        submitBtn.innerHTML = originalContent;
         submitBtn.disabled = false;
-        console.error('Error:', error);
-        Swal.fire('Error', 'Terjadi kesalahan saat menyimpan profil', 'error');
-    });
+    }
 });
 
-// Open avatar modal
+// Avatar Modal Functions
 function openAvatarModal() {
-    const modal = new bootstrap.Modal(document.getElementById('avatarModal'));
-    modal.show();
+    document.getElementById('avatarModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 }
 
-// Avatar preview
+function closeAvatarModal() {
+    document.getElementById('avatarModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    resetAvatarForm();
+}
+
+function resetAvatarForm() {
+    document.getElementById('avatarForm').reset();
+}
+
+// Avatar File Preview
 document.getElementById('avatar').addEventListener('change', function(e) {
     const file = e.target.files[0];
     const preview = document.getElementById('avatarModalPreview');
     
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+    if (!file) return;
+    
+    if (file.size > 2 * 1024 * 1024) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'File Terlalu Besar',
+            text: 'Ukuran file maksimal 2MB',
+            confirmButtonColor: '#2B6CB0'
+        });
+        this.value = '';
+        return;
     }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
 });
 
-// Avatar form submission
-document.getElementById('avatarForm').addEventListener('submit', function(e) {
+// Avatar Form Submission
+document.getElementById('avatarForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
+    const submitBtn = document.getElementById('uploadAvatarBtn');
+    const originalContent = submitBtn.innerHTML;
     
     // Show loading
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Mengupload...';
+    submitBtn.innerHTML = `
+        <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <span>Mengupload...</span>
+    `;
     submitBtn.disabled = true;
     
-    fetch('{{ route("user.profil.update-avatar") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+    try {
+        const response = await fetch('{{ route("user.profil.update-avatar") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
         
         if (data.success) {
             // Update all avatar previews
-            document.getElementById('avatarPreview').src = data.avatar_url;
-            document.getElementById('avatarModalPreview').src = data.avatar_url;
+            const avatarPreviews = document.querySelectorAll('#avatarPreview, #avatarModalPreview');
+            avatarPreviews.forEach(preview => {
+                preview.src = data.avatar_url;
+            });
             
-            // Update navbar avatar if exists
+            // Update navbar avatar
             const navbarAvatar = document.querySelector('.user-avatar-sport');
             if (navbarAvatar) {
-                navbarAvatar.style.backgroundImage = `url(${data.avatar_url})`;
+                navbarAvatar.style.backgroundImage = `url('${data.avatar_url}')`;
                 navbarAvatar.style.backgroundSize = 'cover';
             }
             
-            Toast.fire({
-                icon: 'success',
-                title: data.message
-            });
-            
             // Close modal
-            bootstrap.Modal.getInstance(document.getElementById('avatarModal')).hide();
+            closeAvatarModal();
+            
+            // Show success message
+            await Swal.fire({
+                icon: 'success',
+                title: 'Foto Profil Diperbarui',
+                text: data.message,
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
         } else {
-            Swal.fire('Error', data.message, 'error');
+            throw new Error(data.message);
         }
-    })
-    .catch(error => {
-        submitBtn.innerHTML = originalText;
+    } catch (error) {
+        await Swal.fire({
+            icon: 'error',
+            title: 'Upload Gagal',
+            text: error.message || 'Terjadi kesalahan saat mengupload foto',
+            confirmButtonColor: '#2B6CB0'
+        });
+    } finally {
+        submitBtn.innerHTML = originalContent;
         submitBtn.disabled = false;
-        console.error('Error:', error);
-        Swal.fire('Error', 'Terjadi kesalahan saat mengupload foto', 'error');
-    });
+    }
 });
 
-// Delete avatar
-function deleteAvatar() {
-    Swal.fire({
-        title: 'Hapus foto profil?',
-        text: 'Foto profil akan dihapus permanen',
+// Delete Avatar
+async function deleteAvatar() {
+    const result = await Swal.fire({
+        title: 'Hapus Foto Profil?',
+        text: 'Foto profil akan dihapus permanen dan diganti dengan foto default',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        confirmButtonColor: '#DC2626',
+        cancelButtonColor: '#4B5563',
         confirmButtonText: 'Ya, Hapus',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('{{ route("user.profil.delete-avatar") }}', {
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    });
+    
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch('{{ route("user.profil.delete-avatar") }}', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
+                    'Accept': 'application/json'
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update all avatar previews
-                    document.getElementById('avatarPreview').src = data.avatar_url;
-                    document.getElementById('avatarModalPreview').src = data.avatar_url;
-                    
-                    // Update navbar avatar
-                    const navbarAvatar = document.querySelector('.user-avatar-sport');
-                    if (navbarAvatar) {
-                        navbarAvatar.style.backgroundImage = '';
-                        navbarAvatar.style.backgroundColor = '';
-                    }
-                    
-                    Toast.fire({
-                        icon: 'success',
-                        title: data.message
-                    });
-                    
-                    // Close modal
-                    bootstrap.Modal.getInstance(document.getElementById('avatarModal')).hide();
-                } else {
-                    Swal.fire('Error', data.message, 'error');
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update all avatar previews
+                const avatarPreviews = document.querySelectorAll('#avatarPreview, #avatarModalPreview');
+                avatarPreviews.forEach(preview => {
+                    preview.src = data.avatar_url;
+                });
+                
+                // Update navbar avatar
+                const navbarAvatar = document.querySelector('.user-avatar-sport');
+                if (navbarAvatar) {
+                    navbarAvatar.style.backgroundImage = '';
+                    navbarAvatar.style.backgroundColor = '#2B6CB0';
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Error', 'Terjadi kesalahan', 'error');
+                
+                // Close modal
+                closeAvatarModal();
+                
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Foto Dihapus',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'Gagal Menghapus',
+                text: 'Terjadi kesalahan',
+                confirmButtonColor: '#2B6CB0'
             });
         }
-    });
-}
-
-// Load more activities
-function loadMoreActivities() {
-    const activityTable = document.querySelector('.table tbody');
-    const loadBtn = document.querySelector('#loadMoreActivities');
-    
-    if (loadBtn) {
-        loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Memuat...';
-        loadBtn.disabled = true;
-        
-        fetch('{{ route("user.profil.activity") }}')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Append new activities
-                    data.activities.forEach(activity => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${activity.kode_transaksi}</td>
-                            <td>${new Date(activity.created_at).toLocaleDateString()}</td>
-                            <td>${activity.status}</td>
-                            <td>Rp ${activity.total_bayar.toLocaleString()}</td>
-                        `;
-                        activityTable.appendChild(row);
-                    });
-                    
-                    // Update or remove button
-                    if (data.activities.length < 10) {
-                        loadBtn.remove();
-                    } else {
-                        loadBtn.innerHTML = '<i class="fas fa-plus me-2"></i> Muat Lebih Banyak';
-                        loadBtn.disabled = false;
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                loadBtn.innerHTML = '<i class="fas fa-plus me-2"></i> Muat Lebih Banyak';
-                loadBtn.disabled = false;
-            });
     }
 }
 
-// Initialize AOS
-document.addEventListener('DOMContentLoaded', function() {
-    AOS.init({
-        duration: 800,
-        once: true
+// Close modal on escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAvatarModal();
+    }
+});
+
+// Close modal on background click
+document.getElementById('avatarModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAvatarModal();
+    }
+});
+
+// Form validation
+document.querySelectorAll('#profileForm input, #profileForm textarea').forEach(input => {
+    input.addEventListener('blur', function() {
+        if (this.value.trim() === '' && this.required) {
+            this.classList.add('border-red-500');
+        } else {
+            this.classList.remove('border-red-500');
+        }
     });
-    
-    // Add animation to stat cards
-    document.querySelectorAll('.stat-card').forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
-    });
+});
+
+// Format phone number
+document.getElementById('phone').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 0) {
+        value = value.match(/.{1,4}/g).join('-');
+    }
+    e.target.value = value;
 });
 </script>
 @endpush

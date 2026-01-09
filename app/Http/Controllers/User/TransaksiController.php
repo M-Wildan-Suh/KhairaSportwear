@@ -62,19 +62,34 @@ class TransaksiController extends Controller
         ));
     }
     
-    public function store(Request $request)
-    {
-        $request->validate([
+public function store(Request $request)
+{
+    \Log::info('Store Transaction Request:', $request->all());
+    
+    try {
+        // Validasi yang lebih baik
+        $validatedData = $request->validate([
             'metode_pembayaran' => 'required|in:transfer_bank,tunai,qris',
-            'nama_bank' => 'required_if:metode_pembayaran,transfer_bank',
-            'no_rekening' => 'required_if:metode_pembayaran,transfer_bank',
-            'atas_nama' => 'required_if:metode_pembayaran,transfer_bank',
             'catatan' => 'nullable|string|max:500',
-            'alamat_pengiriman' => 'required_if:tipe,penjualan|string|max:1000'
+            'alamat_pengiriman' => 'nullable|string|max:1000'
         ]);
         
+        // Validasi tambahan untuk transfer bank
+        if ($request->metode_pembayaran === 'transfer_bank') {
+            $request->validate([
+                'nama_bank' => 'required|string|max:100',
+                'no_rekening' => 'required|string|max:50',
+                'atas_nama' => 'required|string|max:100'
+            ]);
+        }
+        
         $user = auth()->user();
-        $keranjangs = $user->keranjangs()->with('produk')->get();
+        $keranjangs = $user->keranjangs()->with('produk.kategori')->get();
+        
+        \Log::info('Cart Items:', [
+            'count' => $keranjangs->count(),
+            'items' => $keranjangs->pluck('produk.nama')
+        ]);
         
         if ($keranjangs->isEmpty()) {
             return response()->json([
@@ -83,47 +98,100 @@ class TransaksiController extends Controller
             ], 400);
         }
         
-        DB::beginTransaction();
-        try {
-            // Determine transaction type based on cart items
-            $hasJual = $keranjangs->where('tipe', 'jual')->isNotEmpty();
-            $hasSewa = $keranjangs->where('tipe', 'sewa')->isNotEmpty();
-            
-            if ($hasJual && $hasSewa) {
-                // Create separate transactions for jual and sewa
-                $this->createSeparateTransactions($user, $keranjangs, $request);
-            } else {
-                // Create single transaction
-                $this->createSingleTransaction($user, $keranjangs, $request);
+        // Validate stock before proceeding
+        foreach ($keranjangs as $item) {
+            if ($item->tipe === 'jual' && $item->produk->stok_tersedia < $item->quantity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Stok {$item->produk->nama} tidak mencukupi."
+                ], 400);
             }
             
-            // Clear cart
-            $user->keranjangs()->delete();
+            if ($item->tipe === 'sewa' && $item->produk->stok_sewa < $item->quantity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Stok sewa {$item->produk->nama} tidak mencukupi."
+                ], 400);
+            }
+        }
+        
+        DB::beginTransaction();
+        
+        // Check transaction type
+        $hasJual = $keranjangs->where('tipe', 'jual')->isNotEmpty();
+        $hasSewa = $keranjangs->where('tipe', 'sewa')->isNotEmpty();
+        
+        $transactionCodes = [];
+        
+        if ($hasJual && $hasSewa) {
+            // Create separate transactions
+            if ($hasJual) {
+                $jualItems = $keranjangs->where('tipe', 'jual');
+                $transaksi = $this->createTransactionForItems($user, $jualItems, 'penjualan', $request);
+                $transactionCodes[] = $transaksi->kode_transaksi;
+            }
             
-            DB::commit();
-            
-            // Create notification
+            if ($hasSewa) {
+                $sewaItems = $keranjangs->where('tipe', 'sewa');
+                $transaksi = $this->createTransactionForItems($user, $sewaItems, 'penyewaan', $request);
+                $transactionCodes[] = $transaksi->kode_transaksi;
+            }
+        } else {
+            // Create single transaction
+            $tipe = $keranjangs->first()->tipe === 'jual' ? 'penjualan' : 'penyewaan';
+            $transaksi = $this->createTransactionForItems($user, $keranjangs, $tipe, $request);
+            $transactionCodes[] = $transaksi->kode_transaksi;
+        }
+        
+        // Clear cart
+        $user->keranjangs()->delete();
+        
+        DB::commit();
+        
+        \Log::info('Transaction created successfully:', $transactionCodes);
+        
+        // Create notification
+        if (class_exists(\App\Models\Notifikasi::class)) {
             \App\Models\Notifikasi::createNotifikasi(
                 $user->id,
                 'Transaksi Berhasil',
                 'Transaksi Anda berhasil dibuat. Silakan upload bukti pembayaran.',
-                'transaksi'
+                'transaksi',
+                route('user.transaksi.index')
             );
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaksi berhasil dibuat.',
-                'redirect' => route('user.transaksi.index')
-            ]);
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
         }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaksi berhasil dibuat.',
+            'transaction_code' => implode(', ', $transactionCodes),
+            'redirect' => route('user.transaksi.index')
+        ]);
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Validation Error:', $e->errors());
+        return response()->json([
+            'success' => false,
+            'message' => 'Validasi gagal.',
+            'errors' => $e->errors()
+        ], 422);
+        
+    } catch (\Exception $e) {
+        \Log::error('Transaction Error:', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        DB::rollBack();
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan sistem. Silakan coba lagi.'
+        ], 500);
     }
+}
     
     private function createSingleTransaction($user, $keranjangs, $request)
     {
@@ -132,23 +200,29 @@ class TransaksiController extends Controller
         $subtotal = $keranjangs->sum('subtotal');
         $tax = $subtotal * 0.11;
         $total = $subtotal + $tax;
+
+            // Determine if alamat_pengiriman is needed
+    $alamatPengiriman = null;
+    if ($tipe === 'penjualan' && $request->has('alamat_pengiriman')) {
+        $alamatPengiriman = $request->alamat_pengiriman;
+    }
         
         // Create transaction
-        $transaksi = Transaksi::create([
-            'kode_transaksi' => Transaksi::generateKodeTransaksi(),
-            'user_id' => $user->id,
-            'tipe' => $tipe,
-            'total_harga' => $subtotal,
-            'diskon' => 0,
-            'total_bayar' => $total,
-            'status' => 'pending',
-            'metode_pembayaran' => $request->metode_pembayaran,
-            'nama_bank' => $request->nama_bank,
-            'no_rekening' => $request->no_rekening,
-            'atas_nama' => $request->atas_nama,
-            'catatan' => $request->catatan,
-            'alamat_pengiriman' => $request->alamat_pengiriman
-        ]);
+$transaksi = Transaksi::create([
+    'user_id' => $user->id,
+    'tipe' => $tipe,
+    'total_harga' => $subtotal,
+    'diskon' => 0,
+    'total_bayar' => $total,
+    'status' => 'pending',
+    'metode_pembayaran' => $request->metode_pembayaran,
+    'nama_bank' => $request->nama_bank,
+    'no_rekening' => $request->no_rekening,
+    'atas_nama' => $request->atas_nama,
+    'catatan' => $request->catatan,
+    'alamat_pengiriman' => $tipe === 'penjualan' ? $request->alamat_pengiriman : null
+]);
+
         
         // Create detail transactions and handle stock
         foreach ($keranjangs as $item) {

@@ -1,433 +1,138 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin - SportWear')</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', config('app.name')) - Admin</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Custom Admin Styles -->
-    <style>
-        :root {
-            --sidebar-width: 250px;
-            --topbar-height: 60px;
-        }
-        
-        body {
-            background-color: #f8f9fc;
-        }
-        
-        #wrapper {
-            display: flex;
-        }
-        
-        /* Sidebar Styles */
-        #sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, #2B6CB0 0%, #1a365d 100%);
-            color: white;
-            position: fixed;
-            height: 100vh;
-            transition: all 0.3s;
-            z-index: 1000;
-            box-shadow: 3px 0 10px rgba(0,0,0,0.1);
-        }
-        
-        .sidebar-brand {
-            padding: 20px 15px;
-            text-align: center;
-            background: rgba(0,0,0,0.2);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .sidebar-brand h2 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin: 0;
-            color: white;
-        }
-        
-        .sidebar-brand span {
-            color: #ED8936;
-        }
-        
-        .sidebar-nav {
-            padding: 20px 0;
-        }
-        
-        .nav-item {
-            margin-bottom: 5px;
-        }
-        
-        .nav-link {
-            color: rgba(255,255,255,0.8);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-        }
-        
-        .nav-link:hover, .nav-link.active {
-            color: white;
-            background: rgba(255,255,255,0.1);
-            border-left-color: #ED8936;
-        }
-        
-        .nav-link i {
-            width: 25px;
-            font-size: 1.1rem;
-            margin-right: 10px;
-        }
-        
-        .nav-link .badge {
-            margin-left: auto;
-        }
-        
-        /* Topbar Styles */
-        #content-wrapper {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        #topbar {
-            height: var(--topbar-height);
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            position: sticky;
-            top: 0;
-            z-index: 999;
-        }
-        
-        #sidebar-toggle {
-            background: none;
-            border: none;
-            color: #4a5568;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-        
-        .user-dropdown {
-            position: relative;
-        }
-        
-        .user-dropdown-toggle {
-            display: flex;
-            align-items: center;
-            background: none;
-            border: none;
-            color: #4a5568;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        
-        .user-dropdown-toggle:hover {
-            background: #f7fafc;
-        }
-        
-        .user-avatar {
-            width: 35px;
-            height: 35px;
-            background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            margin-right: 10px;
-        }
-        
-        .user-dropdown-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            min-width: 200px;
-            padding: 10px 0;
-            display: none;
-        }
-        
-        .user-dropdown:hover .user-dropdown-menu {
-            display: block;
-        }
-        
-        .dropdown-item {
-            display: block;
-            padding: 10px 20px;
-            color: #4a5568;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        
-        .dropdown-item:hover {
-            background: #f7fafc;
-            color: #2B6CB0;
-        }
-        
-        /* Main Content */
-        #main-content {
-            flex: 1;
-            padding: 30px;
-            background: #f8f9fc;
-        }
-        
-        .content-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-        
-        /* Footer */
-        #footer {
-            text-align: center;
-            padding: 20px;
-            color: #718096;
-            font-size: 0.9rem;
-            border-top: 1px solid #e2e8f0;
-            background: white;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            #sidebar {
-                margin-left: -250px;
-            }
-            
-            #sidebar.active {
-                margin-left: 0;
-            }
-            
-            #content-wrapper {
-                margin-left: 0;
-            }
-            
-            #topbar {
-                padding: 0 15px;
-            }
-        }
-        
-        /* Custom Scrollbar for Sidebar */
-        #sidebar::-webkit-scrollbar {
-            width: 5px;
-        }
-        
-        #sidebar::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        #sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.3);
-            border-radius: 3px;
-        }
-    </style>
-    
-    @stack('styles')
-</head>
-<body>
-    <div id="wrapper">
-        <!-- Sidebar -->
-        <nav id="sidebar">
-            <div class="sidebar-brand">
-                <h2>Sport<span>Wear</span> <small>Admin</small></h2>
-            </div>
-            
-            <ul class="sidebar-nav">
-                <li class="nav-item">
-                    <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('admin.produk.index') }}" class="nav-link {{ request()->routeIs('admin.produk.*') ? 'active' : '' }}">
-                        <i class="fas fa-dumbbell"></i>
-                        <span>Produk</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('admin.kategori.index') }}" class="nav-link {{ request()->routeIs('admin.kategori.*') ? 'active' : '' }}">
-                        <i class="fas fa-tags"></i>
-                        <span>Kategori</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('admin.transaksi.index') }}" class="nav-link {{ request()->routeIs('admin.transaksi.*') ? 'active' : '' }}">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span>Transaksi</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('admin.sewa.index') }}" class="nav-link {{ request()->routeIs('admin.sewa.*') ? 'active' : '' }}">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Penyewaan</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('admin.pengembalian.index') }}" class="nav-link {{ request()->routeIs('admin.pengembalian.*') ? 'active' : '' }}">
-                        <i class="fas fa-undo"></i>
-                        <span>Pengembalian</span>
-                        <span class="badge badge-warning">3</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('admin.denda.index') }}" class="nav-link {{ request()->routeIs('admin.denda.*') ? 'active' : '' }}">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span>Denda</span>
-                        <span class="badge badge-danger">5</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('admin.laporan.index') }}" class="nav-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Laporan</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                        <i class="fas fa-users"></i>
-                        <span>Users</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item mt-4">
-                    <a href="{{ route('logout') }}" class="nav-link text-danger"
-                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                        @csrf
-                    </form>
-                </li>
-            </ul>
-        </nav>
-        
-        <!-- Content Wrapper -->
-        <div id="content-wrapper">
-            <!-- Topbar -->
-            <header id="topbar">
-                <button id="sidebar-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                
-                <div class="user-dropdown">
-                    <button class="user-dropdown-toggle">
-                        <div class="user-avatar">
-                            {{ substr(auth()->user()->name, 0, 1) }}
-                        </div>
-                        <div class="user-info">
-                            <div class="user-name">{{ auth()->user()->name }}</div>
-                            <div class="user-role">Admin</div>
-                        </div>
-                        <i class="fas fa-chevron-down ml-2"></i>
-                    </button>
-                    
-                    <div class="user-dropdown-menu">
-                        <a href="{{ route('admin.profile') }}" class="dropdown-item">
-                            <i class="fas fa-user mr-2"></i> Profile
-                        </a>
-                        <a href="{{ route('admin.settings') }}" class="dropdown-item">
-                            <i class="fas fa-cog mr-2"></i> Settings
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="{{ route('logout') }}" class="dropdown-item text-danger"
-                           onclick="event.preventDefault(); document.getElementById('logout-form-topbar').submit();">
-                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                        </a>
-                        <form id="logout-form-topbar" action="{{ route('logout') }}" method="POST" style="display: none;">
-                            @csrf
-                        </form>
-                    </div>
-                </div>
-            </header>
-            
-            <!-- Main Content -->
-            <main id="main-content">
-                @yield('content')
-            </main>
-            
-            <!-- Footer -->
-            <footer id="footer">
-                <div class="container">
-                    <p>&copy; {{ date('Y') }} SportWear - Platform Penjualan & Penyewaan Alat Olahraga</p>
-                    <p class="mb-0">v1.0.0 | Made with <i class="fas fa-heart text-danger"></i></p>
-                </div>
-            </footer>
-        </div>
-    </div>
+    <!-- Flowbite CSS (jika menggunakan) -->
+    <link rel="stylesheet" href="https://unpkg.com/flowbite@1.5.4/dist/flowbite.min.css" />
     
     <!-- Scripts -->
-    <script>
-        // Sidebar toggle
-        document.getElementById('sidebar-toggle').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
-        
-        // Auto-hide sidebar on mobile when clicking outside
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebar-toggle');
-            
-            if (window.innerWidth <= 768 && 
-                !sidebar.contains(event.target) && 
-                !sidebarToggle.contains(event.target) &&
-                sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-            }
-        });
-        
-        // Mark notifications as read when clicked
-        document.querySelectorAll('.notification-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const notificationId = this.dataset.id;
-                // AJAX call to mark as read
-                fetch(`/notifications/${notificationId}/read`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Content-Type': 'application/json'
-                    }
-                });
-            });
-        });
-        
-        // Auto-update dashboard every 60 seconds
-        setInterval(() => {
-            if (window.location.pathname === '/admin/dashboard') {
-                // Refresh certain elements or fetch new data
-                console.log('Auto-refreshing dashboard data...');
-            }
-        }, 60000);
-    </script>
+    @stack('head-scripts')
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <x-admin.navbar 
+        :brandName="config('app.name')"
+        :logo="asset('images/logo.svg')"
+        :showGithub="false"
+    >
+        <x-slot name="rightContent">
+            @auth
+                <div class="flex items-center space-x-4">
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
+                            <div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center text-white font-semibold">
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            </div>
+                            <span class="text-sm text-gray-600">{{ Auth::user()->name }}</span>
+                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div x-show="open" @click.away="open = false" 
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="{{ route('profile.edit') }}" 
+                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                Profile
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" 
+                                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endauth
+        </x-slot>
+    </x-admin.navbar>
     
+    <!-- Sidebar -->
+    <x-admin.sidebar 
+        :navigationItems="[
+            [
+                'url' => route('admin.dashboard'),
+                'label' => 'Dashboard',
+                'icon_svg' => '<path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>',
+                'active' => request()->routeIs('admin.dashboard')
+            ],
+            [
+                'url' => route('admin.products.index'),
+                'label' => 'Products',
+                'icon_svg' => '<path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>',
+                'active' => request()->routeIs('admin.products.*')
+            ],
+            [
+                'url' => route('admin.categories.index'),
+                'label' => 'Categories',
+                'icon_svg' => '<path fill-rule="evenodd" d="M17 10v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2h6a2 2 0 002-2zm-8 2H9a2 2 0 01-2-2v-4a2 2 0 012-2h6a2 2 0 012 2v4a2 2 0 01-2 2h-6z" clip-rule="evenodd"></path>',
+                'active' => request()->routeIs('admin.categories.*')
+            ],
+            [
+                'url' => route('admin.users.index'),
+                'label' => 'Users',
+                'icon_svg' => '<path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>',
+                'active' => request()->routeIs('admin.users.*')
+            ],
+            [
+                'url' => route('admin.orders.index'),
+                'label' => 'Orders',
+                'icon_svg' => '<path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>',
+                'active' => request()->routeIs('admin.orders.*')
+            ],
+            [
+                'url' => route('admin.settings'),
+                'label' => 'Settings',
+                'icon_svg' => '<path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>',
+                'active' => request()->routeIs('admin.settings')
+            ]
+        ]"
+        :bottomItems="[
+            [
+                'url' => route('home'),
+                'label' => 'View Website',
+                'icon' => '<svg class="w-5 h-5 text-gray-500 flex-shrink-0 group-hover:text-gray-900 transition duration-75" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd"></path></svg>',
+                'target' => '_blank'
+            ],
+        ]"
+    />
+    
+    <!-- Main Content -->
+    <main id="main-content" class="h-full w-full bg-gray-50 relative overflow-y-auto lg:ml-64">
+        <div class="pt-16">
+            @yield('content')
+        </div>
+    </main>
+    
+    <!-- Flowbite JS -->
+    <script src="https://unpkg.com/flowbite@1.5.4/dist/flowbite.js"></script>
+    
+    <!-- Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    
+    <!-- Custom Scripts -->
     @stack('scripts')
 </body>
 </html>

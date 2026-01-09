@@ -36,7 +36,7 @@ class Transaksi extends Model
         'tanggal_pengiriman' => 'datetime'
     ];
 
-    // Relationships
+    /* ================= RELATIONS ================= */
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -52,87 +52,39 @@ class Transaksi extends Model
         return $this->hasOne(Sewa::class);
     }
 
-    // Scopes
-    public function scopePenjualan($query)
-    {
-        return $query->where('tipe', 'penjualan');
-    }
-
-    public function scopePenyewaan($query)
-    {
-        return $query->where('tipe', 'penyewaan');
-    }
-
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
-    }
-
-    public function scopeCompleted($query)
-    {
-        return $query->where('status', 'selesai');
-    }
-
-    // Custom methods
-    public function generateKodeTransaksi()
+    /* ================= KODE TRANSAKSI ================= */
+    public static function generateKodeTransaksi()
     {
         $date = now()->format('Ymd');
-        $lastTransaksi = self::where('kode_transaksi', 'like', 'TRX-' . $date . '-%')
+
+        $last = self::where('kode_transaksi', 'like', 'TRX-' . $date . '-%')
             ->orderBy('id', 'desc')
             ->first();
 
-        if ($lastTransaksi) {
-            $lastNumber = (int) substr($lastTransaksi->kode_transaksi, -4);
-            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $newNumber = '0001';
-        }
+        $number = $last
+            ? str_pad(((int) substr($last->kode_transaksi, -4)) + 1, 4, '0', STR_PAD_LEFT)
+            : '0001';
 
-        return 'TRX-' . $date . '-' . $newNumber;
+        return 'TRX-' . $date . '-' . $number;
     }
 
-    public function getBuktiPembayaranUrlAttribute()
-    {
-        if ($this->bukti_pembayaran) {
-            return asset('storage/bukti-pembayaran/' . $this->bukti_pembayaran);
-        }
-        return null;
-    }
-
-    public function getStatusBadgeAttribute()
-    {
-        $badges = [
-            'pending' => 'badge bg-warning',
-            'diproses' => 'badge bg-info',
-            'dibayar' => 'badge bg-primary',
-            'dikirim' => 'badge bg-secondary',
-            'selesai' => 'badge bg-success',
-            'dibatalkan' => 'badge bg-danger'
-        ];
-
-        return '<span class="' . ($badges[$this->status] ?? 'badge bg-secondary') . '">' . 
-               ucfirst(str_replace('_', ' ', $this->status)) . 
-               '</span>';
-    }
-
-    public function getTipeBadgeAttribute()
-    {
-        if ($this->tipe === 'penjualan') {
-            return '<span class="badge bg-success">Penjualan</span>';
-        } else {
-            return '<span class="badge bg-info">Penyewaan</span>';
-        }
-    }
-
-    // Event handler
+    /* ================= AUTO SET KODE ================= */
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($transaksi) {
             if (empty($transaksi->kode_transaksi)) {
-                $transaksi->kode_transaksi = $transaksi->generateKodeTransaksi();
+                $transaksi->kode_transaksi = self::generateKodeTransaksi();
             }
         });
+    }
+
+    /* ================= ACCESSOR ================= */
+    public function getBuktiPembayaranUrlAttribute()
+    {
+        return $this->bukti_pembayaran
+            ? asset('storage/bukti-pembayaran/' . $this->bukti_pembayaran)
+            : null;
     }
 }

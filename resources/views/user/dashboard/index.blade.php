@@ -3,124 +3,115 @@
 @section('title', 'Dashboard - SportWear')
 
 @section('content')
-<div class="container py-5">
+<div class="container mx-auto px-4 py-8">
     <!-- Welcome Banner -->
-    <div class="welcome-banner bg-gradient-primary rounded-4 p-5 text-white mb-5" data-aos="fade-down">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="display-6 mb-3">Selamat Datang, <span class="text-warning">{{ $user->name }}</span>! 👋</h1>
-                <p class="mb-0">Apa yang ingin Anda lakukan hari ini? Mari mulai perjalanan olahraga Anda!</p>
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-secondary mb-8 p-8 text-white" data-aos="fade-down">
+        <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-2/3">
+                <h1 class="text-3xl md:text-4xl font-bold mb-4">Selamat Datang, <span class="text-yellow-300">{{ $user->name }}</span>! 👋</h1>
+                <p class="text-lg opacity-90 mb-0">Apa yang ingin Anda lakukan hari ini? Mari mulai perjalanan olahraga Anda!</p>
             </div>
-            <div class="col-md-4 text-end">
-                <div class="floating">
-                    <i class="fas fa-running fa-5x opacity-50"></i>
+            <div class="md:w-1/3 text-right mt-6 md:mt-0">
+                <div class="animate-float">
+                    <i class="fas fa-running text-6xl opacity-50"></i>
                 </div>
             </div>
         </div>
     </div>
     
     <!-- Quick Stats -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
-            <div class="stats-card bg-white rounded-4 p-4 shadow-sm border-start border-primary border-4">
-                <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-primary bg-opacity-10 rounded-3 p-3 me-3">
-                        <i class="fas fa-shopping-cart text-primary fa-2x"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0">{{ $totalTransactions }}</h3>
-                        <p class="text-muted mb-0">Total Transaksi</p>
-                    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-primary transition-all duration-300 hover:-translate-y-1 hover:shadow-lg" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center">
+                <div class="bg-primary bg-opacity-10 rounded-xl p-3 mr-4 transition-all duration-300 group-hover:scale-110">
+                    <i class="fas fa-shopping-cart text-primary text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-1">{{ $totalTransactions }}</h3>
+                    <p class="text-gray-600 text-sm">Total Transaksi</p>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
-            <div class="stats-card bg-white rounded-4 p-4 shadow-sm border-start border-success border-4">
-                <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-success bg-opacity-10 rounded-3 p-3 me-3">
-                        <i class="fas fa-wallet text-success fa-2x"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0">Rp {{ number_format($totalSpent, 0, ',', '.') }}</h3>
-                        <p class="text-muted mb-0">Total Pengeluaran</p>
-                    </div>
+        <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-green-500 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex items-center">
+                <div class="bg-green-100 rounded-xl p-3 mr-4 transition-all duration-300 group-hover:scale-110">
+                    <i class="fas fa-wallet text-green-500 text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-1">Rp {{ number_format($totalSpent, 0, ',', '.') }}</h3>
+                    <p class="text-gray-600 text-sm">Total Pengeluaran</p>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3" data-aos="fade-up" data-aos-delay="300">
-            <div class="stats-card bg-white rounded-4 p-4 shadow-sm border-start border-info border-4">
-                <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-info bg-opacity-10 rounded-3 p-3 me-3">
-                        <i class="fas fa-calendar-alt text-info fa-2x"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0">{{ $activeRentals }}</h3>
-                        <p class="text-muted mb-0">Sewa Aktif</p>
-                    </div>
+        <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-blue-500 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg" data-aos="fade-up" data-aos-delay="300">
+            <div class="flex items-center">
+                <div class="bg-blue-100 rounded-xl p-3 mr-4 transition-all duration-300 group-hover:scale-110">
+                    <i class="fas fa-calendar-alt text-blue-500 text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-1">{{ $activeRentals }}</h3>
+                    <p class="text-gray-600 text-sm">Sewa Aktif</p>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3" data-aos="fade-up" data-aos-delay="400">
-            <div class="stats-card bg-white rounded-4 p-4 shadow-sm border-start border-warning border-4">
-                <div class="d-flex align-items-center">
-                    <div class="stats-icon bg-warning bg-opacity-10 rounded-3 p-3 me-3">
-                        <i class="fas fa-shopping-basket text-warning fa-2x"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0">{{ $cartCount }}</h3>
-                        <p class="text-muted mb-0">Keranjang</p>
-                    </div>
+        <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-yellow-500 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg" data-aos="fade-up" data-aos-delay="400">
+            <div class="flex items-center">
+                <div class="bg-yellow-100 rounded-xl p-3 mr-4 transition-all duration-300 group-hover:scale-110">
+                    <i class="fas fa-shopping-basket text-yellow-500 text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-1">{{ $cartCount }}</h3>
+                    <p class="text-gray-600 text-sm">Keranjang</p>
                 </div>
             </div>
         </div>
     </div>
     
     <!-- Main Content -->
-    <div class="row g-4">
+    <div class="flex flex-col lg:flex-row gap-8">
         <!-- Left Column -->
-        <div class="col-lg-8">
+        <div class="lg:w-2/3">
             <!-- Recent Transactions -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4" data-aos="fade-up">
-                <div class="card-header bg-white border-0 pt-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Transaksi Terbaru</h5>
-                        <a href="{{ route('user.transaksi.index') }}" class="btn btn-sm btn-outline-primary">
+            <div class="bg-white rounded-2xl shadow-md mb-6" data-aos="fade-up">
+                <div class="px-6 pt-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h5 class="text-xl font-bold">Transaksi Terbaru</h5>
+                        <a href="{{ route('user.transaksi.index') }}" class="btn-primary-outline text-sm px-4 py-2">
                             Lihat Semua
                         </a>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="px-6 pb-6">
                     @if($recentTransactions->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th>Kode</th>
-                                    <th>Tanggal</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($recentTransactions as $transaction)
-                                <tr>
-                                    <td>
-                                        <strong>{{ $transaction->kode_transaksi }}</strong>
-                                        <br>
-                                        <small class="text-muted">{{ $transaction->tipe == 'penjualan' ? 'Pembelian' : 'Penyewaan' }}</small>
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-3">
+                                        <div class="font-medium">{{ $transaction->kode_transaksi }}</div>
+                                        <div class="text-sm text-gray-500">{{ $transaction->tipe == 'penjualan' ? 'Pembelian' : 'Penyewaan' }}</div>
                                     </td>
-                                    <td>{{ $transaction->created_at->format('d/m/Y') }}</td>
-                                    <td class="font-weight-bold">Rp {{ number_format($transaction->total_bayar, 0, ',', '.') }}</td>
-                                    <td>
+                                    <td class="px-4 py-3 whitespace-nowrap">{{ $transaction->created_at->format('d/m/Y') }}</td>
+                                    <td class="px-4 py-3 whitespace-nowrap font-bold">Rp {{ number_format($transaction->total_bayar, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
                                         @include('components.status-badge', ['status' => $transaction->status])
                                     </td>
-                                    <td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
                                         <a href="{{ route('user.transaksi.show', $transaction->id) }}" 
-                                           class="btn btn-sm btn-outline-primary">
+                                           class="btn-primary-outline text-sm px-3 py-1">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>
@@ -130,12 +121,12 @@
                         </table>
                     </div>
                     @else
-                    <div class="text-center py-5">
-                        <i class="fas fa-receipt fa-4x text-muted mb-3"></i>
-                        <h5 class="text-muted">Belum ada transaksi</h5>
-                        <p class="text-muted">Mulai belanja untuk melihat transaksi Anda</p>
-                        <a href="{{ route('user.produk.index') }}" class="btn btn-sport">
-                            <i class="fas fa-shopping-cart me-2"></i> Belanja Sekarang
+                    <div class="text-center py-10">
+                        <i class="fas fa-receipt text-5xl text-gray-300 mb-4"></i>
+                        <h5 class="text-gray-500 font-medium mb-2">Belum ada transaksi</h5>
+                        <p class="text-gray-400 mb-4">Mulai belanja untuk melihat transaksi Anda</p>
+                        <a href="{{ route('user.produk.index') }}" class="btn-primary inline-flex items-center">
+                            <i class="fas fa-shopping-cart mr-2"></i> Belanja Sekarang
                         </a>
                     </div>
                     @endif
@@ -143,80 +134,73 @@
             </div>
             
             <!-- Active Rentals -->
-            <div class="card border-0 shadow-sm rounded-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="card-header bg-white border-0 pt-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Sewa Aktif</h5>
-                        <a href="{{ route('user.sewa.aktif') }}" class="btn btn-sm btn-outline-primary">
+            <div class="bg-white rounded-2xl shadow-md" data-aos="fade-up" data-aos-delay="200">
+                <div class="px-6 pt-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h5 class="text-xl font-bold">Sewa Aktif</h5>
+                        <a href="{{ route('user.sewa.aktif') }}" class="btn-primary-outline text-sm px-4 py-2">
                             Lihat Semua
                         </a>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="px-6 pb-6">
                     @if($activeRentalsList->count() > 0)
-                    <div class="row g-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @foreach($activeRentalsList as $rental)
-                        <div class="col-md-6">
-                            <div class="rental-card border rounded-3 p-3 h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h6 class="font-weight-bold mb-1">{{ $rental->produk->nama }}</h6>
-                                        <small class="text-muted">{{ $rental->kode_sewa }}</small>
-                                    </div>
-                                    @include('components.status-badge', ['status' => $rental->status])
+                        <div class="border rounded-xl p-4 hover:border-primary hover:shadow-md transition-all duration-300">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h6 class="font-bold text-gray-800">{{ $rental->produk->nama }}</h6>
+                                    <small class="text-gray-500">{{ $rental->kode_sewa }}</small>
                                 </div>
-                                
-                                <div class="rental-info mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small class="text-muted">Tanggal Kembali:</small>
-                                        <small class="font-weight-bold {{ $rental->sisa_hari < 3 ? 'text-danger' : 'text-success' }}">
-                                            {{ $rental->tanggal_kembali_rencana->format('d/m/Y') }}
-                                        </small>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <small class="text-muted">Sisa Hari:</small>
-                                        <small class="font-weight-bold {{ $rental->sisa_hari < 3 ? 'text-danger' : 'text-success' }}">
-                                            {{ $rental->sisa_hari }} hari
-                                        </small>
-                                    </div>
+                                @include('components.status-badge', ['status' => $rental->status])
+                            </div>
+                            
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Tanggal Kembali:</span>
+                                    <span class="text-sm font-medium {{ $rental->sisa_hari < 3 ? 'text-red-500' : 'text-green-500' }}">
+                                        {{ $rental->tanggal_kembali_rencana->format('d/m/Y') }}
+                                    </span>
                                 </div>
-                                
-                                <div class="progress mb-3" style="height: 6px;">
-                                    @php
-                                        $totalDays = $rental->jumlah_hari;
-                                        $remainingDays = $rental->sisa_hari;
-                                        $percentage = ($totalDays - $remainingDays) / $totalDays * 100;
-                                    @endphp
-                                    <div class="progress-bar bg-success" 
-                                         role="progressbar" 
-                                         style="width: {{ $percentage }}%"
-                                         aria-valuenow="{{ $percentage }}" 
-                                         aria-valuemin="0" 
-                                         aria-valuemax="100">
-                                    </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Sisa Hari:</span>
+                                    <span class="text-sm font-medium {{ $rental->sisa_hari < 3 ? 'text-red-500' : 'text-green-500' }}">
+                                        {{ $rental->sisa_hari }} hari
+                                    </span>
                                 </div>
-                                
-                                <div class="d-flex gap-2">
-                                    <a href="{{ route('user.sewa.show', $rental->id) }}" 
-                                       class="btn btn-sm btn-outline-primary flex-fill">
-                                        <i class="fas fa-info-circle me-1"></i> Detail
-                                    </a>
-                                    <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" 
-                                            data-bs-target="#pengembalianModal{{ $rental->id }}">
-                                        <i class="fas fa-undo me-1"></i> Kembalikan
-                                    </button>
-                                </div>
+                            </div>
+                            
+                            <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+                                @php
+                                    $totalDays = $rental->jumlah_hari;
+                                    $remainingDays = $rental->sisa_hari;
+                                    $percentage = ($totalDays - $remainingDays) / $totalDays * 100;
+                                @endphp
+                                <div class="bg-green-500 h-2 rounded-full transition-all duration-500" 
+                                     style="width: {{ $percentage }}%"></div>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <a href="{{ route('user.sewa.show', $rental->id) }}" 
+                                   class="btn-primary-outline flex-1 text-sm py-2 flex items-center justify-center">
+                                    <i class="fas fa-info-circle mr-1"></i> Detail
+                                </a>
+                                <button class="btn-success-outline text-sm py-2 flex items-center justify-center" 
+                                        data-modal-target="pengembalianModal{{ $rental->id }}">
+                                    <i class="fas fa-undo mr-1"></i> Kembalikan
+                                </button>
                             </div>
                         </div>
                         @endforeach
                     </div>
                     @else
-                    <div class="text-center py-5">
-                        <i class="fas fa-calendar-alt fa-4x text-muted mb-3"></i>
-                        <h5 class="text-muted">Tidak ada sewa aktif</h5>
-                        <p class="text-muted">Mulai sewa alat olahraga favorit Anda</p>
-                        <a href="{{ route('user.sewa.index') }}" class="btn btn-sport">
-                            <i class="fas fa-calendar-plus me-2"></i> Sewa Sekarang
+                    <div class="text-center py-10">
+                        <i class="fas fa-calendar-alt text-5xl text-gray-300 mb-4"></i>
+                        <h5 class="text-gray-500 font-medium mb-2">Tidak ada sewa aktif</h5>
+                        <p class="text-gray-400 mb-4">Mulai sewa alat olahraga favorit Anda</p>
+                        <a href="{{ route('user.sewa.index') }}" class="btn-primary inline-flex items-center">
+                            <i class="fas fa-calendar-plus mr-2"></i> Sewa Sekarang
                         </a>
                     </div>
                     @endif
@@ -225,119 +209,118 @@
         </div>
         
         <!-- Right Column -->
-        <div class="col-lg-4">
+        <div class="lg:w-1/3">
             <!-- Notifications -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4" data-aos="fade-left">
-                <div class="card-header bg-white border-0 pt-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Notifikasi</h5>
+            <div class="bg-white rounded-2xl shadow-md mb-6" data-aos="fade-left">
+                <div class="px-6 pt-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h5 class="text-xl font-bold">Notifikasi</h5>
                         @if($notifications->count() > 0)
-                        <form action="{{ route('user.notifikasi.mark-all-read') }}" method="POST" class="d-inline">
+                        <form action="{{ route('user.notifikasi.mark-all-read') }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                            <button type="submit" class="btn-secondary-outline text-sm px-4 py-2">
                                 Tandai Semua Dibaca
                             </button>
                         </form>
                         @endif
                     </div>
                 </div>
-                <div class="card-body p-0">
+                <div class="divide-y divide-gray-100">
                     @if($notifications->count() > 0)
-                    <div class="list-group list-group-flush">
+                    <div class="max-h-96 overflow-y-auto">
                         @foreach($notifications as $notification)
                         <a href="{{ $notification->link ?? '#' }}" 
-                           class="list-group-item list-group-item-action border-0 py-3 px-4 notification-item
-                                  {{ $notification->dibaca ? '' : 'bg-light bg-opacity-50' }}"
+                           class="block px-6 py-4 hover:bg-gray-50 transition-colors notification-item
+                                  {{ $notification->dibaca ? '' : 'bg-blue-50' }}"
                            data-id="{{ $notification->id }}">
-                            <div class="d-flex">
-                                <div class="me-3">
-                                    <i class="{{ $notification->tipe_icon }} fa-lg"></i>
+                            <div class="flex">
+                                <div class="mr-4 mt-1">
+                                    <i class="{{ $notification->tipe_icon }} text-lg"></i>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="mb-1 {{ $notification->dibaca ? 'text-muted' : 'font-weight-bold' }}">
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <h6 class="{{ $notification->dibaca ? 'text-gray-700' : 'font-bold text-gray-900' }} mb-1">
                                             {{ $notification->judul }}
                                         </h6>
-                                        <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                        <small class="text-gray-500 text-xs">{{ $notification->created_at->diffForHumans() }}</small>
                                     </div>
-                                    <p class="mb-0 text-muted small">{{ Str::limit($notification->pesan, 50) }}</p>
+                                    <p class="text-gray-600 text-sm">{{ Str::limit($notification->pesan, 50) }}</p>
                                 </div>
                             </div>
                         </a>
                         @endforeach
                     </div>
-                    <div class="card-footer bg-white border-0 text-center">
-                        <a href="{{ route('user.notifikasi.index') }}" class="btn btn-link">
+                    <div class="px-6 py-4 text-center">
+                        <a href="{{ route('user.notifikasi.index') }}" class="text-primary hover:text-primary-dark font-medium">
                             Lihat Semua Notifikasi
                         </a>
                     </div>
                     @else
-                    <div class="text-center py-5">
-                        <i class="fas fa-bell-slash fa-4x text-muted mb-3"></i>
-                        <h5 class="text-muted">Tidak ada notifikasi</h5>
-                        <p class="text-muted small">Semua notifikasi sudah Anda baca</p>
+                    <div class="text-center py-10 px-6">
+                        <i class="fas fa-bell-slash text-5xl text-gray-300 mb-4"></i>
+                        <h5 class="text-gray-500 font-medium mb-2">Tidak ada notifikasi</h5>
+                        <p class="text-gray-400 text-sm">Semua notifikasi sudah Anda baca</p>
                     </div>
                     @endif
                 </div>
             </div>
             
             <!-- Quick Actions -->
-            <div class="card border-0 shadow-sm rounded-4" data-aos="fade-left" data-aos-delay="200">
-                <div class="card-header bg-white border-0 pt-4">
-                    <h5 class="card-title mb-0">Aksi Cepat</h5>
+            <div class="bg-white rounded-2xl shadow-md mb-6" data-aos="fade-left" data-aos-delay="200">
+                <div class="px-6 pt-6">
+                    <h5 class="text-xl font-bold mb-6">Aksi Cepat</h5>
                 </div>
-                <div class="card-body">
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <a href="{{ route('user.keranjang.index') }}" class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center">
-                                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
-                                <span>Keranjang</span>
-                                @if($cartCount > 0)
-                                <span class="badge bg-accent mt-1">{{ $cartCount }}</span>
-                                @endif
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="{{ route('user.produk.index') }}" class="btn btn-outline-success w-100 py-3 d-flex flex-column align-items-center">
-                                <i class="fas fa-store fa-2x mb-2"></i>
-                                <span>Belanja</span>
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="{{ route('user.sewa.index') }}" class="btn btn-outline-info w-100 py-3 d-flex flex-column align-items-center">
-                                <i class="fas fa-calendar-alt fa-2x mb-2"></i>
-                                <span>Sewa</span>
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="{{ route('user.profil.edit') }}" class="btn btn-outline-warning w-100 py-3 d-flex flex-column align-items-center">
-                                <i class="fas fa-user fa-2x mb-2"></i>
-                                <span>Profile</span>
-                            </a>
-                        </div>
+                <div class="px-6 pb-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="{{ route('user.keranjang.index') }}" 
+                           class="btn-outline-primary flex flex-col items-center justify-center p-4 rounded-xl hover:shadow-md transition-all duration-300">
+                            <i class="fas fa-shopping-cart text-2xl mb-2"></i>
+                            <span>Keranjang</span>
+                            @if($cartCount > 0)
+                            <span class="mt-1 bg-accent text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                {{ $cartCount }}
+                            </span>
+                            @endif
+                        </a>
+                        
+                        <a href="{{ route('user.produk.index') }}" 
+                           class="btn-outline-success flex flex-col items-center justify-center p-4 rounded-xl hover:shadow-md transition-all duration-300">
+                            <i class="fas fa-store text-2xl mb-2"></i>
+                            <span>Belanja</span>
+                        </a>
+                        
+                        <a href="{{ route('user.sewa.index') }}" 
+                           class="btn-outline-info flex flex-col items-center justify-center p-4 rounded-xl hover:shadow-md transition-all duration-300">
+                            <i class="fas fa-calendar-alt text-2xl mb-2"></i>
+                            <span>Sewa</span>
+                        </a>
+                        
+                        <a href="{{ route('user.profil.edit') }}" 
+                           class="btn-outline-warning flex flex-col items-center justify-center p-4 rounded-xl hover:shadow-md transition-all duration-300">
+                            <i class="fas fa-user text-2xl mb-2"></i>
+                            <span>Profile</span>
+                        </a>
                     </div>
                 </div>
             </div>
             
             <!-- Upcoming Returns -->
             @if($upcomingReturns->count() > 0)
-            <div class="card border-0 shadow-sm rounded-4 mt-4" data-aos="fade-left" data-aos-delay="300">
-                <div class="card-header bg-white border-0 pt-4">
-                    <h5 class="card-title mb-0">Pengembalian Mendatang</h5>
+            <div class="bg-white rounded-2xl shadow-md" data-aos="fade-left" data-aos-delay="300">
+                <div class="px-6 pt-6">
+                    <h5 class="text-xl font-bold mb-6">Pengembalian Mendatang</h5>
                 </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
+                <div class="px-6 pb-6">
+                    <div class="space-y-3">
                         @foreach($upcomingReturns as $rental)
-                        <div class="list-group-item border-0 px-0 py-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-0 small">{{ $rental->produk->nama }}</h6>
-                                    <small class="text-muted">Kembali: {{ $rental->tanggal_kembali_rencana->format('d/m') }}</small>
-                                </div>
-                                <span class="badge bg-{{ $rental->sisa_hari < 2 ? 'danger' : 'warning' }}">
-                                    {{ $rental->sisa_hari }} hari
-                                </span>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                            <div>
+                                <h6 class="text-sm font-medium text-gray-800">{{ $rental->produk->nama }}</h6>
+                                <p class="text-xs text-gray-500">Kembali: {{ $rental->tanggal_kembali_rencana->format('d/m') }}</p>
                             </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-medium {{ $rental->sisa_hari < 2 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                {{ $rental->sisa_hari }} hari
+                            </span>
                         </div>
                         @endforeach
                     </div>
@@ -350,21 +333,20 @@
 
 <!-- Modals for Returns -->
 @foreach($activeRentalsList as $rental)
-@include('components.modal', [
-    'id' => 'pengembalianModal' . $rental->id,
-    'title' => 'Pengembalian Alat',
-    'size' => 'modal-lg'
-])
-<div class="modal fade" id="pengembalianModal{{ $rental->id }}" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Pengembalian {{ $rental->produk->nama }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Fitur pengembalian akan diimplementasi di fase berikutnya.</p>
-            </div>
+<div id="pengembalianModal{{ $rental->id }}" 
+     class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden transition-opacity duration-300">
+    <div class="bg-white rounded-2xl w-full max-w-2xl mx-4">
+        <div class="px-6 py-4 border-b">
+            <h3 class="text-xl font-bold">Pengembalian {{ $rental->produk->nama }}</h3>
+            <button type="button" class="modal-close absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="px-6 py-8">
+            <p class="text-gray-600">Fitur pengembalian akan diimplementasi di fase berikutnya.</p>
+        </div>
+        <div class="px-6 py-4 border-t flex justify-end space-x-3">
+            <button type="button" class="btn-secondary modal-close">Tutup</button>
         </div>
     </div>
 </div>
@@ -374,90 +356,95 @@
 
 @push('styles')
 <style>
-.welcome-banner {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    position: relative;
-    overflow: hidden;
+.animate-float {
+    animation: float 3s ease-in-out infinite;
 }
 
-.welcome-banner::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-    background-size: 100px 100px;
-    animation: rotate 20s linear infinite;
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
 
-@keyframes rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.btn-primary {
+    @apply bg-primary text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-dark transition-colors duration-300;
 }
 
-.stats-card {
-    transition: all 0.3s ease;
+.btn-primary-outline {
+    @apply border border-primary text-primary px-4 py-2 rounded-lg font-medium hover:bg-primary hover:text-white transition-colors duration-300;
 }
 
-.stats-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+.btn-secondary-outline {
+    @apply border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-300;
 }
 
-.stats-icon {
-    transition: all 0.3s ease;
+.btn-success-outline {
+    @apply border border-green-500 text-green-500 px-4 py-2 rounded-lg font-medium hover:bg-green-500 hover:text-white transition-colors duration-300;
 }
 
-.stats-card:hover .stats-icon {
-    transform: scale(1.1) rotate(5deg);
+.btn-outline-primary {
+    @apply border-2 border-primary text-primary p-4 rounded-xl font-medium hover:bg-primary hover:text-white transition-all duration-300;
 }
 
-.rental-card {
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
+.btn-outline-success {
+    @apply border-2 border-green-500 text-green-500 p-4 rounded-xl font-medium hover:bg-green-500 hover:text-white transition-all duration-300;
 }
 
-.rental-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+.btn-outline-info {
+    @apply border-2 border-blue-500 text-blue-500 p-4 rounded-xl font-medium hover:bg-blue-500 hover:text-white transition-all duration-300;
 }
 
-.progress {
-    background: #e9ecef;
-    border-radius: 10px;
-    overflow: hidden;
+.btn-outline-warning {
+    @apply border-2 border-yellow-500 text-yellow-500 p-4 rounded-xl font-medium hover:bg-yellow-500 hover:text-white transition-all duration-300;
 }
 
-.progress-bar {
-    border-radius: 10px;
-    transition: width 0.6s ease;
+.modal {
+    z-index: 9999;
 }
 
 .notification-item {
-    transition: all 0.3s ease;
+    position: relative;
 }
 
 .notification-item:hover {
-    background: rgba(43, 108, 176, 0.05) !important;
-    padding-left: 1.5rem !important;
+    padding-left: 1.75rem;
 }
 
-.quick-action-btn {
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-}
-
-.quick-action-btn:hover {
-    border-color: var(--primary);
-    transform: translateY(-3px);
+.notification-item:hover::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: var(--primary);
+    border-radius: 0 2px 2px 0;
 }
 </style>
 @endpush
 
 @push('scripts')
 <script>
+// Modal functionality
+document.querySelectorAll('[data-modal-target]').forEach(button => {
+    button.addEventListener('click', () => {
+        const modalId = button.getAttribute('data-modal-target');
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('opacity-100'), 10);
+        }
+    });
+});
+
+document.querySelectorAll('.modal-close, .modal').forEach(element => {
+    element.addEventListener('click', (e) => {
+        if (e.target === element || e.target.classList.contains('modal-close')) {
+            element.closest('.modal').classList.add('hidden');
+            element.closest('.modal').classList.remove('opacity-100');
+        }
+    });
+});
+
 // Mark notification as read when clicked
 document.querySelectorAll('.notification-item').forEach(item => {
     item.addEventListener('click', function(e) {
@@ -468,22 +455,25 @@ document.querySelectorAll('.notification-item').forEach(item => {
         const notificationId = this.dataset.id;
         const notificationElement = this;
         
-        // AJAX request to mark as read
         fetch(`/user/notifications/${notificationId}/read`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
-                notificationElement.classList.remove('bg-light', 'bg-opacity-50');
-                notificationElement.querySelector('h6').classList.remove('font-weight-bold');
-                notificationElement.querySelector('h6').classList.add('text-muted');
+                notificationElement.classList.remove('bg-blue-50');
+                notificationElement.querySelector('h6').classList.remove('font-bold', 'text-gray-900');
+                notificationElement.querySelector('h6').classList.add('text-gray-700');
                 
-                // Update notification badge count
+                // Update notification badge count if exists
                 const badge = document.querySelector('.notification-badge');
                 if (badge) {
                     const currentCount = parseInt(badge.textContent) || 0;
@@ -494,13 +484,16 @@ document.querySelectorAll('.notification-item').forEach(item => {
                     }
                 }
             }
+        })
+        .catch(error => {
+            console.error('Error marking notification as read:', error);
         });
     });
 });
 
-// Progress bar animation
+// Progress bar animation on load
 document.addEventListener('DOMContentLoaded', function() {
-    const progressBars = document.querySelectorAll('.progress-bar');
+    const progressBars = document.querySelectorAll('.h-2 > div');
     progressBars.forEach(bar => {
         const width = bar.style.width;
         bar.style.width = '0';
@@ -508,15 +501,35 @@ document.addEventListener('DOMContentLoaded', function() {
             bar.style.width = width;
         }, 300);
     });
+    
+    // Initialize AOS
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 600,
+            once: true,
+            offset: 100
+        });
+    }
 });
 
-// Real-time updates (simulated)
-setInterval(() => {
-    // Check for new notifications (simulated)
-    if (Math.random() > 0.7) {
-        console.log('Checking for updates...');
-        // In production, this would be a real API call
-    }
-}, 30000);
+// Hover effects for cards
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.hover\\:shadow-lg');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            const icon = card.querySelector('.group-hover\\:scale-110');
+            if (icon) {
+                icon.style.transform = 'scale(1.1) rotate(5deg)';
+            }
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            const icon = card.querySelector('.group-hover\\:scale-110');
+            if (icon) {
+                icon.style.transform = 'scale(1) rotate(0deg)';
+            }
+        });
+    });
+});
 </script>
 @endpush

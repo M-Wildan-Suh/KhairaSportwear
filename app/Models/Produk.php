@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class Produk extends Model
 {
@@ -119,10 +120,34 @@ class Produk extends Model
 
     public function getGambarUrlAttribute()
     {
-        if ($this->gambar) {
-            return asset('storage/produk/' . $this->gambar);
+        // Jika tidak ada gambar
+        if (!$this->gambar) {
+            return $this->getDefaultImage();
         }
-        return asset('images/default-product.jpg');
+        
+        // Cek jika gambar adalah URL lengkap
+        if (filter_var($this->gambar, FILTER_VALIDATE_URL)) {
+            return $this->gambar;
+        }
+        
+        // Untuk gambar di storage (yang paling umum)
+        try {
+            if (Storage::disk('public')->exists($this->gambar)) {
+                return Storage::disk('public')->url($this->gambar);
+            }
+        } catch (\Exception $e) {
+            // Log error jika diperlukan
+            \Log::error('Error getting image URL: ' . $e->getMessage());
+        }
+        
+        // Fallback: coba path lain
+        return $this->getDefaultImage();
+    }
+
+        protected function getDefaultImage()
+    {
+        // Gunakan placeholder yang pasti bekerja
+        return 'https://placehold.co/400x400/e5e7eb/6b7280?text=Produk&font=roboto';
     }
 
     // Generate slug

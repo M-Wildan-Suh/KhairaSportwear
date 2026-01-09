@@ -93,8 +93,8 @@
                         </h3>
                         <div class="space-y-2">
                             @foreach($kategoris as $kategori)
-                            <a href="{{ route('user.produk.kategori', $kategori->slug) }}" 
-                               class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-50">
+                            <a href="{{ route('user.produk.index', ['kategori' => $kategori->slug]) }}" 
+                               class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-50 {{ request('kategori') == $kategori->slug ? 'bg-primary/10 text-primary border-l-4 border-primary' : '' }}">
                                 <span class="flex items-center gap-2">
                                     <i class="fas fa-{{ $kategori->icon ?? 'tag' }}"></i>
                                     {{ $kategori->nama }}
@@ -111,7 +111,21 @@
                             <i class="fas fa-sort-amount-down text-primary"></i>
                             Urutkan
                         </h3>
-                        <form id="sortForm">
+                        <form id="sortForm" action="{{ route('user.produk.index') }}" method="GET">
+                            <!-- Preserve existing filters -->
+                            @if(request('tipe'))
+                                <input type="hidden" name="tipe" value="{{ request('tipe') }}">
+                            @endif
+                            @if(request('kategori'))
+                                <input type="hidden" name="kategori" value="{{ request('kategori') }}">
+                            @endif
+                            @if(request('search'))
+                                <input type="hidden" name="search" value="{{ request('search') }}">
+                            @endif
+                            @if(request('view'))
+                                <input type="hidden" name="view" value="{{ request('view') }}">
+                            @endif
+                            
                             <select name="sort" 
                                     onchange="this.form.submit()"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
@@ -162,11 +176,30 @@
             <!-- Header & Controls -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4" data-aos="fade-left">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Semua Produk</h2>
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        @if(request('kategori'))
+                            {{ $currentKategori->nama ?? 'Kategori' }}
+                        @elseif(request('search'))
+                            Hasil Pencarian: "{{ request('search') }}"
+                        @elseif(request('tipe'))
+                            {{ request('tipe') == 'jual' ? 'Produk Dijual' : 'Produk Disewa' }}
+                        @else
+                            Semua Produk
+                        @endif
+                    </h2>
                     <p class="text-gray-600">{{ $produks->total() }} produk ditemukan</p>
                 </div>
                 
                 <div class="flex items-center gap-4">
+                    <!-- Clear Filters Button -->
+                    @if(request()->anyFilled(['tipe', 'kategori', 'search', 'sort']))
+                    <a href="{{ route('user.produk.index') }}" 
+                       class="inline-flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                        <i class="fas fa-times"></i>
+                        Reset Filter
+                    </a>
+                    @endif
+                    
                     <!-- View Toggle -->
                     <div class="flex items-center gap-2">
                         <button class="p-2 rounded-lg border {{ $view == 'grid' ? 'border-primary bg-primary/10 text-primary' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}"
@@ -184,7 +217,7 @@
             <!-- Products Grid View -->
             <div id="gridView" class="{{ $view == 'grid' ? 'block' : 'hidden' }}">
                 @if($produks->count() > 0)
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="productsContainer">
                     @foreach($produks as $produk)
                     <div data-aos="fade-up" data-aos-delay="{{ $loop->index * 50 }}">
                         <div class="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden group">
@@ -285,7 +318,7 @@
             <!-- Products List View -->
             <div id="listView" class="{{ $view == 'list' ? 'block' : 'hidden' }}">
                 @if($produks->count() > 0)
-                <div class="space-y-4">
+                <div class="space-y-4" id="listProductsContainer">
                     @foreach($produks as $produk)
                     <div data-aos="fade-up" data-aos-delay="{{ $loop->index * 50 }}">
                         <div class="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
@@ -382,12 +415,25 @@
                 @endif
             </div>
             
-            <!-- Pagination -->
+            <!-- Pagination (Tetap dipertahankan untuk fallback) -->
             @if($produks->hasPages())
-            <div class="mt-8" data-aos="fade-up">
+            <div class="mt-8" data-aos="fade-up" id="paginationContainer">
                 {{ $produks->withQueryString()->onEachSide(1)->links('vendor.pagination.custom') }}
             </div>
             @endif
+            
+            <!-- Loading Indicator untuk Infinite Scroll -->
+            <div id="loadingIndicator" class="hidden mt-8 text-center">
+                <div class="inline-flex flex-col items-center">
+                    <div class="spinner w-12 h-12 mb-4"></div>
+                    <p class="text-gray-600">Memuat produk...</p>
+                </div>
+            </div>
+            
+            <!-- End of Content Marker -->
+            <div id="endOfContent" class="hidden mt-8 text-center py-4">
+                <p class="text-gray-500">😊 Anda telah mencapai akhir daftar produk</p>
+            </div>
         </div>
     </div>
 </div>
@@ -455,11 +501,20 @@
 
 @push('scripts')
 <script>
+// Global variables
+let isLoading = false;
+let currentPage = 1;
+let hasMorePages = true;
+let observer = null;
+let currentView = 'grid';
+
 // Switch between grid and list view
 function switchView(view) {
     const gridView = document.getElementById('gridView');
     const listView = document.getElementById('listView');
     const url = new URL(window.location.href);
+    
+    currentView = view;
     
     if (view === 'grid') {
         gridView.classList.remove('hidden');
@@ -476,6 +531,9 @@ function switchView(view) {
     
     // Update URL without page reload
     window.history.pushState({}, '', url);
+    
+    // Re-initialize infinite scroll for the current view
+    setTimeout(() => initInfiniteScroll(), 100);
 }
 
 // Add to cart function
@@ -612,6 +670,207 @@ function initCartButtonsInModal() {
     });
 }
 
+// Initialize infinite scroll
+function initInfiniteScroll() {
+    // Hentikan observer sebelumnya jika ada
+    if (observer) {
+        observer.disconnect();
+        observer = null;
+    }
+    
+    // Reset state
+    isLoading = false;
+    currentPage = {{ $produks->currentPage() }};
+    
+    // Cek apakah ada halaman berikutnya dari data Laravel
+    hasMorePages = {{ $produks->hasMorePages() ? 'true' : 'false' }};
+    
+    // Jika tidak ada halaman berikutnya, tidak perlu setup infinite scroll
+    if (!hasMorePages) {
+        const endOfContent = document.getElementById('endOfContent');
+        if (endOfContent) endOfContent.classList.remove('hidden');
+        return;
+    }
+    
+    // Buat sentinel element untuk diamati
+    let sentinel = document.getElementById('infiniteScrollSentinel');
+    if (!sentinel) {
+        sentinel = document.createElement('div');
+        sentinel.id = 'infiniteScrollSentinel';
+        sentinel.className = 'h-10 w-full';
+        
+        // Tambahkan sentinel di tempat yang tepat
+        if (currentView === 'grid') {
+            const container = document.getElementById('productsContainer');
+            if (container) {
+                const pagination = document.getElementById('paginationContainer');
+                if (pagination) {
+                    container.parentNode.insertBefore(sentinel, pagination);
+                } else {
+                    container.appendChild(sentinel);
+                }
+            }
+        } else {
+            const container = document.getElementById('listProductsContainer');
+            if (container) {
+                const pagination = document.getElementById('paginationContainer');
+                if (pagination) {
+                    container.parentNode.insertBefore(sentinel, pagination);
+                } else {
+                    container.appendChild(sentinel);
+                }
+            }
+        }
+    }
+    
+    // Setup Intersection Observer
+    observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !isLoading && hasMorePages) {
+                    loadMoreProducts();
+                }
+            });
+        },
+        {
+            rootMargin: '100px',
+            threshold: 0.1
+        }
+    );
+    
+    if (sentinel) observer.observe(sentinel);
+}
+
+// Load more products for infinite scroll
+async function loadMoreProducts() {
+    if (isLoading || !hasMorePages) return;
+    
+    isLoading = true;
+    currentPage++;
+    
+    // Show loading indicator
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const endOfContent = document.getElementById('endOfContent');
+    loadingIndicator.classList.remove('hidden');
+    
+    try {
+        // Build URL with current query parameters
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('page', currentPage);
+        
+        // Fetch next page
+        const response = await fetch(currentUrl.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        });
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Extract products based on current view
+        if (currentView === 'grid') {
+            const newProductsContainer = doc.querySelector('#productsContainer');
+            const container = document.getElementById('productsContainer');
+            if (newProductsContainer && container) {
+                // Convert HTML string to DOM elements
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = newProductsContainer.innerHTML;
+                
+                // Append each new product
+                while (tempDiv.firstChild) {
+                    container.appendChild(tempDiv.firstChild);
+                }
+            }
+        } else {
+            const newProductsContainer = doc.querySelector('#listProductsContainer');
+            const container = document.getElementById('listProductsContainer');
+            if (newProductsContainer && container) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = newProductsContainer.innerHTML;
+                
+                while (tempDiv.firstChild) {
+                    container.appendChild(tempDiv.firstChild);
+                }
+            }
+        }
+        
+        // Check if there are more pages
+        const newPagination = doc.querySelector('#paginationContainer');
+        if (newPagination) {
+            const nextPageLink = newPagination.querySelector('a[rel="next"]');
+            if (!nextPageLink) {
+                hasMorePages = false;
+                endOfContent.classList.remove('hidden');
+                // Remove sentinel
+                const sentinel = document.getElementById('infiniteScrollSentinel');
+                if (sentinel) sentinel.remove();
+            } else {
+                // Update pagination container
+                document.getElementById('paginationContainer').innerHTML = newPagination.innerHTML;
+            }
+        }
+        
+        // Initialize AOS for new elements
+        if (typeof AOS !== 'undefined') {
+            AOS.refreshHard();
+        }
+        
+        // Re-initialize cart buttons for new products
+        initCartButtons();
+        
+        // Update sentinel position
+        updateSentinelPosition();
+        
+    } catch (error) {
+        console.error('Error loading more products:', error);
+        hasMorePages = false;
+        loadingIndicator.innerHTML = '<p class="text-red-500">Gagal memuat lebih banyak produk</p>';
+    } finally {
+        isLoading = false;
+        loadingIndicator.classList.add('hidden');
+    }
+}
+
+// Initialize cart buttons
+function initCartButtons() {
+    document.querySelectorAll('[onclick^="addToCart"]').forEach(button => {
+        const onclick = button.getAttribute('onclick');
+        const match = onclick.match(/addToCart\((\d+),\s*'(\w+)'\)/);
+        if (match) {
+            button.onclick = () => addToCart(match[1], match[2]);
+        }
+    });
+}
+
+// Update sentinel position
+function updateSentinelPosition() {
+    const sentinel = document.getElementById('infiniteScrollSentinel');
+    if (sentinel) {
+        observer.unobserve(sentinel);
+        sentinel.remove();
+    }
+    
+    // Create new sentinel
+    const newSentinel = document.createElement('div');
+    newSentinel.id = 'infiniteScrollSentinel';
+    newSentinel.className = 'h-10 w-full';
+    
+    if (currentView === 'grid') {
+        const container = document.getElementById('productsContainer');
+        if (container) container.appendChild(newSentinel);
+    } else {
+        const container = document.getElementById('listProductsContainer');
+        if (container) container.appendChild(newSentinel);
+    }
+    
+    observer.observe(newSentinel);
+}
+
 // Initialize page on load
 document.addEventListener('DOMContentLoaded', function() {
     // Set initial view from localStorage
@@ -628,72 +887,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Initialize cart buttons
+    initCartButtons();
+    
     // Close modal on ESC
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeModal();
         }
     });
+    
+    // Initialize infinite scroll after a short delay
+    setTimeout(() => initInfiniteScroll(), 500);
 });
 
-// Infinite scroll (optional)
-let isLoading = false;
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting && !isLoading) {
-            const nextPageUrl = '{{ $produks->nextPageUrl() }}';
-            if (nextPageUrl) {
-                isLoading = true;
-                loadMoreProducts(nextPageUrl);
-            }
-        }
-    });
-}, {
-    rootMargin: '0px 0px 100px 0px'
+// Handle browser back/forward navigation
+window.addEventListener('popstate', function() {
+    // Reload page for proper state
+    window.location.reload();
 });
-
-// Observe last product for infinite scroll
-const lastProduct = document.querySelector('#gridView > div:last-child');
-if (lastProduct) {
-    observer.observe(lastProduct);
-}
-
-async function loadMoreProducts(url) {
-    try {
-        const response = await fetch(url);
-        const html = await response.text();
-        
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const newProducts = doc.querySelectorAll('#gridView > div > div');
-        
-        const container = document.querySelector('#gridView > div');
-        newProducts.forEach(product => {
-            container.appendChild(product);
-        });
-        
-        // Update pagination
-        const newPagination = doc.querySelector('.pagination');
-        if (newPagination) {
-            document.querySelector('.pagination').outerHTML = newPagination.outerHTML;
-        }
-        
-        // Re-initialize AOS for new elements
-        if (typeof AOS !== 'undefined') {
-            AOS.refresh();
-        }
-        
-        // Re-observe last product
-        const lastProduct = container.lastElementChild;
-        if (lastProduct) {
-            observer.observe(lastProduct);
-        }
-        
-        isLoading = false;
-    } catch (error) {
-        console.error('Error loading more products:', error);
-        isLoading = false;
-    }
-}
 </script>
 @endpush

@@ -22,11 +22,13 @@ class ProdukController extends Controller
             }
         }
         
-        // Filter by category
+        // Get current kategori jika ada filter
+        $currentKategori = null;
         if ($request->has('kategori')) {
-            $query->whereHas('kategori', function($q) use ($request) {
-                $q->where('slug', $request->kategori);
-            });
+            $currentKategori = Kategori::where('slug', $request->kategori)->first();
+            if ($currentKategori) {
+                $query->where('kategori_id', $currentKategori->id);
+            }
         }
         
         // Search
@@ -61,15 +63,22 @@ class ProdukController extends Controller
         }
         
         $produks = $query->paginate(12);
-        $kategoris = Kategori::active()->get();
+        
+        // **FIXED: Ambil kategori dengan menghitung produk aktif**
+        $kategoris = Kategori::active()
+            ->withCount(['produks' => function($query) {
+                $query->active()->stokTersedia();
+            }])
+            ->get();
 
-        // Count total jual and sewa
-        $jualCount = Produk::active()->tipeJual()->count();
-        $sewaCount = Produk::active()->tipeSewa()->count();
+        // Count total jual and sewa (hanya produk aktif dengan stok)
+        $jualCount = Produk::active()->stokTersedia()->tipeJual()->count();
+        $sewaCount = Produk::active()->stokTersedia()->tipeSewa()->count();
         
         // Get featured products for sidebar
         $featuredProducts = Produk::with('kategori')
             ->active()
+            ->stokTersedia()
             ->inRandomOrder()
             ->limit(4)
             ->get();
@@ -86,7 +95,8 @@ class ProdukController extends Controller
             'totalProducts', 
             'jualCount',
             'sewaCount',
-            'view'  // Tambahkan variabel view ke compact
+            'currentKategori',
+            'view'
         ));
     }
     
@@ -115,9 +125,13 @@ class ProdukController extends Controller
             ->stokTersedia()
             ->paginate(12);
         
-        $kategoris = Kategori::active()->get();
+        // Ambil semua kategori dengan count
+        $kategoris = Kategori::active()
+            ->withCount(['produks' => function($query) {
+                $query->active()->stokTersedia();
+            }])
+            ->get();
         
-        // Tambahkan view parameter
         $view = request()->get('view', 'grid');
         
         return view('user.produk.kategori', compact('produks', 'kategori', 'kategoris', 'view'));
@@ -139,9 +153,33 @@ class ProdukController extends Controller
             ->stokTersedia()
             ->paginate(12);
         
-        // Tambahkan view parameter
+        // Ambil kategori dengan count untuk sidebar
+        $kategoris = Kategori::active()
+            ->withCount(['produks' => function($query) {
+                $query->active()->stokTersedia();
+            }])
+            ->get();
+        
+        // Hitung untuk sidebar
+        $jualCount = Produk::active()->stokTersedia()->tipeJual()->count();
+        $sewaCount = Produk::active()->stokTersedia()->tipeSewa()->count();
+        $featuredProducts = Produk::with('kategori')
+            ->active()
+            ->stokTersedia()
+            ->inRandomOrder()
+            ->limit(4)
+            ->get();
+        
         $view = $request->get('view', 'grid');
         
-        return view('user.produk.search', compact('produks', 'search', 'view'));
+        return view('user.produk.search', compact(
+            'produks', 
+            'search', 
+            'view',
+            'kategoris',
+            'jualCount',
+            'sewaCount',
+            'featuredProducts'
+        ));
     }
 }

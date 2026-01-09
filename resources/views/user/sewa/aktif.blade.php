@@ -3,173 +3,229 @@
 @section('title', 'Sewa Aktif - SportWear')
 
 @section('content')
-<div class="container py-5">
+<div class="py-8">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('user.sewa.index') }}">Sewa</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Sewa Aktif</li>
-        </ol>
-    </nav>
-    
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2 font-weight-bold mb-0">Sewa Aktif</h1>
-        <a href="{{ route('user.sewa.index') }}" class="btn btn-outline-primary">
-            <i class="fas fa-plus me-2"></i> Sewa Baru
-        </a>
+    <div class="container mb-6">
+        <nav class="flex items-center text-sm text-gray-600">
+            <a href="{{ route('home') }}" class="hover:text-primary transition-colors">
+                <i class="fas fa-home mr-2"></i> Home
+            </a>
+            <i class="fas fa-chevron-right mx-2 text-gray-400"></i>
+            <a href="{{ route('user.sewa.index') }}" class="hover:text-primary transition-colors">Sewa</a>
+            <i class="fas fa-chevron-right mx-2 text-gray-400"></i>
+            <span class="text-primary font-medium">Sewa Aktif</span>
+        </nav>
     </div>
-    
-    @if($sewas->count() > 0)
-    <div class="row">
-        @foreach($sewas as $sewa)
-        <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-            <div class="rental-card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+
+    <div class="container">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-1">Sewa Aktif</h1>
+                <p class="text-gray-600">Kelola penyewaan alat olahraga Anda</p>
+            </div>
+            
+            <a href="{{ route('user.sewa.index') }}" 
+               class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors">
+                <i class="fas fa-plus"></i>
+                <span>Sewa Baru</span>
+            </a>
+        </div>
+
+        @if($sewas->count() > 0)
+        <!-- Active Rentals Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            @foreach($sewas as $sewa)
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300" 
+                 data-aos="fade-up" 
+                 data-aos-delay="{{ $loop->index * 100 }}">
+                <div class="p-6">
+                    <!-- Header -->
+                    <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h5 class="font-weight-bold mb-1">{{ $sewa->produk->nama }}</h5>
-                            <div class="text-muted small">{{ $sewa->kode_sewa }}</div>
+                            <h3 class="font-semibold text-gray-900 text-lg mb-1">{{ $sewa->produk->nama }}</h3>
+                            <p class="text-sm text-gray-600">{{ $sewa->kode_sewa }}</p>
                         </div>
                         <div>
                             @include('components.status-badge', ['status' => $sewa->status])
                         </div>
                     </div>
                     
-                    <!-- Product Info -->
-                    <div class="d-flex align-items-center mb-4">
+                    <!-- Product & Info -->
+                    <div class="flex gap-4 mb-6">
                         <img src="{{ $sewa->produk->gambar_url }}" 
                              alt="{{ $sewa->produk->nama }}"
-                             class="rounded-3 me-3"
-                             style="width: 80px; height: 80px; object-fit: cover;">
-                        <div>
-                            <div class="mb-1">
-                                <i class="fas fa-calendar-alt text-primary me-2"></i>
-                                <span>{{ $sewa->durasi }} ({{ $sewa->jumlah_hari }} hari)</span>
-                            </div>
-                            <div class="mb-1">
-                                <i class="fas fa-play-circle text-success me-2"></i>
-                                <span>Mulai: {{ $sewa->tanggal_mulai->format('d/m/Y') }}</span>
-                            </div>
-                            <div>
-                                <i class="fas fa-flag-checkered text-danger me-2"></i>
-                                <span>Kembali: {{ $sewa->tanggal_kembali_rencana->format('d/m/Y') }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Progress Bar -->
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="small">Progress Sewa</span>
-                            <span class="small font-weight-bold">{{ $sewa->sisa_hari }} hari tersisa</span>
-                        </div>
-                        <div class="progress" style="height: 8px;">
-                            @php
-                                $totalDays = $sewa->jumlah_hari;
-                                $remainingDays = $sewa->sisa_hari;
-                                $percentage = ($totalDays - $remainingDays) / $totalDays * 100;
-                            @endphp
-                            <div class="progress-bar bg-success" 
-                                 role="progressbar" 
-                                 style="width: {{ $percentage }}%"
-                                 aria-valuenow="{{ $percentage }}" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between mt-1">
-                            <small class="text-muted">Mulai</small>
-                            <small class="text-muted">Kembali</small>
-                        </div>
-                    </div>
-                    
-                    <!-- Rental Info -->
-                    <div class="rental-info mb-4">
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="info-item">
-                                    <small class="text-muted d-block">Total Biaya</small>
-                                    <strong class="text-primary">Rp {{ number_format($sewa->total_harga, 0, ',', '.') }}</strong>
+                             class="w-20 h-20 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-calendar-alt text-primary text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-600">Durasi</p>
+                                        <p class="text-sm font-medium">{{ $sewa->durasi }} ({{ $sewa->jumlah_hari }} hari)</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="info-item">
-                                    <small class="text-muted d-block">Status</small>
-                                    <div class="d-flex align-items-center">
-                                        <div class="status-dot bg-{{ $sewa->sisa_hari < 3 ? 'danger' : 'success' }} me-2"></div>
-                                        <span>{{ $sewa->sisa_hari }} hari lagi</span>
+                                
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-play-circle text-green-600 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-600">Mulai</p>
+                                        <p class="text-sm font-medium">{{ $sewa->tanggal_mulai->format('d/m/Y') }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-flag-checkered text-red-600 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-600">Kembali</p>
+                                        <p class="text-sm font-medium">{{ $sewa->tanggal_kembali_rencana->format('d/m/Y') }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-money-bill-wave text-blue-600 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-600">Total</p>
+                                        <p class="text-sm font-medium">Rp {{ number_format($sewa->total_harga, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Progress Bar -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm text-gray-600">Progress Sewa</span>
+                            <span class="text-sm font-medium {{ $sewa->sisa_hari < 3 ? 'text-red-600' : 'text-green-600' }}">
+                                {{ $sewa->sisa_hari }} hari tersisa
+                            </span>
+                        </div>
+                        <div class="relative">
+                            @php
+                                $totalDays = $sewa->jumlah_hari;
+                                $remainingDays = $sewa->sisa_hari;
+                                $elapsedDays = $totalDays - $remainingDays;
+                                $percentage = min(100, ($elapsedDays / $totalDays) * 100);
+                            @endphp
+                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-primary to-green-500 rounded-full transition-all duration-500"
+                                     style="width: {{ $percentage }}%"></div>
+                            </div>
+                            <div class="absolute inset-0 flex justify-between items-center px-1">
+                                @for($i = 0; $i <= $totalDays; $i++)
+                                <div class="w-px h-3 {{ $i <= $elapsedDays ? 'bg-primary' : 'bg-gray-300' }}"></div>
+                                @endfor
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Mulai</span>
+                            <span>Kembali</span>
+                        </div>
+                    </div>
+                    
                     <!-- Action Buttons -->
-                    <div class="d-flex gap-2">
+                    <div class="flex flex-wrap gap-2">
                         <a href="{{ route('user.sewa.show', $sewa->id) }}" 
-                           class="btn btn-outline-primary flex-fill">
-                            <i class="fas fa-eye me-2"></i> Detail
+                           class="flex-1 min-w-[120px] px-4 py-2 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors text-center">
+                            <i class="fas fa-eye mr-2"></i> Detail
                         </a>
-                        <button class="btn btn-outline-info" onclick="showExtendModal('{{ $sewa->id }}')"
+                        
+                        <button onclick="showExtendModal('{{ $sewa->id }}')" 
+                                class="flex-1 min-w-[120px] px-4 py-2 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors {{ $sewa->sisa_hari < 1 ? 'opacity-50 cursor-not-allowed' : '' }}"
                                 {{ $sewa->sisa_hari < 1 ? 'disabled' : '' }}>
-                            <i class="fas fa-plus me-2"></i> Perpanjang
+                            <i class="fas fa-plus mr-2"></i> Perpanjang
                         </button>
-                        <button class="btn btn-outline-success" onclick="showReturnModal('{{ $sewa->id }}')">
-                            <i class="fas fa-undo me-2"></i> Kembalikan
+                        
+                        <button onclick="showReturnModal('{{ $sewa->id }}')" 
+                                class="flex-1 min-w-[120px] px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-undo mr-2"></i> Kembalikan
                         </button>
                     </div>
                 </div>
             </div>
+            @endforeach
         </div>
-        @endforeach
-    </div>
-    
-    <!-- Pagination -->
-    @if($sewas->hasPages())
-    <div class="d-flex justify-content-center mt-4">
-        {{ $sewas->links() }}
-    </div>
-    @endif
-    @else
-    <!-- Empty State -->
-    <div class="text-center py-5" data-aos="fade-up">
-        <div class="empty-state">
-            <i class="fas fa-calendar-check fa-5x text-muted mb-4"></i>
-            <h3 class="text-muted mb-3">Tidak Ada Sewa Aktif</h3>
-            <p class="text-muted mb-4">Mulai sewa alat olahraga favorit Anda</p>
-            <a href="{{ route('user.sewa.index') }}" class="btn btn-sport">
-                <i class="fas fa-calendar-plus me-2"></i> Sewa Sekarang
-            </a>
+        
+        <!-- Pagination -->
+        @if($sewas->hasPages())
+        <div class="mt-8">
+            {{ $sewas->onEachSide(1)->links('vendor.pagination.custom') }}
         </div>
+        @endif
+        
+        @else
+        <!-- Empty State -->
+        <div class="text-center py-12" data-aos="fade-up">
+            <div class="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                <i class="fas fa-calendar-check text-gray-400 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Tidak Ada Sewa Aktif</h3>
+            <p class="text-gray-600 mb-6">Mulai sewa alat olahraga favorit Anda</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="{{ route('user.sewa.index') }}" 
+                   class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors">
+                    <i class="fas fa-calendar-plus"></i>
+                    <span>Sewa Sekarang</span>
+                </a>
+                <a href="{{ route('user.produk.index') }}" 
+                   class="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors">
+                    <i class="fas fa-store"></i>
+                    <span>Lihat Katalog</span>
+                </a>
+            </div>
+        </div>
+        @endif
     </div>
-    @endif
 </div>
 
 <!-- Return Modal -->
-<div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Pengembalian Alat</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="returnForm">
+<div id="returnModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50" onclick="closeReturnModal()"></div>
+        <div class="relative bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-900">Pengembalian Alat</h3>
+                    <button onclick="closeReturnModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="returnForm" class="space-y-6">
                     @csrf
                     <input type="hidden" id="return_sewa_id" name="sewa_id">
                     
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Tanggal Kembali <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" name="tanggal_kembali" id="return_tanggal_kembali" required>
-                                <div class="form-text">Tanggal saat Anda mengembalikan alat</div>
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Tanggal Kembali <span class="text-red-500">*</span>
+                                </label>
+                                <input type="date" 
+                                       name="tanggal_kembali" 
+                                       id="return_tanggal_kembali"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                       required>
+                                <p class="mt-2 text-sm text-gray-500">Tanggal saat Anda mengembalikan alat</p>
                             </div>
                             
-                            <div class="mb-3">
-                                <label class="form-label">Kondisi Alat <span class="text-danger">*</span></label>
-                                <select class="form-select" name="kondisi_alat" id="return_kondisi_alat" required>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Kondisi Alat <span class="text-red-500">*</span>
+                                </label>
+                                <select name="kondisi_alat" 
+                                        id="return_kondisi_alat"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                        required>
                                     <option value="">Pilih kondisi</option>
                                     <option value="baik">Baik (Tidak ada kerusakan)</option>
                                     <option value="rusak_ringan">Rusak Ringan (Perlu perbaikan kecil)</option>
@@ -178,35 +234,43 @@
                                 </select>
                             </div>
                             
-                            <div class="mb-3">
-                                <label class="form-label">Catatan Kondisi</label>
-                                <textarea class="form-control" name="catatan_kondisi" rows="3" placeholder="Deskripsi kondisi alat..."></textarea>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Kondisi</label>
+                                <textarea name="catatan_kondisi" 
+                                          rows="3"
+                                          placeholder="Deskripsi kondisi alat..."
+                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"></textarea>
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
-                            <div class="fine-calculation border rounded p-4 h-100">
-                                <h6 class="font-weight-bold mb-3">Perhitungan Denda</h6>
-                                <div id="fineCalculation">
-                                    <div class="text-center py-4">
-                                        <div class="spinner-border spinner-border-sm text-primary"></div>
-                                        <p class="mt-2 text-muted">Menghitung denda...</p>
+                        <div>
+                            <div class="bg-gray-50 rounded-lg p-6">
+                                <h4 class="font-semibold text-gray-900 mb-4">Perhitungan Denda</h4>
+                                <div id="fineCalculation" class="space-y-3">
+                                    <div class="text-center py-8">
+                                        <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                        <p class="text-gray-600">Menghitung denda...</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Perhatian:</strong> Pengembalian akan diverifikasi oleh admin. Denda akan dikenakan jika terdapat keterlambatan atau kerusakan.
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-blue-800 mb-1">Perhatian:</p>
+                                <p class="text-sm text-blue-700">Pengembalian akan diverifikasi oleh admin. Denda akan dikenakan jika terdapat keterlambatan atau kerusakan.</p>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-check-circle me-2"></i> Ajukan Pengembalian
-                        </button>
-                    </div>
+                    <button type="submit" 
+                            class="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Ajukan Pengembalian</span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -214,41 +278,59 @@
 </div>
 
 <!-- Extend Modal -->
-<div class="modal fade" id="extendModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Perpanjang Sewa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div id="extendModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50" onclick="closeExtendModal()"></div>
+        <div class="relative bg-white rounded-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Perpanjang Sewa</h3>
+                <button onclick="closeExtendModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
-            <div class="modal-body">
-                <form id="extendForm">
-                    @csrf
-                    <input type="hidden" id="extend_sewa_id" name="sewa_id">
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Tambahan Hari <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="tambahan_hari" min="1" max="30" value="1" required>
-                        <div class="form-text">Maksimal 30 hari per sewa</div>
+            
+            <form id="extendForm" class="space-y-6">
+                @csrf
+                <input type="hidden" id="extend_sewa_id" name="sewa_id">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Tambahan Hari <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" 
+                           name="tambahan_hari" 
+                           min="1" 
+                           max="30" 
+                           value="1"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                           required>
+                    <p class="mt-2 text-sm text-gray-500">Maksimal 30 hari per sewa</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Perpanjangan</label>
+                    <textarea name="alasan" 
+                              rows="2"
+                              placeholder="Alasan perpanjangan sewa..."
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"></textarea>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 mt-1 mr-3"></i>
+                        <div>
+                            <p class="font-medium text-yellow-800 mb-1">Perhatian:</p>
+                            <p class="text-sm text-yellow-700">Perpanjangan sewa akan menambah biaya sesuai durasi tambahan.</p>
+                        </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Alasan Perpanjangan</label>
-                        <textarea class="form-control" name="alasan" rows="2" placeholder="Alasan perpanjangan sewa..."></textarea>
-                    </div>
-                    
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Perpanjangan sewa akan menambah biaya sesuai durasi tambahan.
-                    </div>
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-check me-2"></i> Ajukan Perpanjangan
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                
+                <button type="submit" 
+                        class="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-check"></i>
+                    <span>Ajukan Perpanjangan</span>
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -256,52 +338,31 @@
 
 @push('styles')
 <style>
-.rental-card {
-    transition: all 0.3s ease;
+/* Progress bar styling */
+.animate-spin {
+    animation: spin 1s linear infinite;
 }
 
-.rental-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
+/* Modal animations */
+#returnModal, #extendModal {
+    transition: opacity 0.3s ease;
 }
 
-.info-item {
-    padding: 0.5rem;
-    border-radius: 8px;
-    background: #f8f9fa;
-}
-
-.fine-calculation {
-    background: #f8f9fa;
-}
-
-.empty-state {
-    padding: 3rem 1rem;
-}
-
-.progress {
-    background: #e9ecef;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    border-radius: 10px;
-    transition: width 0.6s ease;
+/* Card hover effects */
+.hover\:shadow-md:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-// Show return modal
+// Modal functions
 function showReturnModal(sewaId) {
     document.getElementById('return_sewa_id').value = sewaId;
     
@@ -313,239 +374,250 @@ function showReturnModal(sewaId) {
     // Calculate fines
     calculateFines(sewaId);
     
-    const modal = new bootstrap.Modal(document.getElementById('returnModal'));
-    modal.show();
+    document.getElementById('returnModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeReturnModal() {
+    document.getElementById('returnModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+function showExtendModal(sewaId) {
+    document.getElementById('extend_sewa_id').value = sewaId;
+    document.getElementById('extendModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeExtendModal() {
+    document.getElementById('extendModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
 }
 
 // Calculate fines
-function calculateFines(sewaId) {
+async function calculateFines(sewaId) {
     const tanggalKembali = document.getElementById('return_tanggal_kembali').value;
     const kondisiAlat = document.getElementById('return_kondisi_alat').value;
     
     if (!tanggalKembali || !kondisiAlat) return;
     
-    fetch('/user/sewa/calculate-denda', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            sewa_id: sewaId,
-            tanggal_kembali: tanggalKembali,
-            kondisi_alat: kondisiAlat
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
+    try {
+        const response = await fetch('/user/sewa/calculate-denda', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                sewa_id: sewaId,
+                tanggal_kembali: tanggalKembali,
+                kondisi_alat: kondisiAlat
+            })
+        });
+        
+        const data = await response.json();
+        
         if (data.success) {
             const fines = data.data;
             let fineHtml = '';
             
             if (fines.total_denda > 0) {
                 fineHtml = `
-                    <div class="fine-detail">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Keterlambatan:</span>
-                            <span>${fines.keterlambatan_hari} hari × Rp ${fines.tarif_denda_per_hari.toLocaleString()}</span>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Keterlambatan:</span>
+                            <span class="font-medium">${fines.keterlambatan_hari} hari × Rp ${fines.tarif_denda_per_hari.toLocaleString()}</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Denda Keterlambatan:</span>
-                            <span class="text-danger">Rp ${fines.denda_keterlambatan.toLocaleString()}</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Denda Keterlambatan:</span>
+                            <span class="text-red-600 font-medium">Rp ${fines.denda_keterlambatan.toLocaleString()}</span>
                         </div>
                         ${fines.denda_kerusakan > 0 ? `
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Denda Kerusakan:</span>
-                            <span class="text-danger">Rp ${fines.denda_kerusakan.toLocaleString()}</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Denda Kerusakan:</span>
+                            <span class="text-red-600 font-medium">Rp ${fines.denda_kerusakan.toLocaleString()}</span>
                         </div>
                         ` : ''}
-                        <hr>
-                        <div class="d-flex justify-content-between">
-                            <strong>Total Denda:</strong>
-                            <strong class="text-danger">Rp ${fines.total_denda.toLocaleString()}</strong>
+                        <div class="pt-3 border-t border-gray-300">
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-900">Total Denda:</span>
+                                <span class="text-xl font-bold text-red-600">Rp ${fines.total_denda.toLocaleString()}</span>
+                            </div>
                         </div>
                     </div>
                 `;
             } else {
                 fineHtml = `
-                    <div class="text-center text-success">
-                        <i class="fas fa-check-circle fa-3x mb-3"></i>
-                        <p class="mb-0">Tidak ada denda</p>
+                    <div class="text-center py-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                        </div>
+                        <p class="text-green-600 font-medium">Tidak ada denda</p>
                     </div>
                 `;
             }
             
             document.getElementById('fineCalculation').innerHTML = fineHtml;
         }
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error:', error);
         document.getElementById('fineCalculation').innerHTML = `
-            <div class="text-center text-danger">
-                <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
-                <p class="mb-0">Gagal menghitung denda</p>
+            <div class="text-center py-4">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
+                </div>
+                <p class="text-red-600 font-medium">Gagal menghitung denda</p>
             </div>
         `;
-    });
+    }
 }
 
 // Event listeners for fine calculation
-document.getElementById('return_tanggal_kembali').addEventListener('change', function() {
+document.getElementById('return_tanggal_kembali')?.addEventListener('change', function() {
     const sewaId = document.getElementById('return_sewa_id').value;
     if (sewaId) calculateFines(sewaId);
 });
 
-document.getElementById('return_kondisi_alat').addEventListener('change', function() {
+document.getElementById('return_kondisi_alat')?.addEventListener('change', function() {
     const sewaId = document.getElementById('return_sewa_id').value;
     if (sewaId) calculateFines(sewaId);
 });
 
 // Return form submission
-document.getElementById('returnForm').addEventListener('submit', function(e) {
+document.getElementById('returnForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
     const sewaId = formData.get('sewa_id');
     
-    Swal.fire({
-        title: 'Ajukan Pengembalian?',
-        text: 'Alat akan dikembalikan dan menunggu verifikasi admin',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#ED8936',
-        cancelButtonColor: '#718096',
-        confirmButtonText: 'Ya, Ajukan',
-        cancelButtonText: 'Batal',
-        showLoaderOnConfirm: true,
-        preConfirm: () => {
-            return fetch(`/user/sewa/${sewaId}/pengembalian`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    tanggal_kembali: formData.get('tanggal_kembali'),
-                    kondisi_alat: formData.get('kondisi_alat'),
-                    catatan_kondisi: formData.get('catatan_kondisi')
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(response.statusText);
-                }
-                return response.json();
-            })
-            .catch(error => {
-                Swal.showValidationMessage(
-                    `Request failed: ${error}`
-                );
-            });
-        },
-        allowOutsideClick: () => !Swal.isLoading()
-    }).then((result) => {
-        if (result.isConfirmed) {
-            if (result.value.success) {
-                // Close modal
-                bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
-                
-                // Show success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: result.value.message,
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    // Redirect
-                    window.location.href = result.value.redirect;
-                });
-            } else {
-                Swal.fire('Error', result.value.message, 'error');
-            }
-        }
-    });
-});
-
-// Show extend modal
-function showExtendModal(sewaId) {
-    document.getElementById('extend_sewa_id').value = sewaId;
+    if (!confirm('Ajukan pengembalian alat?')) return;
     
-    const modal = new bootstrap.Modal(document.getElementById('extendModal'));
-    modal.show();
-}
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalContent = submitButton.innerHTML;
+    
+    // Show loading
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengajukan...';
+    submitButton.disabled = true;
+    
+    try {
+        const response = await fetch(`/user/sewa/${sewaId}/pengembalian`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                tanggal_kembali: formData.get('tanggal_kembali'),
+                kondisi_alat: formData.get('kondisi_alat'),
+                catatan_kondisi: formData.get('catatan_kondisi')
+            })
+        });
+        
+        const data = await response.json();
+        
+        // Restore button
+        submitButton.innerHTML = originalContent;
+        submitButton.disabled = false;
+        
+        if (data.success) {
+            closeReturnModal();
+            showToast('success', data.message);
+            setTimeout(() => window.location.href = data.redirect, 1500);
+        } else {
+            showToast('error', data.message);
+        }
+    } catch (error) {
+        // Restore button
+        submitButton.innerHTML = originalContent;
+        submitButton.disabled = false;
+        
+        console.error('Error:', error);
+        showToast('error', 'Terjadi kesalahan');
+    }
+});
 
 // Extend form submission
-document.getElementById('extendForm').addEventListener('submit', function(e) {
+document.getElementById('extendForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
     const sewaId = formData.get('sewa_id');
     
-    Swal.fire({
-        title: 'Perpanjang Sewa?',
-        text: 'Sewa akan diperpanjang dan biaya tambahan akan ditambahkan',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#ED8936',
-        cancelButtonColor: '#718096',
-        confirmButtonText: 'Ya, Perpanjang',
-        cancelButtonText: 'Batal',
-        showLoaderOnConfirm: true,
-        preConfirm: () => {
-            return fetch(`/user/sewa/${sewaId}/extend`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    tambahan_hari: formData.get('tambahan_hari'),
-                    alasan: formData.get('alasan')
-                })
+    if (!confirm('Perpanjang sewa ini?')) return;
+    
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalContent = submitButton.innerHTML;
+    
+    // Show loading
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengajukan...';
+    submitButton.disabled = true;
+    
+    try {
+        const response = await fetch(`/user/sewa/${sewaId}/extend`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                tambahan_hari: formData.get('tambahan_hari'),
+                alasan: formData.get('alasan')
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(response.statusText);
-                }
-                return response.json();
-            })
-            .catch(error => {
-                Swal.showValidationMessage(
-                    `Request failed: ${error}`
-                );
-            });
-        },
-        allowOutsideClick: () => !Swal.isLoading()
-    }).then((result) => {
-        if (result.isConfirmed) {
-            if (result.value.success) {
-                // Close modal
-                bootstrap.Modal.getInstance(document.getElementById('extendModal')).hide();
-                
-                // Show success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: result.value.message,
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    // Redirect
-                    window.location.href = result.value.redirect;
-                });
-            } else {
-                Swal.fire('Error', result.value.message, 'error');
-            }
+        });
+        
+        const data = await response.json();
+        
+        // Restore button
+        submitButton.innerHTML = originalContent;
+        submitButton.disabled = false;
+        
+        if (data.success) {
+            closeExtendModal();
+            showToast('success', data.message);
+            setTimeout(() => window.location.href = data.redirect, 1500);
+        } else {
+            showToast('error', data.message);
         }
-    });
+    } catch (error) {
+        // Restore button
+        submitButton.innerHTML = originalContent;
+        submitButton.disabled = false;
+        
+        console.error('Error:', error);
+        showToast('error', 'Terjadi kesalahan');
+    }
 });
 
-// Initialize AOS
+// Toast notification
+function showToast(type, message) {
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in-right ${type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('animate-slide-out-right');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Initialize
 document.addEventListener('DOMContentLoaded', function() {
-    AOS.init({
-        duration: 800,
-        once: true
+    // AOS initialization
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 50
+        });
+    }
+    
+    // Close modals on ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeReturnModal();
+            closeExtendModal();
+        }
     });
 });
 </script>
