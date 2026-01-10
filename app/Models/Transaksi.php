@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 
 class Transaksi extends Model
 {
@@ -86,5 +87,11 @@ class Transaksi extends Model
         return $this->bukti_pembayaran
             ? asset('storage/bukti-pembayaran/' . $this->bukti_pembayaran)
             : null;
+    }
+
+    // ================= SCOPE =================
+    public function scopeSelesai(Builder $query)
+    {
+        return $query->where('status', 'selesai'); // sesuaikan status yang menandakan transaksi selesai
     }
 }

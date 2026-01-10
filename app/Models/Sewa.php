@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 class Sewa extends Model
 {
@@ -77,5 +78,11 @@ class Sewa extends Model
                 $sewa->kode_sewa = self::generateKodeSewa();
             }
         });
+    }
+
+    // ================= SCOPE =================
+    public function scopeAktif(Builder $query)
+    {
+        return $query->where('status', 'aktif');
     }
 }

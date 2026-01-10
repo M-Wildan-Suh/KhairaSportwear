@@ -18,7 +18,7 @@ class DashboardController extends Controller
         
         // User statistics
         $totalTransactions = $user->transaksis()->count();
-        $totalSpent = $user->transaksis()->completed()->sum('total_bayar');
+        $totalSpent = $user->transaksis()->selesai()->sum('total_bayar');
         $activeRentals = $user->sewas()->aktif()->count();
         $cartCount = $user->keranjangs()->count();
         
