@@ -94,4 +94,9 @@ class Transaksi extends Model
     {
         return $query->where('status', 'selesai'); // sesuaikan status yang menandakan transaksi selesai
     }
+
+    public function items()
+{
+    return $this->detailTransaksis(); // alias untuk detailTransaksis
+}
 }

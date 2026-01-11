@@ -4,7 +4,7 @@
 
 @section('content')
     <!-- Hero Section - Elegant Design -->
-    <section class="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50 py-12">
+    <section class="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50 py- 12">
         <!-- Elegant Background Pattern -->
         <div class="absolute inset-0">
             <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/5 to-transparent"></div>

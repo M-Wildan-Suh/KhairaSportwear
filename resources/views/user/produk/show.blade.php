@@ -487,16 +487,7 @@
     @endif
 </div>
 
-<!-- Sewa Options Modal -->
-<div id="sewaModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="flex min-h-full items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/50" onclick="closeModal()"></div>
-        <div class="relative bg-white rounded-xl max-w-md w-full p-6">
-            <!-- Content loaded via JS -->
-        </div>
-    </div>
-</div>
-
+@include('user.components.sewa-modal')
 @endsection
 
 @push('styles')
@@ -578,88 +569,6 @@ function changeMainImage(src) {
     event.currentTarget.classList.add('active');
 }
 
-// Show sewa options modal
-function showSewaOptions(checkout = false) {
-    const modal = document.getElementById('sewaModal');
-    const modalContent = modal.querySelector('div > div');
-    
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const minDate = tomorrow.toISOString().split('T')[0];
-    
-    modalContent.innerHTML = `
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-semibold text-gray-900">Pilihan Sewa</h3>
-            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        
-        <form id="sewaForm" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Durasi Sewa</label>
-                <select name="durasi" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" required>
-                    <option value="">Pilih durasi</option>
-                    <option value="harian">Harian</option>
-                    <option value="mingguan">Mingguan</option>
-                    <option value="bulanan">Bulanan</option>
-                </select>
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Hari</label>
-                <input type="number" name="jumlah_hari" 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                       min="1" max="30" value="1" required>
-                <p class="mt-1 text-sm text-gray-500">Maksimal 30 hari</p>
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
-                <input type="date" name="tanggal_mulai" 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                       min="${minDate}" required>
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
-                <textarea name="catatan" rows="3" 
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"></textarea>
-            </div>
-            
-            <button type="submit" class="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors">
-                ${checkout ? 'Lanjut ke Checkout' : 'Tambahkan ke Keranjang'}
-            </button>
-        </form>
-    `;
-    
-    // Form submission
-    modalContent.querySelector('#sewaForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const quantity = document.getElementById('quantity').value;
-        
-        const options = {
-            durasi: formData.get('durasi'),
-            jumlah_hari: formData.get('jumlah_hari'),
-            tanggal_mulai: formData.get('tanggal_mulai'),
-            catatan: formData.get('catatan')
-        };
-        
-        addToCart('sewa', quantity, checkout, options);
-        closeModal();
-    });
-    
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-// Close modal
-function closeModal() {
-    document.getElementById('sewaModal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
-
 // Add to cart function
 async function addToCart(type, quantity, checkout = false, options = null) {
     const data = {
@@ -722,9 +631,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Close modal on ESC
+    // Close modal on ESC
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            closeModal();
+            const modal = document.getElementById('sewaModal');
+            if (!modal.classList.contains('hidden')) {
+                closeSewaModal();
+            }
         }
     });
 });
