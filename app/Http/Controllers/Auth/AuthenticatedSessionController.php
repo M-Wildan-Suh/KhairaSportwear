@@ -30,19 +30,25 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Kirim notifikasi login
-        \App\Models\Notifikasi::createNotifikasi(
-            $user->id,
-            'Login Berhasil',
-            'Anda berhasil login ke akun SportWear.',
-            'success'
-        );
+        // Kirim notifikasi login ke database
+        if (class_exists(\App\Models\Notifikasi::class)) {
+            \App\Models\Notifikasi::createNotifikasi(
+                $user->id,
+                'Login Berhasil',
+                'Anda berhasil login ke akun SportWear.',
+                'success'
+            );
+        }
 
-        // Redirect berdasarkan role
+        // Tambahkan session flash untuk popup
+        $request->session()->flash('login_success', 'Login Berhasil!');
+        
+        // Redirect berdasarkan role - SESUAI ROUTE ANDA
         if ($user->isAdmin()) {
             return redirect()->intended(route('admin.dashboard', absolute: false));
         }
 
+        // Jika bukan admin, redirect ke user dashboard
         return redirect()->intended(route('user.dashboard', absolute: false));
     }
 
@@ -51,6 +57,21 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+        
+        // Kirim notifikasi logout jika user ada
+        if ($user && class_exists(\App\Models\Notifikasi::class)) {
+            \App\Models\Notifikasi::createNotifikasi(
+                $user->id,
+                'Logout Berhasil',
+                'Anda telah logout dari sistem SportWear.',
+                'info'
+            );
+        }
+
+        // Tambahkan session flash untuk logout
+        $request->session()->flash('logout_success', 'Anda telah berhasil logout.');
+        
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

@@ -37,6 +37,13 @@ class Transaksi extends Model
         'tanggal_pengiriman' => 'datetime'
     ];
 
+
+    public function verifikator()
+    {
+        return $this->belongsTo(User::class, 'verifikator_id');
+    }
+
+
     /* ================= RELATIONS ================= */
     public function user()
     {

@@ -45,7 +45,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('transaksi/{transaksi}/status', [AdminTransaksiController::class, 'updateStatus'])->name('transaksi.update-status');
     Route::get('transaksi/{transaksi}/invoice', [AdminTransaksiController::class, 'invoice'])->name('transaksi.invoice');
     Route::get('transaksi/{transaksi}/print', [AdminTransaksiController::class, 'print'])->name('transaksi.print');
+    Route::get('transaksi/{transaksi}/print', [AdminTransaksiController::class, 'print'])->name('transaksi.print');
+    Route::post('transaksi/{transaksi}/verify-payment', [AdminTransaksiController::class, 'verifyPayment'])->name('transaksi.verifyPayment');
     
+    // TAMBAHKAN INI untuk Export
+    Route::get('transaksi/export/excel', [AdminTransaksiController::class, 'exportExcel'])->name('transaksi.export.excel');
+    Route::get('transaksi/export/pdf', [AdminTransaksiController::class, 'exportPDF'])->name('transaksi.export.pdf');
+    Route::get('transaksi/export/csv', [AdminTransaksiController::class, 'exportCSV'])->name('transaksi.export.csv');
+
     // Sewa Routes
     Route::resource('sewa', AdminSewaController::class);
     Route::get('sewa/aktif', [AdminSewaController::class, 'aktif'])->name('sewa.aktif');

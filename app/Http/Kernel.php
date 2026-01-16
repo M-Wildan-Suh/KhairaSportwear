@@ -58,4 +58,14 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
     ];
+
+    protected $commands = [
+    \App\Console\Commands\GenerateLaporanHarian::class,
+];
+
+// Untuk schedule otomatis (opsional)
+protected function schedule(Schedule $schedule)
+{
+    $schedule->command('laporan:harian')->dailyAt('23:59');
+}
 }

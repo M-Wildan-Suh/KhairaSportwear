@@ -45,6 +45,19 @@ class ProdukController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->has('warna') && is_string($request->warna)) {
+    $decodedWarna = json_decode($request->warna, true);
+    $request->merge([
+        'warna' => is_array($decodedWarna) ? $decodedWarna : []
+    ]);
+}
+if ($request->has('size') && is_string($request->size)) {
+    $decodedSize = json_decode($request->size, true);
+    $request->merge([
+        'size' => is_array($decodedSize) ? $decodedSize : []
+    ]);
+}
+        // Validasi dasar
         $validated = $request->validate([
             'kategori_id' => 'required|exists:kategoris,id',
             'nama' => 'required|string|max:255',
@@ -56,6 +69,11 @@ class ProdukController extends Controller
             'harga_sewa_bulanan' => 'nullable|numeric|min:0',
             'stok_total' => 'required|integer|min:0',
             'stok_tersedia' => 'required|integer|min:0|lte:stok_total',
+            'stok_disewa' => 'nullable|integer|min:0|lte:stok_total',
+            'warna' => 'nullable|array',
+            'warna.*' => 'string|max:50',
+            'size' => 'nullable|array',
+            'size.*' => 'string|max:20',
             'gambar' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
         ]);
@@ -69,6 +87,23 @@ class ProdukController extends Controller
             $request->validate(['harga_sewa_harian' => 'required|numeric|min:0']);
         }
 
+        // Validasi stok berdasarkan tipe
+        if ($validated['tipe'] === 'sewa' || $validated['tipe'] === 'both') {
+            $request->validate(['stok_disewa' => 'required|integer|min:0|lte:stok_total']);
+        } else {
+            $validated['stok_disewa'] = 0; // Set ke 0 untuk produk jual saja
+        }
+
+        // Validasi total stok harus sama dengan stok tersedia + stok disewa (untuk produk both)
+        if ($validated['tipe'] === 'both') {
+            $totalStok = $validated['stok_tersedia'] + $validated['stok_disewa'];
+            if ($totalStok > $validated['stok_total']) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['stok_total' => 'Stok total tidak boleh kurang dari stok tersedia + stok disewa.']);
+            }
+        }
+
         // Handle spesifikasi
         if ($request->has('spesifikasi')) {
             $spesifikasi = [];
@@ -80,17 +115,32 @@ class ProdukController extends Controller
             $validated['spesifikasi'] = count($spesifikasi) > 0 ? $spesifikasi : null;
         }
 
+        // Handle warna dan size (konversi dari JSON string ke array)
+        if ($request->filled('warna')) {
+            $warna = is_array($request->warna) ? $request->warna : json_decode($request->warna, true);
+            $validated['warna'] = !empty($warna) ? $warna : null;
+        } else {
+            $validated['warna'] = null;
+        }
+
+        if ($request->filled('size')) {
+            $size = is_array($request->size) ? $request->size : json_decode($request->size, true);
+            $validated['size'] = !empty($size) ? $size : null;
+        } else {
+            $validated['size'] = null;
+        }
+
         // Handle gambar upload
         if ($request->hasFile('gambar')) {
             $fileName = time() . '_' . Str::slug($validated['nama']) . '.' . $request->file('gambar')->getClientOriginalExtension();
             $validated['gambar'] = $request->file('gambar')->storeAs('produk', $fileName, 'public');
         }
 
-        // Set stok disewa default
-        $validated['stok_disewa'] = $validated['stok_total'] - $validated['stok_tersedia'];
-
         // Generate slug
         $validated['slug'] = Str::slug($validated['nama']);
+
+        // Set default values jika tidak ada
+        $validated['is_active'] = $request->has('is_active') ? true : false;
 
         Produk::create($validated);
 
@@ -111,6 +161,21 @@ class ProdukController extends Controller
 
     public function update(Request $request, Produk $produk)
     {
+            // ===== DECODE JSON WARNA & SIZE (WAJIB) =====
+    if ($request->has('warna') && is_string($request->warna)) {
+        $decodedWarna = json_decode($request->warna, true);
+        $request->merge([
+            'warna' => is_array($decodedWarna) ? $decodedWarna : []
+        ]);
+    }
+
+    if ($request->has('size') && is_string($request->size)) {
+        $decodedSize = json_decode($request->size, true);
+        $request->merge([
+            'size' => is_array($decodedSize) ? $decodedSize : []
+        ]);
+    }
+        // Validasi dasar
         $validated = $request->validate([
             'kategori_id' => 'required|exists:kategoris,id',
             'nama' => 'required|string|max:255',
@@ -122,6 +187,11 @@ class ProdukController extends Controller
             'harga_sewa_bulanan' => 'nullable|numeric|min:0',
             'stok_total' => 'required|integer|min:0',
             'stok_tersedia' => 'required|integer|min:0|lte:stok_total',
+            'stok_disewa' => 'nullable|integer|min:0|lte:stok_total',
+            'warna' => 'nullable|array',
+            'warna.*' => 'string|max:50',
+            'size' => 'nullable|array',
+            'size.*' => 'string|max:20',
             'gambar' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
         ]);
@@ -135,6 +205,23 @@ class ProdukController extends Controller
             $request->validate(['harga_sewa_harian' => 'required|numeric|min:0']);
         }
 
+        // Validasi stok berdasarkan tipe
+        if ($validated['tipe'] === 'sewa' || $validated['tipe'] === 'both') {
+            $request->validate(['stok_disewa' => 'required|integer|min:0|lte:stok_total']);
+        } else {
+            $validated['stok_disewa'] = 0; // Set ke 0 untuk produk jual saja
+        }
+
+        // Validasi total stok harus sama dengan stok tersedia + stok disewa (untuk produk both)
+        if ($validated['tipe'] === 'both') {
+            $totalStok = $validated['stok_tersedia'] + $validated['stok_disewa'];
+            if ($totalStok > $validated['stok_total']) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['stok_total' => 'Stok total tidak boleh kurang dari stok tersedia + stok disewa.']);
+            }
+        }
+
         // Handle spesifikasi
         if ($request->has('spesifikasi')) {
             $spesifikasi = [];
@@ -144,6 +231,21 @@ class ProdukController extends Controller
                 }
             }
             $validated['spesifikasi'] = count($spesifikasi) > 0 ? $spesifikasi : null;
+        }
+
+        // Handle warna dan size (konversi dari JSON string ke array)
+        if ($request->filled('warna')) {
+            $warna = is_array($request->warna) ? $request->warna : json_decode($request->warna, true);
+            $validated['warna'] = !empty($warna) ? $warna : null;
+        } else {
+            $validated['warna'] = null;
+        }
+
+        if ($request->filled('size')) {
+            $size = is_array($request->size) ? $request->size : json_decode($request->size, true);
+            $validated['size'] = !empty($size) ? $size : null;
+        } else {
+            $validated['size'] = null;
         }
 
         // Handle gambar upload
@@ -157,13 +259,13 @@ class ProdukController extends Controller
             $validated['gambar'] = $request->file('gambar')->storeAs('produk', $fileName, 'public');
         }
 
-        // Update stok disewa
-        $validated['stok_disewa'] = $validated['stok_total'] - $validated['stok_tersedia'];
-
         // Update slug if nama changed
         if ($produk->nama !== $validated['nama']) {
             $validated['slug'] = Str::slug($validated['nama']);
         }
+
+        // Set default values jika tidak ada
+        $validated['is_active'] = $request->has('is_active') ? true : false;
 
         $produk->update($validated);
 

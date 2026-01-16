@@ -84,13 +84,6 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('user.transaksi.index') }}" 
-                                           class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors duration-200">
-                                            <i class="fas fa-receipt"></i>
-                                            <span>Transaksi</span>
-                                        </a>
-                                    </li>
-                                    <li>
                                         <a href="{{ route('user.sewa.aktif') }}" 
                                            class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors duration-200">
                                             <i class="fas fa-calendar-alt"></i>
@@ -169,17 +162,7 @@
                         </div>
                     </div>
                     
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-300">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-wallet text-green-600 text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($statistics['total_spent'], 0, ',', '.') }}</p>
-                                <p class="text-sm text-gray-600">Total Pengeluaran</p>
-                            </div>
-                        </div>
-                    </div>
+
                     
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-300">
                         <div class="flex items-center gap-4">

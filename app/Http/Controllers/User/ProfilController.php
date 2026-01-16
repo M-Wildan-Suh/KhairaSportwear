@@ -18,7 +18,6 @@ class ProfilController extends Controller
         // Get user statistics
         $statistics = [
             'total_transactions' => $user->transaksis()->count(),
-            'total_spent' => $user->transaksis()->completed()->sum('total_bayar'),
             'active_rentals' => $user->sewas()->aktif()->count(),
             'completed_rentals' => $user->sewas()->selesai()->count(),
             'total_fines' => $user->dendas()->sum('jumlah_denda'),

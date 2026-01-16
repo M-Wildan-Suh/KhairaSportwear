@@ -5,7 +5,7 @@
 @section('content')
 <div class="py-8">
     <!-- Breadcrumb -->
-    <div class="container mb-6">
+    <div class="container mx-auto px-4 lg:px-8">
         <nav class="flex items-center text-sm text-gray-600">
             <a href="{{ route('home') }}" class="hover:text-primary transition-colors">
                 <i class="fas fa-home mr-2"></i> Home
@@ -15,7 +15,7 @@
         </nav>
     </div>
 
-    <div class="container">
+    <div class="container mx-auto px-4 lg:px-8">
         <div class="grid lg:grid-cols-4 gap-8">
             <!-- Sidebar Filters -->
             <div class="lg:col-span-1" data-aos="fade-right">

@@ -3,7 +3,6 @@
 @section('title', 'Manajemen Sewa')
 
 @section('page-title', 'Manajemen Sewa')
-@section('page-subtitle', 'Kelola penyewaan produk')
 
 @section('breadcrumbs')
     @php
@@ -18,8 +17,7 @@
     <!-- Header with Actions -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">Penyewaan</h1>
-            <p class="text-gray-600">Total {{ $sewas->total() }} transaksi sewa</p>
+            <p class="text-gray-800">Total {{ $sewas->total() }} transaksi sewa</p>
         </div>
         
         <div class="flex items-center space-x-3">

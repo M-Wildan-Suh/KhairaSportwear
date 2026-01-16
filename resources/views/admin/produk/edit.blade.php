@@ -1,25 +1,27 @@
-{{-- resources/views/admin/produk/create.blade.php --}}
+{{-- resources/views/admin/produk/edit.blade.php --}}
 @extends('admin.layouts.app')
 
-@section('title', 'Tambah Produk')
+@section('title', 'Edit Produk')
 
-@section('page-title', 'Tambah Produk Baru')
-@section('page-subtitle', 'Isi form untuk menambahkan produk baru')
+@section('page-title', 'Edit Produk')
+@section('page-subtitle', 'Perbarui informasi produk')
 
 @section('breadcrumbs')
     @php
         $breadcrumbs = [
             ['url' => route('admin.dashboard'), 'label' => 'Dashboard'],
             ['url' => route('admin.produk.index'), 'label' => 'Produk'],
-            ['label' => 'Tambah']
+            ['url' => route('admin.produk.show', $produk), 'label' => $produk->nama],
+            ['label' => 'Edit']
         ];
     @endphp
 @endsection
 
 @section('content')
     <div class="admin-card">
-        <form action="{{ route('admin.produk.store') }}" method="POST" enctype="multipart/form-data" id="produk-form">
+        <form action="{{ route('admin.produk.update', $produk) }}" method="POST" enctype="multipart/form-data" id="produk-form">
             @csrf
+            @method('PUT')
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Left Column: Basic Information -->
@@ -35,7 +37,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Nama Produk *</label>
                                 <input type="text" name="nama" required
                                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
-                                       value="{{ old('nama') }}"
+                                       value="{{ old('nama', $produk->nama) }}"
                                        placeholder="Masukkan nama produk">
                                 @error('nama')
                                     <p class="mt-2 text-sm text-red-600 flex items-center">
@@ -52,7 +54,7 @@
                                                 class="w-full border border-gray-300 rounded-lg px-4 py-3 appearance-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200 bg-white">
                                             <option value="">Pilih Kategori</option>
                                             @foreach($kategoris as $kategori)
-                                                <option value="{{ $kategori->id }}" {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
+                                                <option value="{{ $kategori->id }}" {{ old('kategori_id', $produk->kategori_id) == $kategori->id ? 'selected' : '' }}>
                                                     {{ $kategori->nama }}
                                                 </option>
                                             @endforeach
@@ -75,9 +77,9 @@
                                                 class="w-full border border-gray-300 rounded-lg px-4 py-3 appearance-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200 bg-white"
                                                 onchange="updateFormFields()">
                                             <option value="">Pilih Tipe</option>
-                                            <option value="jual" {{ old('tipe') == 'jual' ? 'selected' : '' }}>Jual</option>
-                                            <option value="sewa" {{ old('tipe') == 'sewa' ? 'selected' : '' }}>Sewa</option>
-                                            <option value="both" {{ old('tipe') == 'both' ? 'selected' : '' }}>Jual & Sewa</option>
+                                            <option value="jual" {{ old('tipe', $produk->tipe) == 'jual' ? 'selected' : '' }}>Jual</option>
+                                            <option value="sewa" {{ old('tipe', $produk->tipe) == 'sewa' ? 'selected' : '' }}>Sewa</option>
+                                            <option value="both" {{ old('tipe', $produk->tipe) == 'both' ? 'selected' : '' }}>Jual & Sewa</option>
                                         </select>
                                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                             <i class="fas fa-chevron-down"></i>
@@ -105,7 +107,7 @@
                                 <div class="relative">
                                     <input type="number" name="stok_total" required min="0"
                                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
-                                           value="{{ old('stok_total', 0) }}"
+                                           value="{{ old('stok_total', $produk->stok_total) }}"
                                            oninput="updateAvailableStock()">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                         <span class="text-gray-500">unit</span>
@@ -121,11 +123,11 @@
                             <div id="stock-fields" class="space-y-4">
                                 <!-- Stok Tersedia -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Stok Tersedia</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Stok Tersedia *</label>
                                     <div class="relative">
-                                        <input type="number" name="stok_tersedia" min="0" id="stok_tersedia"
+                                        <input type="number" name="stok_tersedia" required min="0" id="stok_tersedia"
                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
-                                               value="{{ old('stok_tersedia', 0) }}">
+                                               value="{{ old('stok_tersedia', $produk->stok_tersedia) }}">
                                         <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                             <span class="text-gray-500">unit</span>
                                         </div>
@@ -141,12 +143,12 @@
                                 </div>
                                 
                                 <!-- Stok Sewa (conditional) -->
-                                <div id="stok-disewa-group" class="hidden">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Stok untuk Disewa</label>
+                                <div id="stok-disewa-group" class="{{ in_array($produk->tipe, ['sewa', 'both']) ? '' : 'hidden' }}">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Stok untuk Disewa *</label>
                                     <div class="relative">
                                         <input type="number" name="stok_disewa" min="0" id="stok_disewa"
                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
-                                               value="{{ old('stok_disewa', 0) }}"
+                                               value="{{ old('stok_disewa', $produk->stok_disewa) }}"
                                                oninput="validateDisewaStock()">
                                         <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                             <span class="text-gray-500">unit</span>
@@ -175,7 +177,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
                             <textarea name="deskripsi" rows="4"
                                       class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
-                                      placeholder="Deskripsikan produk Anda...">{{ old('deskripsi') }}</textarea>
+                                      placeholder="Deskripsikan produk Anda...">{{ old('deskripsi', $produk->deskripsi) }}</textarea>
                             @error('deskripsi')
                                 <p class="mt-2 text-sm text-red-600 flex items-center">
                                     <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
@@ -195,7 +197,7 @@
                         
                         <div id="price-fields" class="space-y-4">
                             <!-- Harga Beli -->
-                            <div id="harga-beli-group" class="hidden">
+                            <div id="harga-beli-group" class="{{ in_array($produk->tipe, ['jual', 'both']) ? '' : 'hidden' }}">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Harga Beli *</label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -203,7 +205,7 @@
                                     </div>
                                     <input type="number" name="harga_beli" min="0"
                                            class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
-                                           value="{{ old('harga_beli') }}"
+                                           value="{{ old('harga_beli', $produk->harga_beli) }}"
                                            placeholder="0">
                                 </div>
                                 @error('harga_beli')
@@ -214,7 +216,7 @@
                             </div>
                             
                             <!-- Harga Sewa -->
-                            <div id="harga-sewa-group" class="hidden space-y-4">
+                            <div id="harga-sewa-group" class="{{ in_array($produk->tipe, ['sewa', 'both']) ? 'space-y-4' : 'hidden' }}">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Harga Sewa Harian *</label>
                                     <div class="relative">
@@ -223,7 +225,7 @@
                                         </div>
                                         <input type="number" name="harga_sewa_harian" min="0"
                                                class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
-                                               value="{{ old('harga_sewa_harian') }}"
+                                               value="{{ old('harga_sewa_harian', $produk->harga_sewa_harian) }}"
                                                placeholder="0">
                                     </div>
                                     @error('harga_sewa_harian')
@@ -242,7 +244,7 @@
                                             </div>
                                             <input type="number" name="harga_sewa_mingguan" min="0"
                                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
-                                                   value="{{ old('harga_sewa_mingguan') }}"
+                                                   value="{{ old('harga_sewa_mingguan', $produk->harga_sewa_mingguan) }}"
                                                    placeholder="0">
                                         </div>
                                     </div>
@@ -255,17 +257,10 @@
                                             </div>
                                             <input type="number" name="harga_sewa_bulanan" min="0"
                                                    class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
-                                                   value="{{ old('harga_sewa_bulanan') }}"
+                                                   value="{{ old('harga_sewa_bulanan', $produk->harga_sewa_bulanan) }}"
                                                    placeholder="0">
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            
-                            <div id="no-price-message" class="hidden p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                <div class="flex items-center">
-                                    <i class="fas fa-info-circle text-yellow-500 mr-2"></i>
-                                    <p class="text-sm text-yellow-700">Pilih tipe produk untuk menampilkan field harga</p>
                                 </div>
                             </div>
                         </div>
@@ -282,7 +277,17 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-3">Warna</label>
                                 <div class="flex flex-wrap gap-2 mb-3" id="warna-container">
-                                    <!-- Warna akan ditambahkan secara dinamis -->
+                                    @if($produk->warna && count($produk->warna) > 0)
+                                        @foreach($produk->warna as $warna)
+                                            <div class="variant-tag">
+                                                <i class="fas fa-circle mr-2" style="color: {{ \App\Models\Produk::getColorCode($warna) }}"></i>
+                                                {{ $warna }}
+                                                <button type="button" onclick="removeWarna('{{ $warna }}')" class="ml-2">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        @endforeach
+                                    @endif
                                 </div>
                                 <div class="flex gap-2">
                                     <input type="text" id="warna-input" 
@@ -296,7 +301,7 @@
                                 <p class="mt-2 text-xs text-gray-500 flex items-center">
                                     <i class="fas fa-lightbulb mr-1"></i> Tekan Enter atau tombol plus untuk menambah warna
                                 </p>
-                                <input type="hidden" name="warna" id="warna-hidden" value="{{ old('warna', '[]') }}">
+                                <input type="hidden" name="warna" id="warna-hidden" value="{{ old('warna', $produk->warna ? json_encode($produk->warna) : '[]') }}">
                                 @error('warna')
                                     <p class="mt-2 text-sm text-red-600 flex items-center">
                                         <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
@@ -308,7 +313,17 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-3">Ukuran (Size)</label>
                                 <div class="flex flex-wrap gap-2 mb-3" id="size-container">
-                                    <!-- Size akan ditambahkan secara dinamis -->
+                                    @if($produk->size && count($produk->size) > 0)
+                                        @foreach($produk->size as $size)
+                                            <div class="variant-tag">
+                                                <i class="fas fa-ruler mr-2 text-primary"></i>
+                                                {{ $size }}
+                                                <button type="button" onclick="removeSize('{{ $size }}')" class="ml-2">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        @endforeach
+                                    @endif
                                 </div>
                                 <div class="flex gap-2">
                                     <input type="text" id="size-input"
@@ -322,7 +337,7 @@
                                 <p class="mt-2 text-xs text-gray-500 flex items-center">
                                     <i class="fas fa-lightbulb mr-1"></i> Tekan Enter atau tombol plus untuk menambah ukuran
                                 </p>
-                                <input type="hidden" name="size" id="size-hidden" value="{{ old('size', '[]') }}">
+                                <input type="hidden" name="size" id="size-hidden" value="{{ old('size', $produk->size ? json_encode($produk->size) : '[]') }}">
                                 @error('size')
                                     <p class="mt-2 text-sm text-red-600 flex items-center">
                                         <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
@@ -342,19 +357,25 @@
                             <!-- Image Upload -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-3">Gambar Produk</label>
+                                <div class="mb-4">
+                                    <img src="{{ $produk->gambar_url }}" 
+                                         alt="{{ $produk->nama }}"
+                                         class="max-w-full h-auto rounded-lg shadow-sm max-h-64 mx-auto">
+                                </div>
                                 <div class="relative">
                                     <input type="file" name="gambar" id="gambar" accept="image/*"
                                            class="hidden"
                                            onchange="previewImage(event)">
                                     <label for="gambar" class="cursor-pointer">
-                                        <div id="image-upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary/50 transition duration-200">
+                                        <div id="image-upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-primary/50 transition duration-200">
                                             <div id="image-preview" class="hidden mb-4">
                                                 <img id="preview" class="mx-auto max-h-48 rounded-lg shadow-sm">
                                             </div>
-                                            <div id="upload-placeholder" class="text-center">
+                                            <div id="upload-placeholder">
                                                 <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
-                                                <p class="text-sm text-gray-600 mb-1">Klik untuk upload gambar</p>
+                                                <p class="text-sm text-gray-600 mb-1">Klik untuk ganti gambar</p>
                                                 <p class="text-xs text-gray-500">Max: 2MB, Format: JPG, PNG, JPEG</p>
+                                                <p class="text-xs text-gray-500 mt-1">Biarkan kosong jika tidak ingin mengganti</p>
                                             </div>
                                         </div>
                                     </label>
@@ -370,10 +391,10 @@
                             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                 <div>
                                     <label class="text-sm font-medium text-gray-700">Status Produk</label>
-                                    <p class="text-xs text-gray-500">Produk akan langsung aktif setelah disimpan</p>
+                                    <p class="text-xs text-gray-500">Aktifkan/nonaktifkan produk ini</p>
                                 </div>
                                 <div class="relative">
-                                    <input type="checkbox" name="is_active" value="1" id="is_active" {{ old('is_active', true) ? 'checked' : '' }}
+                                    <input type="checkbox" name="is_active" value="1" id="is_active" {{ old('is_active', $produk->is_active) ? 'checked' : '' }}
                                            class="sr-only peer">
                                     <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                 </div>
@@ -385,12 +406,12 @@
             
             <!-- Submit Buttons -->
             <div class="mt-8 pt-6 border-t border-gray-200 flex justify-end space-x-3">
-                <a href="{{ route('admin.produk.index') }}" 
+                <a href="{{ route('admin.produk.show', $produk) }}" 
                    class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200 flex items-center">
                     <i class="fas fa-times mr-2"></i> Batal
                 </a>
                 <button type="submit" class="btn-admin-primary px-8 py-3 flex items-center group">
-                    <i class="fas fa-save mr-2 group-hover:animate-pulse"></i> Simpan Produk
+                    <i class="fas fa-save mr-2 group-hover:animate-pulse"></i> Simpan Perubahan
                 </button>
             </div>
         </form>
@@ -427,28 +448,6 @@
     .variant-tag button:hover {
         color: #ef4444;
     }
-    
-    /* Custom select styling */
-    select:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    /* Smooth transitions */
-    .transition-all {
-        transition: all 0.3s ease-in-out;
-    }
-    
-    /* Custom checkbox (toggle switch) */
-    .switch-checkbox:checked {
-        right: 0;
-        border-color: #3b82f6;
-    }
-    
-    /* Image preview hover effect */
-    #image-upload-area:hover {
-        background-color: #f9fafb;
-    }
 </style>
 @endpush
 
@@ -480,24 +479,26 @@
         const hargaBeliGroup = document.getElementById('harga-beli-group');
         const hargaSewaGroup = document.getElementById('harga-sewa-group');
         const stokDisewaGroup = document.getElementById('stok-disewa-group');
-        const noPriceMessage = document.getElementById('no-price-message');
         
-        // Reset all groups
-        [hargaBeliGroup, hargaSewaGroup, stokDisewaGroup, noPriceMessage].forEach(el => {
-            el.classList.add('hidden');
-        });
-        
+        // Update visibility
         if (tipe === 'jual') {
             hargaBeliGroup.classList.remove('hidden');
+            hargaSewaGroup.classList.add('hidden');
+            stokDisewaGroup.classList.add('hidden');
         } else if (tipe === 'sewa') {
+            hargaBeliGroup.classList.add('hidden');
             hargaSewaGroup.classList.remove('hidden');
+            hargaSewaGroup.classList.add('space-y-4');
             stokDisewaGroup.classList.remove('hidden');
         } else if (tipe === 'both') {
             hargaBeliGroup.classList.remove('hidden');
             hargaSewaGroup.classList.remove('hidden');
+            hargaSewaGroup.classList.add('space-y-4');
             stokDisewaGroup.classList.remove('hidden');
         } else {
-            noPriceMessage.classList.remove('hidden');
+            hargaBeliGroup.classList.add('hidden');
+            hargaSewaGroup.classList.add('hidden');
+            stokDisewaGroup.classList.add('hidden');
         }
         
         updateAvailableStock();
@@ -553,7 +554,29 @@
         }, 3000);
     }
     
-    // Variants Management with better UI
+    // Helper function to get color code based on color name
+    function getColorCode(colorName) {
+        const colorMap = {
+            'merah': '#ef4444',
+            'biru': '#3b82f6',
+            'hijau': '#10b981',
+            'kuning': '#f59e0b',
+            'hitam': '#000000',
+            'putih': '#ffffff',
+            'abu-abu': '#6b7280',
+            'coklat': '#92400e',
+            'ungu': '#8b5cf6',
+            'pink': '#ec4899',
+            'orange': '#f97316',
+            'emas': '#fbbf24',
+            'perak': '#9ca3af'
+        };
+        
+        const lowerColor = colorName.toLowerCase();
+        return colorMap[lowerColor] || '#6b7280';
+    }
+    
+    // Variants Management
     function addWarna() {
         const input = document.getElementById('warna-input');
         const warna = input.value.trim();
@@ -664,64 +687,8 @@
         });
     }
     
-    // Helper function to get color code based on color name
-    function getColorCode(colorName) {
-        const colorMap = {
-            'merah': '#ef4444',
-            'biru': '#3b82f6',
-            'hijau': '#10b981',
-            'kuning': '#f59e0b',
-            'hitam': '#000000',
-            'putih': '#ffffff',
-            'abu-abu': '#6b7280',
-            'coklat': '#92400e',
-            'ungu': '#8b5cf6',
-            'pink': '#ec4899',
-            'orange': '#f97316',
-            'emas': '#fbbf24',
-            'perak': '#9ca3af'
-        };
-        
-        const lowerColor = colorName.toLowerCase();
-        return colorMap[lowerColor] || '#6b7280'; // Default grey if not found
-    }
-    
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        updateFormFields();
-        
-        // Load existing warna and sizes from old input
-        const existingWarna = JSON.parse(document.getElementById('warna-hidden').value || '[]');
-        const existingSizes = JSON.parse(document.getElementById('size-hidden').value || '[]');
-        
-        existingWarna.forEach(warna => {
-            const container = document.getElementById('warna-container');
-            const tag = document.createElement('div');
-            tag.className = 'variant-tag';
-            tag.innerHTML = `
-                <i class="fas fa-circle mr-2" style="color: ${getColorCode(warna)}"></i>
-                ${warna}
-                <button type="button" onclick="removeWarna('${warna}')" class="ml-2">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            container.appendChild(tag);
-        });
-        
-        existingSizes.forEach(size => {
-            const container = document.getElementById('size-container');
-            const tag = document.createElement('div');
-            tag.className = 'variant-tag';
-            tag.innerHTML = `
-                <i class="fas fa-ruler mr-2 text-primary"></i>
-                ${size}
-                <button type="button" onclick="removeSize('${size}')" class="ml-2">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            container.appendChild(tag);
-        });
-        
         // Add enter key support
         document.getElementById('warna-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -740,26 +707,6 @@
         // Auto-update stock calculations
         document.querySelector('input[name="stok_total"]').addEventListener('input', updateAvailableStock);
         document.getElementById('stok_disewa').addEventListener('input', validateDisewaStock);
-        
-        // Form validation before submit
-        document.getElementById('produk-form').addEventListener('submit', function(e) {
-            const tipe = document.getElementById('tipe').value;
-            const hargaBeli = document.querySelector('input[name="harga_beli"]');
-            const hargaSewa = document.querySelector('input[name="harga_sewa_harian"]');
-            
-            if (tipe === 'jual' && (!hargaBeli.value || hargaBeli.value <= 0)) {
-                e.preventDefault();
-                showNotification('Harap isi harga beli untuk produk jual', 'error');
-                hargaBeli.focus();
-            } else if (tipe === 'sewa' && (!hargaSewa.value || hargaSewa.value <= 0)) {
-                e.preventDefault();
-                showNotification('Harap isi harga sewa harian untuk produk sewa', 'error');
-                hargaSewa.focus();
-            } else if (tipe === 'both' && ((!hargaBeli.value || hargaBeli.value <= 0) || (!hargaSewa.value || hargaSewa.value <= 0))) {
-                e.preventDefault();
-                showNotification('Harap isi harga beli dan harga sewa untuk produk both', 'error');
-            }
-        });
     });
 </script>
 @endpush

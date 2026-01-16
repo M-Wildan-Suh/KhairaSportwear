@@ -38,11 +38,49 @@ class TransaksiController extends Controller
                 ->with('error', 'Keranjang Anda kosong. Silakan tambahkan produk terlebih dahulu.');
         }
         
+        // Debug info
+        \Log::info('=== CHECKOUT DEBUG ===');
+        \Log::info('User: ' . $user->id . ' - ' . $user->name);
+        \Log::info('Total items in cart: ' . $keranjangs->count());
+        
+        foreach ($keranjangs as $item) {
+            \Log::info('Cart Item:', [
+                'id' => $item->id,
+                'produk_id' => $item->produk_id,
+                'produk_nama' => $item->produk->nama,
+                'tipe' => $item->tipe,
+                'quantity' => $item->quantity,
+                'harga' => $item->harga,
+                'subtotal' => $item->subtotal,
+                'stok_tersedia' => $item->produk->stok_tersedia,
+                'stok_sewa' => $item->produk->stok_sewa,
+                'opsi_sewa' => $item->opsi_sewa,
+                'opsi_sewa_type' => gettype($item->opsi_sewa)
+            ]);
+        }
+        
         // Validate stock before checkout
         foreach ($keranjangs as $item) {
-            if ($item->produk->stok_tersedia < $item->quantity) {
+            if ($item->tipe === 'jual' && $item->produk->stok_tersedia < $item->quantity) {
+                \Log::error('Stock insufficient for sale', [
+                    'produk' => $item->produk->nama,
+                    'stok' => $item->produk->stok_tersedia,
+                    'required' => $item->quantity
+                ]);
+                
                 return redirect()->route('user.keranjang.index')
                     ->with('error', "Stok {$item->produk->nama} tidak mencukupi.");
+            }
+            
+            if ($item->tipe === 'sewa' && $item->produk->stok_sewa < $item->quantity) {
+                \Log::error('Stock insufficient for rental', [
+                    'produk' => $item->produk->nama,
+                    'stok_sewa' => $item->produk->stok_sewa,
+                    'required' => $item->quantity
+                ]);
+                
+                return redirect()->route('user.keranjang.index')
+                    ->with('error', "Stok sewa {$item->produk->nama} tidak mencukupi.");
             }
         }
         
@@ -51,10 +89,22 @@ class TransaksiController extends Controller
         $tax = $subtotal * 0.11;
         $total = $subtotal + $tax;
         
+        \Log::info('Calculated totals:', [
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'total' => $total
+        ]);
+        
         // Get bank transfer info from config
         $bankInfo = Konfigurasi::getValue('bank_transfer', []);
         $noRekening = Konfigurasi::getValue('no_rekening_admin');
         $namaRekening = Konfigurasi::getValue('nama_rekening_admin');
+        
+        \Log::info('Bank info:', [
+            'bankInfo' => $bankInfo,
+            'noRekening' => $noRekening,
+            'namaRekening' => $namaRekening
+        ]);
         
         return view('user.transaksi.create', compact(
             'keranjangs', 'subtotal', 'tax', 'total',
@@ -64,272 +114,500 @@ class TransaksiController extends Controller
     
 public function store(Request $request)
 {
-    \Log::info('Store Transaction Request:', $request->all());
+    \Log::info('=== TRANSACTION STORE START ===');
+    \Log::info('Request Data:', $request->all());
+    \Log::info('User ID: ' . auth()->id());
+    \Log::info('User Name: ' . auth()->user()->name);
     
-    try {
-        // Validasi yang lebih baik
-        $validatedData = $request->validate([
-            'metode_pembayaran' => 'required|in:transfer_bank,tunai,qris',
-            'catatan' => 'nullable|string|max:500',
-            'alamat_pengiriman' => 'nullable|string|max:1000'
+    // Log semua input termasuk file
+    \Log::info('All Inputs:', [
+        'metode_pembayaran' => $request->metode_pembayaran,
+        'catatan' => $request->catatan,
+        'alamat_pengiriman' => $request->alamat_pengiriman,
+        'nama_bank' => $request->nama_bank,
+        'no_rekening' => $request->no_rekening,
+        'atas_nama' => $request->atas_nama,
+        'has_file' => $request->hasFile('bukti_pembayaran')
+    ]);
+
+    $request->validate([
+        'metode_pembayaran' => 'required|in:transfer_bank,tunai,qris',
+        'catatan' => 'nullable|string|max:500',
+        'alamat_pengiriman' => 'nullable|string|max:1000',
+        'nama_bank' => 'nullable|string|max:100',
+        'no_rekening' => 'nullable|string|max:50',
+        'atas_nama' => 'nullable|string|max:100',
+    ]);
+
+    $user = auth()->user();
+    $keranjangs = $user->keranjangs()->with('produk')->get();
+
+    \Log::info('Cart items retrieved:', [
+        'count' => $keranjangs->count(),
+        'items' => $keranjangs->map(function($item) {
+            // Debug detail untuk setiap produk
+            $opsiDecoded = null;
+            if (is_string($item->opsi_sewa)) {
+                $opsiDecoded = json_decode($item->opsi_sewa, true);
+                $jsonError = json_last_error_msg();
+            } else {
+                $opsiDecoded = $item->opsi_sewa;
+                $jsonError = 'N/A';
+            }
+            
+            return [
+                'id' => $item->id,
+                'produk_id' => $item->produk_id,
+                'produk_nama' => $item->produk->nama,
+                'tipe' => $item->tipe,
+                'quantity' => $item->quantity,
+                'harga' => $item->harga,
+                'subtotal' => $item->subtotal,
+                'stok_tersedia' => $item->produk->stok_tersedia,
+                'stok_disewa' => $item->produk->stok_disewa, // Gunakan stok_disewa langsung
+                'stok_total' => $item->produk->stok_total,
+                'opsi_sewa' => $item->opsi_sewa,
+                'opsi_sewa_decoded' => $opsiDecoded,
+                'json_error' => $jsonError
+            ];
+        })->toArray()
+    ]);
+
+    if ($keranjangs->isEmpty()) {
+        \Log::warning('Cart is empty for user: ' . $user->id);
+        return response()->json([
+            'success' => false,
+            'message' => 'Keranjang Anda kosong.'
+        ], 400);
+    }
+
+    // Validasi stok dengan debugging detail
+    \Log::info('=== STOCK VALIDATION ===');
+    foreach ($keranjangs as $item) {
+        $stokTersedia = $item->produk->stok_tersedia;
+        $stokSewa = $item->produk->stok_disewa; // Gunakan stok_disewa dari database
+        
+        \Log::info('Validating item: ' . $item->produk->nama, [
+            'product_id' => $item->produk_id,
+            'product_name' => $item->produk->nama,
+            'tipe' => $item->tipe,
+            'quantity' => $item->quantity,
+            'stok_tersedia' => $stokTersedia,
+            'stok_disewa' => $stokSewa,
+            'comparison_jual' => $item->tipe === 'jual' ? ($stokTersedia . ' >= ' . $item->quantity . ' = ' . ($stokTersedia >= $item->quantity ? 'PASS' : 'FAIL')) : 'N/A',
+            'comparison_sewa' => $item->tipe === 'sewa' ? ($stokSewa . ' >= ' . $item->quantity . ' = ' . ($stokSewa >= $item->quantity ? 'PASS' : 'FAIL')) : 'N/A'
         ]);
         
-        // Validasi tambahan untuk transfer bank
-        if ($request->metode_pembayaran === 'transfer_bank') {
-            $request->validate([
-                'nama_bank' => 'required|string|max:100',
-                'no_rekening' => 'required|string|max:50',
-                'atas_nama' => 'required|string|max:100'
-            ]);
-        }
-        
-        $user = auth()->user();
-        $keranjangs = $user->keranjangs()->with('produk.kategori')->get();
-        
-        \Log::info('Cart Items:', [
-            'count' => $keranjangs->count(),
-            'items' => $keranjangs->pluck('produk.nama')
-        ]);
-        
-        if ($keranjangs->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Keranjang Anda kosong.'
-            ], 400);
-        }
-        
-        // Validate stock before proceeding
-        foreach ($keranjangs as $item) {
-            if ($item->tipe === 'jual' && $item->produk->stok_tersedia < $item->quantity) {
+        if ($item->tipe === 'jual') {
+            if ($stokTersedia < $item->quantity) {
+                \Log::error('Stock validation failed for sale item', [
+                    'product' => $item->produk->nama,
+                    'required' => $item->quantity,
+                    'available' => $stokTersedia,
+                    'deficit' => $item->quantity - $stokTersedia
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => "Stok {$item->produk->nama} tidak mencukupi."
+                    'message' => "Stok {$item->produk->nama} tidak mencukupi. Stok tersedia: {$stokTersedia}, dibutuhkan: {$item->quantity}",
+                    'debug' => [
+                        'stok_tersedia' => $stokTersedia,
+                        'quantity' => $item->quantity
+                    ]
+                ], 400);
+            }
+        } 
+        elseif ($item->tipe === 'sewa') {
+            // Validasi stok sewa - GUNAKAN stok_disewa
+            if ($stokSewa < $item->quantity) {
+                \Log::error('Stock validation failed for rental item', [
+                    'product' => $item->produk->nama,
+                    'required' => $item->quantity,
+                    'available' => $stokSewa,
+                    'deficit' => $item->quantity - $stokSewa,
+                    'field_used' => 'stok_disewa'
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => "Stok sewa {$item->produk->nama} tidak mencukupi. Stok sewa tersedia: {$stokSewa}, dibutuhkan: {$item->quantity}",
+                    'debug' => [
+                        'stok_disewa' => $stokSewa,
+                        'quantity' => $item->quantity,
+                        'product_id' => $item->produk_id
+                    ]
                 ], 400);
             }
             
-            if ($item->tipe === 'sewa' && $item->produk->stok_sewa < $item->quantity) {
+            // Validasi tambahan untuk data sewa
+            $opsi = $item->opsi_sewa;
+            if (is_string($opsi)) {
+                $opsi = json_decode($opsi, true);
+            }
+            
+            if (empty($opsi) || !isset($opsi['tanggal_mulai'])) {
+                \Log::error('Rental options incomplete', [
+                    'product' => $item->produk->nama,
+                    'opsi' => $opsi
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => "Stok sewa {$item->produk->nama} tidak mencukupi."
+                    'message' => "Data sewa tidak lengkap untuk produk: {$item->produk->nama}"
                 ], 400);
             }
         }
-        
-        DB::beginTransaction();
-        
-        // Check transaction type
+    }
+    
+    \Log::info('=== STOCK VALIDATION PASSED ===');
+
+    DB::beginTransaction();
+    \Log::info('Transaction started');
+
+    try {
         $hasJual = $keranjangs->where('tipe', 'jual')->isNotEmpty();
         $hasSewa = $keranjangs->where('tipe', 'sewa')->isNotEmpty();
-        
         $transactionCodes = [];
-        
-        if ($hasJual && $hasSewa) {
-            // Create separate transactions
-            if ($hasJual) {
-                $jualItems = $keranjangs->where('tipe', 'jual');
-                $transaksi = $this->createTransactionForItems($user, $jualItems, 'penjualan', $request);
-                $transactionCodes[] = $transaksi->kode_transaksi;
+
+        \Log::info('Transaction types:', [
+            'has_jual' => $hasJual,
+            'has_sewa' => $hasSewa,
+            'jual_count' => $keranjangs->where('tipe', 'jual')->count(),
+            'sewa_count' => $keranjangs->where('tipe', 'sewa')->count()
+        ]);
+
+        // Penjualan
+        if ($hasJual) {
+            $jualItems = $keranjangs->where('tipe', 'jual');
+            \Log::info('Creating sales transaction with ' . $jualItems->count() . ' items');
+            
+            $transaksiJual = $this->createTransactionForItems($user, $jualItems, 'penjualan', $request);
+            $transactionCodes[] = $transaksiJual->kode_transaksi;
+            
+            \Log::info('Sales transaction created:', [
+                'id' => $transaksiJual->id,
+                'kode' => $transaksiJual->kode_transaksi,
+                'total' => $transaksiJual->total_bayar,
+                'status' => $transaksiJual->status
+            ]);
+        }
+
+        // Penyewaan
+        if ($hasSewa) {
+            $sewaItems = $keranjangs->where('tipe', 'sewa');
+            \Log::info('Creating rental transaction with ' . $sewaItems->count() . ' items');
+            
+            foreach ($sewaItems as $item) {
+                // Decode opsi sewa jika perlu
+                $opsi = $item->opsi_sewa;
+                if (is_string($opsi)) {
+                    $opsi = json_decode($opsi, true);
+                }
+                
+                \Log::info('Rental item details:', [
+                    'produk_id' => $item->produk_id,
+                    'produk_nama' => $item->produk->nama,
+                    'quantity' => $item->quantity,
+                    'harga' => $item->harga,
+                    'stok_disewa_before' => $item->produk->stok_disewa,
+                    'opsi_sewa_raw' => $item->opsi_sewa,
+                    'opsi_sewa_parsed' => $opsi,
+                    'has_tanggal_mulai' => isset($opsi['tanggal_mulai']),
+                    'jumlah_hari' => $opsi['jumlah_hari'] ?? 'N/A',
+                    'durasi' => $opsi['durasi'] ?? 'N/A'
+                ]);
             }
             
-            if ($hasSewa) {
-                $sewaItems = $keranjangs->where('tipe', 'sewa');
-                $transaksi = $this->createTransactionForItems($user, $sewaItems, 'penyewaan', $request);
-                $transactionCodes[] = $transaksi->kode_transaksi;
-            }
-        } else {
-            // Create single transaction
-            $tipe = $keranjangs->first()->tipe === 'jual' ? 'penjualan' : 'penyewaan';
-            $transaksi = $this->createTransactionForItems($user, $keranjangs, $tipe, $request);
-            $transactionCodes[] = $transaksi->kode_transaksi;
+            $transaksiSewa = $this->createTransactionForItems($user, $sewaItems, 'penyewaan', $request);
+            $transactionCodes[] = $transaksiSewa->kode_transaksi;
+            
+            \Log::info('Rental transaction created:', [
+                'id' => $transaksiSewa->id,
+                'kode' => $transaksiSewa->kode_transaksi,
+                'total' => $transaksiSewa->total_bayar,
+                'status' => $transaksiSewa->status
+            ]);
         }
-        
-        // Clear cart
-        $user->keranjangs()->delete();
-        
+
+        // Kosongkan keranjang
+        $deleted = $user->keranjangs()->delete();
+        \Log::info('Cart cleared, deleted ' . $deleted . ' items');
+
         DB::commit();
-        
-        \Log::info('Transaction created successfully:', $transactionCodes);
-        
-        // Create notification
+        \Log::info('Transaction committed successfully');
+
+        \Log::info('Transaksi berhasil dibuat:', [
+            'transaction_codes' => $transactionCodes,
+            'user_id' => $user->id,
+            'total_transactions' => count($transactionCodes)
+        ]);
+
+        // Notifikasi
         if (class_exists(\App\Models\Notifikasi::class)) {
             \App\Models\Notifikasi::createNotifikasi(
                 $user->id,
                 'Transaksi Berhasil',
-                'Transaksi Anda berhasil dibuat. Silakan upload bukti pembayaran.',
+                'Transaksi Anda berhasil dibuat dengan kode: ' . implode(', ', $transactionCodes) . '. Silakan upload bukti pembayaran.',
                 'transaksi',
                 route('user.transaksi.index')
             );
+            \Log::info('Notification created');
         }
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Transaksi berhasil dibuat.',
             'transaction_code' => implode(', ', $transactionCodes),
-            'redirect' => route('user.transaksi.index')
+            'redirect' => route('user.transaksi.index'),
+            'debug' => [
+                'transaction_count' => count($transactionCodes),
+                'codes' => $transactionCodes
+            ]
         ]);
-        
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        \Log::error('Validation Error:', $e->errors());
-        return response()->json([
-            'success' => false,
-            'message' => 'Validasi gagal.',
-            'errors' => $e->errors()
-        ], 422);
-        
+
     } catch (\Exception $e) {
-        \Log::error('Transaction Error:', [
-            'message' => $e->getMessage(),
+        DB::rollBack();
+        \Log::error('Gagal membuat transaksi:', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString()
+            'user_id' => auth()->id(),
+            'cart_count' => $keranjangs->count()
         ]);
-        
-        DB::rollBack();
-        
+
         return response()->json([
             'success' => false,
-            'message' => 'Terjadi kesalahan sistem. Silakan coba lagi.'
+            'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage(),
+            'debug' => [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]
         ], 500);
     }
 }
-    
-    private function createSingleTransaction($user, $keranjangs, $request)
-    {
-        $tipe = $keranjangs->first()->tipe === 'jual' ? 'penjualan' : 'penyewaan';
-        
-        $subtotal = $keranjangs->sum('subtotal');
-        $tax = $subtotal * 0.11;
-        $total = $subtotal + $tax;
 
-            // Determine if alamat_pengiriman is needed
-    $alamatPengiriman = null;
-    if ($tipe === 'penjualan' && $request->has('alamat_pengiriman')) {
-        $alamatPengiriman = $request->alamat_pengiriman;
-    }
-        
-        // Create transaction
-$transaksi = Transaksi::create([
-    'user_id' => $user->id,
-    'tipe' => $tipe,
-    'total_harga' => $subtotal,
-    'diskon' => 0,
-    'total_bayar' => $total,
-    'status' => 'pending',
-    'metode_pembayaran' => $request->metode_pembayaran,
-    'nama_bank' => $request->nama_bank,
-    'no_rekening' => $request->no_rekening,
-    'atas_nama' => $request->atas_nama,
-    'catatan' => $request->catatan,
-    'alamat_pengiriman' => $tipe === 'penjualan' ? $request->alamat_pengiriman : null
-]);
+    /**
+     * Buat transaksi untuk item (penjualan atau penyewaan)
+     */
+private function createTransactionForItems($user, $items, $tipe, $request)
+{
+    \Log::info('=== CREATE TRANSACTION FOR ITEMS ===');
+    \Log::info('Type: ' . $tipe);
+    \Log::info('Items count: ' . $items->count());
+    
+    $subtotal = $items->sum('subtotal');
+    $tax = $subtotal * 0.11;
+    $total = $subtotal + $tax;
 
-        
-        // Create detail transactions and handle stock
-        foreach ($keranjangs as $item) {
-            // Create detail transaction
-            DetailTransaksi::create([
-                'transaksi_id' => $transaksi->id,
-                'produk_id' => $item->produk_id,
-                'tipe_produk' => $item->tipe,
-                'quantity' => $item->quantity,
-                'harga_satuan' => $item->harga,
-                'subtotal' => $item->subtotal,
-                'opsi_sewa' => $item->opsi_sewa
-            ]);
-            
-            // Update product stock
-            if ($item->tipe === 'jual') {
-                $item->produk->updateStok($item->quantity, 'keluar');
-            } else {
-                // For sewa, create rental record
-                $this->createSewaRecord($transaksi, $item);
-                $item->produk->updateStokSewa($item->quantity, 'keluar');
-            }
-        }
-        
-        return $transaksi;
-    }
-    
-    private function createSeparateTransactions($user, $keranjangs, $request)
-    {
-        $jualItems = $keranjangs->where('tipe', 'jual');
-        $sewaItems = $keranjangs->where('tipe', 'sewa');
-        
-        // Create penjualan transaction
-        if ($jualItems->isNotEmpty()) {
-            $this->createTransactionForItems($user, $jualItems, 'penjualan', $request);
-        }
-        
-        // Create penyewaan transaction
-        if ($sewaItems->isNotEmpty()) {
-            $this->createTransactionForItems($user, $sewaItems, 'penyewaan', $request);
-        }
-    }
-    
-    private function createTransactionForItems($user, $items, $tipe, $request)
-    {
-        $subtotal = $items->sum('subtotal');
-        $tax = $subtotal * 0.11;
-        $total = $subtotal + $tax;
-        
-        $transaksi = Transaksi::create([
-            'kode_transaksi' => Transaksi::generateKodeTransaksi(),
-            'user_id' => $user->id,
-            'tipe' => $tipe,
-            'total_harga' => $subtotal,
-            'diskon' => 0,
-            'total_bayar' => $total,
-            'status' => 'pending',
-            'metode_pembayaran' => $request->metode_pembayaran,
-            'nama_bank' => $request->nama_bank,
-            'no_rekening' => $request->no_rekening,
-            'atas_nama' => $request->atas_nama,
-            'catatan' => $request->catatan,
-            'alamat_pengiriman' => $tipe === 'penjualan' ? $request->alamat_pengiriman : null
+    \Log::info('Calculations:', [
+        'subtotal' => $subtotal,
+        'tax' => $tax,
+        'total' => $total
+    ]);
+
+    $transaksi = Transaksi::create([
+        'kode_transaksi' => Transaksi::generateKodeTransaksi(),
+        'user_id' => $user->id,
+        'tipe' => $tipe,
+        'total_harga' => $subtotal,
+        'diskon' => 0,
+        'total_bayar' => $total,
+        'status' => 'pending',
+        'metode_pembayaran' => $request->metode_pembayaran,
+        'nama_bank' => $request->nama_bank,
+        'no_rekening' => $request->no_rekening,
+        'atas_nama' => $request->atas_nama,
+        'catatan' => $request->catatan,
+        'alamat_pengiriman' => $tipe === 'penjualan' ? $request->alamat_pengiriman : null
+    ]);
+
+    \Log::info('Transaction created:', [
+        'id' => $transaksi->id,
+        'kode' => $transaksi->kode_transaksi,
+        'user_id' => $transaksi->user_id,
+        'tipe' => $transaksi->tipe
+    ]);
+
+    foreach ($items as $item) {
+        \Log::info('Creating detail for item:', [
+            'produk_id' => $item->produk_id,
+            'produk_nama' => $item->produk->nama,
+            'tipe_produk' => $item->tipe,
+            'quantity' => $item->quantity,
+            'harga_satuan' => $item->harga,
+            'subtotal' => $item->subtotal,
+            'opsi_sewa' => $item->opsi_sewa
         ]);
         
-        foreach ($items as $item) {
-            DetailTransaksi::create([
-                'transaksi_id' => $transaksi->id,
+        $detail = DetailTransaksi::create([
+            'transaksi_id' => $transaksi->id,
+            'produk_id' => $item->produk_id,
+            'tipe_produk' => $item->tipe,
+            'quantity' => $item->quantity,
+            'harga_satuan' => $item->harga,
+            'subtotal' => $item->subtotal,
+            'opsi_sewa' => $item->opsi_sewa
+        ]);
+
+        \Log::info('Detail created:', [
+            'detail_id' => $detail->id,
+            'transaksi_id' => $detail->transaksi_id
+        ]);
+
+        if ($tipe === 'penjualan') {
+            // Update stok untuk penjualan
+            $oldStock = $item->produk->stok_tersedia;
+            \Log::info('Updating sale stock for product:', [
                 'produk_id' => $item->produk_id,
-                'tipe_produk' => $item->tipe,
                 'quantity' => $item->quantity,
-                'harga_satuan' => $item->harga,
-                'subtotal' => $item->subtotal,
-                'opsi_sewa' => $item->opsi_sewa
+                'old_stock' => $oldStock,
+                'new_stock' => $oldStock - $item->quantity
             ]);
             
-            if ($tipe === 'penjualan') {
-                $item->produk->updateStok($item->quantity, 'keluar');
-            } else {
-                $this->createSewaRecord($transaksi, $item);
-                $item->produk->updateStokSewa($item->quantity, 'keluar');
-            }
+            $item->produk->updateStok($item->quantity, 'keluar');
+            
+            \Log::info('Sale stock updated:', [
+                'current_stock' => $item->produk->fresh()->stok_tersedia
+            ]);
+        } else {
+            // Update stok untuk penyewaan - GUNAKAN stok_disewa
+            $oldStockSewa = $item->produk->stok_disewa;
+            $oldStockTersedia = $item->produk->stok_tersedia;
+            
+            \Log::info('Updating rental stock for product:', [
+                'produk_id' => $item->produk_id,
+                'produk_nama' => $item->produk->nama,
+                'quantity' => $item->quantity,
+                'old_stok_disewa' => $oldStockSewa,
+                'old_stok_tersedia' => $oldStockTersedia
+            ]);
+            
+            // Create sewa record
+            $sewa = $this->createSewaRecord($transaksi, $item);
+            
+            // Update stok menggunakan method yang benar
+            $item->produk->updateStokSewa($item->quantity, 'keluar');
+            
+            $item->produk->refresh();
+            
+            \Log::info('Rental processing completed', [
+                'sewa_id' => $sewa ? $sewa->id : null,
+                'new_stok_disewa' => $item->produk->stok_disewa,
+                'new_stok_tersedia' => $item->produk->stok_tersedia,
+                'stock_updated' => true
+            ]);
         }
-        
-        return $transaksi;
     }
-    
+
+    return $transaksi;
+}
+
+    /**
+     * Buat record sewa dari item keranjang
+     */
     private function createSewaRecord($transaksi, $item)
     {
-        $opsi = $item->opsi_sewa;
-        $jumlahHari = $opsi['jumlah_hari'] ?? 1;
-        $tanggalMulai = Carbon::parse($opsi['tanggal_mulai']);
-        $tanggalSelesai = $tanggalMulai->copy()->addDays($jumlahHari);
+        \Log::info('=== CREATE SEWA RECORD ===');
+        \Log::info('Transaction ID: ' . $transaksi->id);
+        \Log::info('Item ID: ' . $item->id);
+        \Log::info('Product ID: ' . $item->produk_id);
         
-        return Sewa::create([
-            'transaksi_id' => $transaksi->id,
-            'user_id' => $transaksi->user_id,
-            'produk_id' => $item->produk_id,
-            'kode_sewa' => Sewa::generateKodeSewa(),
-            'durasi' => $opsi['durasi'] ?? 'harian',
-            'jumlah_hari' => $jumlahHari,
-            'tanggal_mulai' => $tanggalMulai,
-            'tanggal_selesai' => $tanggalSelesai,
-            'tanggal_kembali_rencana' => $tanggalSelesai,
-            'total_harga' => $item->subtotal,
-            'status' => 'aktif'
+        $opsi = $item->opsi_sewa ?? [];
+
+        \Log::info('Original opsi_sewa:', [
+            'raw' => $opsi,
+            'type' => gettype($opsi),
+            'is_string' => is_string($opsi),
+            'is_array' => is_array($opsi)
         ]);
+
+        // Jika opsi_sewa adalah JSON string, decode
+        if (is_string($opsi) && !empty($opsi)) {
+            $decoded = json_decode($opsi, true);
+            \Log::info('Decoded JSON:', [
+                'decoded' => $decoded,
+                'json_error' => json_last_error_msg()
+            ]);
+            
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $opsi = $decoded;
+            } else {
+                \Log::error('Failed to decode JSON opsi_sewa:', [
+                    'json_error' => json_last_error_msg(),
+                    'raw_string' => $opsi
+                ]);
+                throw new \Exception('Format data sewa tidak valid.');
+            }
+        }
+
+        \Log::info('Processed opsi:', $opsi);
+
+        // Validasi data yang diperlukan
+        if (empty($opsi)) {
+            \Log::error('Empty rental options');
+            throw new \Exception('Data sewa tidak ditemukan.');
+        }
+
+        if (!isset($opsi['tanggal_mulai'])) {
+            \Log::error('Missing tanggal_mulai', ['opsi' => $opsi]);
+            throw new \Exception('Tanggal mulai sewa tidak ditemukan.');
+        }
+
+        $jumlahHari = max(1, $opsi['jumlah_hari'] ?? 1);
+        $durasi = in_array($opsi['durasi'] ?? '', ['harian','mingguan','bulanan'])
+            ? $opsi['durasi']
+            : 'harian';
+
+        \Log::info('Rental parameters:', [
+            'jumlah_hari' => $jumlahHari,
+            'durasi' => $durasi,
+            'tanggal_mulai' => $opsi['tanggal_mulai']
+        ]);
+
+        try {
+            $tanggalMulai = Carbon::parse($opsi['tanggal_mulai']);
+            $tanggalSelesai = $tanggalMulai->copy()->addDays($jumlahHari);
+
+            \Log::info('Parsed dates:', [
+                'tanggal_mulai' => $tanggalMulai->format('Y-m-d'),
+                'tanggal_selesai' => $tanggalSelesai->format('Y-m-d')
+            ]);
+
+            $sewa = Sewa::create([
+                'transaksi_id' => $transaksi->id,
+                'user_id' => $transaksi->user_id,
+                'produk_id' => $item->produk_id,
+                'kode_sewa' => Sewa::generateKodeSewa(),
+                'durasi' => $durasi,
+                'jumlah_hari' => $jumlahHari,
+                'tanggal_mulai' => $tanggalMulai,
+                'tanggal_selesai' => $tanggalSelesai,
+                'tanggal_kembali_rencana' => $tanggalSelesai,
+                'total_harga' => $item->subtotal ?? 0,
+                'status' => 'aktif',
+                'denda' => 0,
+                'catatan' => $opsi['catatan'] ?? null
+            ]);
+
+            \Log::info('Sewa record created successfully:', [
+                'sewa_id' => $sewa->id,
+                'kode_sewa' => $sewa->kode_sewa,
+                'status' => $sewa->status
+            ]);
+
+            return $sewa;
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to create sewa record', [
+                'item' => $item->toArray(),
+                'opsi' => $opsi,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new \Exception('Gagal membuat record sewa: ' . $e->getMessage());
+        }
     }
     
     public function show($id)
@@ -343,13 +621,28 @@ $transaksi = Transaksi::create([
     
     public function uploadBukti(Request $request, $id)
     {
+        \Log::info('=== UPLOAD BUKTI PEMBAYARAN ===');
+        \Log::info('Transaction ID: ' . $id);
+        \Log::info('User ID: ' . auth()->id());
+        
         $request->validate([
             'bukti_pembayaran' => 'required|image|mimes:jpg,jpeg,png|max:2048'
         ]);
         
         $transaksi = auth()->user()->transaksis()->findOrFail($id);
         
+        \Log::info('Transaction found:', [
+            'id' => $transaksi->id,
+            'kode' => $transaksi->kode_transaksi,
+            'status' => $transaksi->status
+        ]);
+        
         if ($transaksi->status !== 'pending') {
+            \Log::warning('Transaction not in pending status', [
+                'current_status' => $transaksi->status,
+                'expected' => 'pending'
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Hanya transaksi pending yang dapat diupload bukti pembayaran.'
@@ -359,21 +652,42 @@ $transaksi = Transaksi::create([
         // Upload image
         if ($request->hasFile('bukti_pembayaran')) {
             $file = $request->file('bukti_pembayaran');
+            
+            \Log::info('File details:', [
+                'original_name' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'mime_type' => $file->getMimeType(),
+                'extension' => $file->getClientOriginalExtension()
+            ]);
+            
             $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
             $file->storeAs('bukti-pembayaran', $filename, 'public');
+            
+            \Log::info('File stored:', [
+                'filename' => $filename,
+                'path' => 'bukti-pembayaran/' . $filename
+            ]);
             
             $transaksi->bukti_pembayaran = $filename;
             $transaksi->status = 'diproses';
             $transaksi->save();
             
+            \Log::info('Transaction updated:', [
+                'new_status' => $transaksi->status,
+                'bukti_pembayaran' => $transaksi->bukti_pembayaran
+            ]);
+            
             // Create notification
-            \App\Models\Notifikasi::createNotifikasi(
-                $transaksi->user_id,
-                'Bukti Pembayaran Diupload',
-                'Bukti pembayaran untuk transaksi ' . $transaksi->kode_transaksi . ' telah diupload.',
-                'transaksi',
-                route('user.transaksi.show', $transaksi->id)
-            );
+            if (class_exists(\App\Models\Notifikasi::class)) {
+                \App\Models\Notifikasi::createNotifikasi(
+                    $transaksi->user_id,
+                    'Bukti Pembayaran Diupload',
+                    'Bukti pembayaran untuk transaksi ' . $transaksi->kode_transaksi . ' telah diupload.',
+                    'transaksi',
+                    route('user.transaksi.show', $transaksi->id)
+                );
+                \Log::info('Notification created');
+            }
             
             return response()->json([
                 'success' => true,
@@ -381,6 +695,8 @@ $transaksi = Transaksi::create([
                 'bukti_url' => $transaksi->bukti_pembayaran_url
             ]);
         }
+        
+        \Log::warning('No file uploaded');
         
         return response()->json([
             'success' => false,
@@ -390,9 +706,25 @@ $transaksi = Transaksi::create([
     
     public function cancel($id)
     {
+        \Log::info('=== CANCEL TRANSACTION ===');
+        \Log::info('Transaction ID: ' . $id);
+        \Log::info('User ID: ' . auth()->id());
+        
         $transaksi = auth()->user()->transaksis()->findOrFail($id);
         
+        \Log::info('Transaction found:', [
+            'id' => $transaksi->id,
+            'kode' => $transaksi->kode_transaksi,
+            'status' => $transaksi->status,
+            'tipe' => $transaksi->tipe
+        ]);
+        
         if (!in_array($transaksi->status, ['pending', 'diproses'])) {
+            \Log::warning('Transaction cannot be cancelled', [
+                'current_status' => $transaksi->status,
+                'allowed_statuses' => ['pending', 'diproses']
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Transaksi tidak dapat dibatalkan.'
@@ -400,35 +732,62 @@ $transaksi = Transaksi::create([
         }
         
         DB::beginTransaction();
+        \Log::info('Transaction started for cancellation');
+        
         try {
             // Restore stock
+            \Log::info('Restoring stock for transaction items');
+            
             foreach ($transaksi->detailTransaksis as $detail) {
+                \Log::info('Processing detail:', [
+                    'id' => $detail->id,
+                    'produk_id' => $detail->produk_id,
+                    'tipe_produk' => $detail->tipe_produk,
+                    'quantity' => $detail->quantity
+                ]);
+                
                 if ($detail->tipe_produk === 'jual') {
                     $detail->produk->updateStok($detail->quantity, 'masuk');
+                    \Log::info('Sale stock restored');
                 } else {
                     $detail->produk->updateStokSewa($detail->quantity, 'masuk');
+                    \Log::info('Rental stock restored');
                 }
             }
             
             // Cancel any rental records
             if ($transaksi->sewa) {
+                \Log::info('Cancelling rental record:', [
+                    'sewa_id' => $transaksi->sewa->id,
+                    'kode_sewa' => $transaksi->sewa->kode_sewa
+                ]);
+                
                 $transaksi->sewa->update(['status' => 'dibatalkan']);
+                \Log::info('Rental record cancelled');
             }
             
             // Update transaction status
             $transaksi->status = 'dibatalkan';
             $transaksi->save();
             
+            \Log::info('Transaction cancelled:', [
+                'new_status' => $transaksi->status
+            ]);
+            
             DB::commit();
+            \Log::info('Cancellation transaction committed');
             
             // Create notification
-            \App\Models\Notifikasi::createNotifikasi(
-                $transaksi->user_id,
-                'Transaksi Dibatalkan',
-                'Transaksi ' . $transaksi->kode_transaksi . ' telah dibatalkan.',
-                'warning',
-                route('user.transaksi.show', $transaksi->id)
-            );
+            if (class_exists(\App\Models\Notifikasi::class)) {
+                \App\Models\Notifikasi::createNotifikasi(
+                    $transaksi->user_id,
+                    'Transaksi Dibatalkan',
+                    'Transaksi ' . $transaksi->kode_transaksi . ' telah dibatalkan.',
+                    'warning',
+                    route('user.transaksi.show', $transaksi->id)
+                );
+                \Log::info('Notification created');
+            }
             
             return response()->json([
                 'success' => true,
@@ -437,9 +796,21 @@ $transaksi = Transaksi::create([
             
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Failed to cancel transaction:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'debug' => [
+                    'error' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]
             ], 500);
         }
     }
