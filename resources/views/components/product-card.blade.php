@@ -83,7 +83,7 @@
             
             <!-- Action Buttons -->
             <div class="flex gap-2 mt-auto">
-                <a href="{{ route('user.produk.show', $product->slug) }}" 
+                <a href="{{ route('produk.show', $product->slug) }}" 
                    class="flex-1 group/view">
                     <div class="flex items-center justify-center gap-2 bg-gradient-to-r from-gray-100 to-gray-50 hover:from-blue-50 hover:to-blue-100 text-blue-600 hover:text-blue-700 font-semibold py-2 px-4 rounded-lg transition-all duration-300 border border-gray-200 hover:border-blue-300">
                         <i class="fas fa-eye"></i>

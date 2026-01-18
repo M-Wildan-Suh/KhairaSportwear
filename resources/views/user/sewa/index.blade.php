@@ -251,15 +251,15 @@
                             
                             <!-- Action Buttons -->
                             <div class="flex gap-3">
-                                <a href="{{ route('user.produk.show', $produk->slug) }}" 
+                                <a href="{{ route('produk.show', $produk->slug) }}" 
                                    class="flex-1 px-4 py-2.5 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center gap-2">
                                     <i class="fas fa-info-circle"></i>
                                     <span>Detail</span>
                                 </a>
                                 
                                 @if($produk->stok_tersedia > 0)
-                                <button onclick="showRentalModal({{ $produk->id }})"
-                                        class="flex-1 px-4 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
+                                <button onclick="showSewaModal({{ $produk->id }})" 
+                                        class="flex-1 px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
                                     <i class="fas fa-cart-plus"></i>
                                     <span>Sewa</span>
                                 </button>
@@ -390,177 +390,10 @@
             </div>
         </div>
     </section>
-
-    <!-- CTA Section -->
-    <section class="py-16 bg-gradient-to-r from-primary to-primary-dark">
-        <div class="container mx-auto px-4 lg:px-8">
-            <div class="text-center" data-aos="zoom-in">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-                    Siap Mulai Olahraga?
-                </h2>
-                <p class="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-                    Sewa alat olahraga premium sekarang dan nikmati pengalaman berolahraga yang lebih baik
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="tel:02112345678" 
-                       class="px-8 py-3 bg-white text-primary font-bold rounded-xl hover:bg-gray-100 transition-colors duration-200 flex items-center justify-center gap-3">
-                        <i class="fas fa-phone"></i>
-                        <span>Hubungi Kami</span>
-                    </a>
-                    <a href="{{ route('user.produk.index') }}" 
-                       class="px-8 py-3 border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-primary transition-all duration-200 flex items-center justify-center gap-3">
-                        <i class="fas fa-store"></i>
-                        <span>Lihat Semua Produk</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
 </div>
 
-<!-- Rental Modal -->
-<div id="rentalModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
-    <div class="relative top-4 mx-auto p-4 w-full max-w-lg">
-        <div class="bg-white rounded-2xl shadow-xl">
-            <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-primary to-primary-dark rounded-t-2xl">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-calendar-alt text-white"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-white">Form Penyewaan</h3>
-                    </div>
-                    <button onclick="closeRentalModal()" class="text-white hover:text-gray-200">
-                        <i class="fas fa-times text-lg"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Modal Body -->
-            <div class="p-6">
-                <form id="rentalForm">
-                    @csrf
-                    <input type="hidden" id="product_id" name="product_id">
-                    
-                    <!-- Product Info -->
-                    <div class="mb-6 p-4 bg-gray-50 rounded-xl">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                                <img id="modalProductImage" src="" alt="" class="w-full h-full object-cover">
-                            </div>
-                            <div>
-                                <h4 id="modalProductName" class="font-bold text-gray-900 mb-1"></h4>
-                                <p id="modalProductCategory" class="text-sm text-gray-600"></p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div>
-                                <div class="font-semibold text-emerald-600" id="modalDailyPrice"></div>
-                                <div class="text-xs text-gray-500">Harian</div>
-                            </div>
-                            <div class="border-x border-gray-200">
-                                <div class="font-semibold text-emerald-600" id="modalWeeklyPrice"></div>
-                                <div class="text-xs text-gray-500">Mingguan</div>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-emerald-600" id="modalMonthlyPrice"></div>
-                                <div class="text-xs text-gray-500">Bulanan</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Rental Form -->
-                    <div class="space-y-6">
-                        <!-- Duration -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Durasi Sewa</label>
-                            <div class="grid grid-cols-3 gap-3">
-                                @foreach(['harian' => 'Harian', 'mingguan' => 'Mingguan', 'bulanan' => 'Bulanan'] as $value => $label)
-                                <label class="duration-option relative">
-                                    <input type="radio" name="durasi" value="{{ $value }}" class="sr-only" required>
-                                    <div class="w-full p-4 border-2 border-gray-200 rounded-xl text-center cursor-pointer hover:border-primary transition-colors duration-200">
-                                        <div class="font-semibold text-gray-900">{{ $label }}</div>
-                                    </div>
-                                </label>
-                                @endforeach
-                            </div>
-                        </div>
-                        
-                        <!-- Duration Details -->
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Hari</label>
-                                <div class="relative">
-                                    <input type="number" 
-                                           name="jumlah_hari" 
-                                           id="jumlah_hari" 
-                                           value="1" 
-                                           min="1" 
-                                           max="30"
-                                           class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
-                                           required>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                        <span class="text-gray-500 text-sm">hari</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
-                                <input type="date" 
-                                       name="tanggal_mulai" 
-                                       id="tanggal_mulai"
-                                       class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
-                                       required>
-                            </div>
-                        </div>
-                        
-                        <!-- Notes -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
-                            <textarea name="catatan" 
-                                      rows="3" 
-                                      class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
-                                      placeholder="Contoh: Butuh alat untuk turnamen tanggal..."></textarea>
-                        </div>
-                        
-                        <!-- Price Summary -->
-                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
-                            <h4 class="font-semibold text-gray-900 mb-4">Ringkasan Biaya</h4>
-                            <div class="space-y-3">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Harga per hari:</span>
-                                    <span class="font-semibold text-gray-900" id="pricePerDay">Rp 0</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Jumlah hari:</span>
-                                    <span class="font-semibold text-gray-900" id="daysCount">0 hari</span>
-                                </div>
-                                <div class="border-t border-gray-200 pt-3">
-                                    <div class="flex justify-between">
-                                        <span class="text-lg font-bold text-gray-900">Total Biaya:</span>
-                                        <span class="text-2xl font-bold text-primary" id="totalPrice">Rp 0</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Submit Button -->
-                        <div class="pt-4">
-                            <button type="submit" 
-                                    id="submitRentalBtn"
-                                    class="w-full px-6 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-3">
-                                <i class="fas fa-cart-plus"></i>
-                                <span>Tambah ke Keranjang</span>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Include Modal Component -->
+@include('user.components.sewa-modal')
 @endsection
 
 @push('styles')
@@ -607,6 +440,9 @@
 @endpush
 
 @push('scripts')
+<!-- Include Modal JavaScript -->
+@vite('resources/js/sewa-modal.js')
+
 <script>
 // Initialize AOS
 document.addEventListener('DOMContentLoaded', function() {
@@ -620,6 +456,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize FAQ functionality
     initFAQ();
+    
+    // Initialize search functionality
+    initSearch();
 });
 
 // FAQ Functionality
@@ -649,39 +488,52 @@ function initFAQ() {
     });
 }
 
-// Clear Filters
-function clearFilters() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('categoryFilter').value = '';
-    
-    // Show all products
-    document.querySelectorAll('.group').forEach(el => {
-        el.style.display = 'block';
-    });
-}
-
 // Search Functionality
 let searchTimeout;
-document.getElementById('searchInput').addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        searchProducts();
-    }, 500);
-});
-
-document.getElementById('categoryFilter').addEventListener('change', searchProducts);
+function initSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchProducts();
+            }, 500);
+        });
+    }
+    
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', searchProducts);
+    }
+}
 
 function searchProducts() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const categoryId = document.getElementById('categoryFilter').value;
+    const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const categoryId = document.getElementById('categoryFilter')?.value || '';
     
     document.querySelectorAll('.group').forEach(card => {
-        const productName = card.querySelector('h3').textContent.toLowerCase();
-        const productCategory = card.querySelector('span').textContent;
+        const productName = card.querySelector('h3')?.textContent.toLowerCase() || '';
+        const productCategory = card.querySelector('span')?.textContent || '';
         const shouldShow = (!searchTerm || productName.includes(searchTerm)) &&
                           (!categoryId || productCategory.includes(categoryId));
         
         card.style.display = shouldShow ? 'block' : 'none';
+    });
+}
+
+// Clear Filters
+function clearFilters() {
+    if (document.getElementById('searchInput')) {
+        document.getElementById('searchInput').value = '';
+    }
+    if (document.getElementById('categoryFilter')) {
+        document.getElementById('categoryFilter').value = '';
+    }
+    
+    // Show all products
+    document.querySelectorAll('.group').forEach(el => {
+        el.style.display = 'block';
     });
 }
 
@@ -726,190 +578,45 @@ document.getElementById('loadMoreBtn')?.addEventListener('click', async function
     }
 });
 
-// Rental Modal Functions
-let currentProduct = null;
+// Make sure showSewaModal is available globally
+// (Already exported from sewa-modal.js, but just in case)
+window.showSewaModal = window.showSewaModal || function(productId) {
+    console.warn('showSewaModal not loaded from sewa-modal.js');
+    alert('Fungsi sewa belum siap. Silakan refresh halaman.');
+};
 
-async function showRentalModal(productId) {
-    currentProduct = productId;
-    
-    try {
-        const response = await fetch(`/api/products/${productId}/rental-info`);
-        const product = await response.json();
+// Quick filter buttons functionality (optional enhancement)
+document.querySelectorAll('.bg-gray-100').forEach(button => {
+    button.addEventListener('click', function() {
+        const text = this.textContent.trim();
         
-        // Update modal with product info
-        document.getElementById('product_id').value = product.id;
-        document.getElementById('modalProductImage').src = product.gambar_url;
-        document.getElementById('modalProductName').textContent = product.nama;
-        document.getElementById('modalProductCategory').textContent = product.kategori.nama;
-        document.getElementById('modalDailyPrice').textContent = `Rp ${product.harga_sewa_harian.toLocaleString()}`;
-        document.getElementById('modalWeeklyPrice').textContent = `Rp ${product.harga_sewa_mingguan.toLocaleString()}`;
-        document.getElementById('modalMonthlyPrice').textContent = `Rp ${product.harga_sewa_bulanan.toLocaleString()}`;
-        
-        // Set minimum date to tomorrow
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        document.getElementById('tanggal_mulai').min = tomorrow.toISOString().split('T')[0];
-        document.getElementById('tanggal_mulai').value = tomorrow.toISOString().split('T')[0];
-        
-        // Reset form
-        document.getElementById('rentalForm').reset();
-        
-        // Show modal
-        document.getElementById('rentalModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-        
-        // Initialize price calculation
-        updatePrice();
-    } catch (error) {
-        console.error('Error loading product info:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal memuat informasi produk',
-            text: 'Silakan coba lagi nanti',
-            confirmButtonColor: '#2B6CB0'
-        });
-    }
-}
-
-function closeRentalModal() {
-    document.getElementById('rentalModal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
-
-// Price Calculation
-function updatePrice() {
-    const selectedDuration = document.querySelector('input[name="durasi"]:checked');
-    const days = parseInt(document.getElementById('jumlah_hari').value) || 1;
-    
-    if (!selectedDuration) return;
-    
-    const duration = selectedDuration.value;
-    let pricePerDay = 0;
-    let totalPrice = 0;
-    
-    // Get prices from modal display (in real app, this would come from API)
-    const dailyPriceText = document.getElementById('modalDailyPrice').textContent;
-    const weeklyPriceText = document.getElementById('modalWeeklyPrice').textContent;
-    const monthlyPriceText = document.getElementById('modalMonthlyPrice').textContent;
-    
-    // Extract numeric values (remove "Rp " and commas)
-    const dailyPrice = parseInt(dailyPriceText.replace('Rp ', '').replace(/\./g, '')) || 0;
-    const weeklyPrice = parseInt(weeklyPriceText.replace('Rp ', '').replace(/\./g, '')) || 0;
-    const monthlyPrice = parseInt(monthlyPriceText.replace('Rp ', '').replace(/\./g, '')) || 0;
-    
-    switch(duration) {
-        case 'harian':
-            pricePerDay = dailyPrice;
-            totalPrice = dailyPrice * days;
-            break;
-        case 'mingguan':
-            pricePerDay = Math.round(weeklyPrice / 7);
-            totalPrice = weeklyPrice * Math.ceil(days / 7);
-            break;
-        case 'bulanan':
-            pricePerDay = Math.round(monthlyPrice / 30);
-            totalPrice = monthlyPrice * Math.ceil(days / 30);
-            break;
-    }
-    
-    // Update display
-    document.getElementById('pricePerDay').textContent = `Rp ${pricePerDay.toLocaleString()}`;
-    document.getElementById('daysCount').textContent = `${days} hari`;
-    document.getElementById('totalPrice').textContent = `Rp ${totalPrice.toLocaleString()}`;
-}
-
-// Event listeners for price updates
-document.querySelectorAll('input[name="durasi"]').forEach(radio => {
-    radio.addEventListener('change', updatePrice);
-});
-
-document.getElementById('jumlah_hari').addEventListener('input', updatePrice);
-
-// Rental Form Submission
-document.getElementById('rentalForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const submitBtn = document.getElementById('submitRentalBtn');
-    const originalContent = submitBtn.innerHTML;
-    
-    // Show loading
-    submitBtn.innerHTML = `
-        <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-        <span>Memproses...</span>
-    `;
-    submitBtn.disabled = true;
-    
-    try {
-        const response = await fetch('/user/keranjang', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                product_id: formData.get('product_id'),
-                type: 'sewa',
-                quantity: 1,
-                options: {
-                    durasi: formData.get('durasi'),
-                    jumlah_hari: formData.get('jumlah_hari'),
-                    tanggal_mulai: formData.get('tanggal_mulai'),
-                    catatan: formData.get('catatan')
-                }
-            })
+        // Reset all buttons
+        document.querySelectorAll('.bg-gray-100, .bg-primary').forEach(btn => {
+            btn.classList.remove('bg-primary', 'text-white');
+            btn.classList.add('bg-gray-100', 'text-gray-700');
         });
         
-        const data = await response.json();
+        // Activate clicked button
+        this.classList.remove('bg-gray-100', 'text-gray-700');
+        this.classList.add('bg-primary', 'text-white');
         
-        if (data.success) {
-            // Close modal
-            closeRentalModal();
-            
-            // Update cart badge
-            window.dispatchEvent(new CustomEvent('cartUpdated', {
-                detail: { count: data.cart_count }
-            }));
-            
-            // Show success message
-            await Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: data.message,
-                timer: 2000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-        } else {
-            throw new Error(data.message);
+        // Implement filter logic based on text
+        switch(text) {
+            case 'Populer':
+                // Add your popular filter logic
+                break;
+            case 'Harga Terendah':
+                // Add your price sort logic
+                break;
+            case 'Stok Tersedia':
+                // Filter by stock
+                document.querySelectorAll('.group').forEach(card => {
+                    const stockBadge = card.querySelector('.bg-red-100');
+                    card.style.display = stockBadge ? 'none' : 'block';
+                });
+                break;
         }
-    } catch (error) {
-        await Swal.fire({
-            icon: 'error',
-            title: 'Gagal',
-            text: error.message || 'Terjadi kesalahan saat menambahkan ke keranjang',
-            confirmButtonColor: '#2B6CB0'
-        });
-    } finally {
-        submitBtn.innerHTML = originalContent;
-        submitBtn.disabled = false;
-    }
-});
-
-// Close modal on escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeRentalModal();
-    }
-});
-
-// Close modal on background click
-document.getElementById('rentalModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeRentalModal();
-    }
+    });
 });
 </script>
 @endpush

@@ -75,8 +75,8 @@
                         <h4 class="text-lg font-semibold mb-4">Navigasi</h4>
                         <ul class="space-y-2">
                             <li><a href="{{ route('user.dashboard') }}" class="text-gray-400 hover:text-white transition-colors">Dashboard</a></li>
-                            <li><a href="{{ route('user.produk.index') }}" class="text-gray-400 hover:text-white transition-colors">Produk</a></li>
-                            <li><a href="{{ route('user.sewa.index') }}" class="text-gray-400 hover:text-white transition-colors">Sewa</a></li>
+                            <li><a href="{{ route('produk.index') }}" class="text-gray-400 hover:text-white transition-colors">Produk</a></li>
+                            <li><a href="{{ route('sewa.index') }}" class="text-gray-400 hover:text-white transition-colors">Sewa</a></li>
                             <li><a href="{{ route('user.keranjang.index') }}" class="text-gray-400 hover:text-white transition-colors">Keranjang</a></li>
                         </ul>
                     </div>

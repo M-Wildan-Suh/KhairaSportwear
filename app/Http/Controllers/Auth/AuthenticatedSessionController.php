@@ -22,35 +22,42 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
+public function store(LoginRequest $request): RedirectResponse
+{
+    $request->authenticate();
+    $request->session()->regenerate();
 
-        $request->session()->regenerate();
+    $user = Auth::user();
 
-        $user = Auth::user();
-
-        // Kirim notifikasi login ke database
-        if (class_exists(\App\Models\Notifikasi::class)) {
-            \App\Models\Notifikasi::createNotifikasi(
-                $user->id,
-                'Login Berhasil',
-                'Anda berhasil login ke akun SportWear.',
-                'success'
-            );
-        }
-
-        // Tambahkan session flash untuk popup
-        $request->session()->flash('login_success', 'Login Berhasil!');
-        
-        // Redirect berdasarkan role - SESUAI ROUTE ANDA
-        if ($user->isAdmin()) {
-            return redirect()->intended(route('admin.dashboard', absolute: false));
-        }
-
-        // Jika bukan admin, redirect ke user dashboard
-        return redirect()->intended(route('user.dashboard', absolute: false));
+    // Notifikasi login
+    if (class_exists(\App\Models\Notifikasi::class)) {
+        \App\Models\Notifikasi::createNotifikasi(
+            $user->id,
+            'Login Berhasil',
+            'Anda berhasil login ke akun SportWear.',
+            'success'
+        );
     }
+
+    $request->session()->flash('login_success', 'Login Berhasil!');
+
+    // 🔑 AMBIL RETURN URL DARI MODAL
+    $returnUrl = $request->input('return');
+
+    // 🛡️ KEAMANAN: pastikan URL internal
+    if ($returnUrl && str_starts_with($returnUrl, url('/'))) {
+        return redirect()->to($returnUrl);
+    }
+
+    // Role admin
+    if ($user->isAdmin()) {
+        return redirect()->intended(route('admin.dashboard', false));
+    }
+
+    // Default user
+    return redirect()->intended(route('user.dashboard', false));
+}
+
 
     /**
      * Destroy an authenticated session.

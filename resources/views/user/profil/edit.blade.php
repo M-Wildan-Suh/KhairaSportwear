@@ -71,7 +71,7 @@
                                 <ul class="space-y-2">
                                     <li>
                                         <a href="{{ route('user.profil.edit') }}" 
-                                           class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl font-medium">
+                                           class="flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-xl font-medium">
                                             <i class="fas fa-user"></i>
                                             <span>Profil Saya</span>
                                         </a>
@@ -308,7 +308,7 @@
                                 </button>
                                 <button type="submit" 
                                         id="saveProfileBtn"
-                                        class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
+                                        class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
                                     <i class="fas fa-save"></i>
                                     <span>Simpan Perubahan</span>
                                 </button>
@@ -396,12 +396,12 @@
                                 Mulai berbelanja atau menyewa alat olahraga untuk melihat aktivitas Anda di sini
                             </p>
                             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                                <a href="{{ route('user.produk.index') }}" 
+                                <a href="{{ route('produk.index') }}" 
                                    class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200">
                                     <i class="fas fa-store mr-2"></i>
                                     Mulai Belanja
                                 </a>
-                                <a href="{{ route('user.sewa.index') }}" 
+                                <a href="{{ route('sewa.index') }}" 
                                    class="px-6 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-200">
                                     <i class="fas fa-calendar-alt mr-2"></i>
                                     Sewa Alat

@@ -33,12 +33,12 @@
                     <i class="fas fa-home mr-2"></i> Dashboard
                 </a>
                 
-                <a href="{{ route('user.produk.index') }}" 
+                <a href="{{ route('produk.index') }}" 
                    class="nav-link {{ request()->routeIs('user.produk.*') ? 'active' : '' }}">
                     <i class="fas fa-shopping-cart mr-2"></i> Produk
                 </a>
                 
-                <a href="{{ route('user.sewa.index') }}" 
+                <a href="{{ route('sewa.index') }}" 
                    class="nav-link {{ request()->routeIs('user.sewa.*') ? 'active' : '' }}">
                     <i class="fas fa-calendar-alt mr-2"></i> Sewa
                 </a>
@@ -114,7 +114,7 @@
                                 <div class="text-center py-8">
                                     <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-4"></i>
                                     <p class="text-gray-600">Keranjang masih kosong</p>
-                                    <a href="{{ route('user.produk.index') }}" 
+                                    <a href="{{ route('produk.index') }}" 
                                        class="inline-block mt-4 text-blue-600 hover:text-blue-800 font-semibold">
                                         Belanja Sekarang →
                                     </a>
@@ -203,12 +203,12 @@
                 <i class="fas fa-home mr-3"></i> Dashboard
             </a>
             
-            <a href="{{ route('user.produk.index') }}" 
+            <a href="{{ route('produk.index') }}" 
                class="mobile-nav-link {{ request()->routeIs('user.produk.*') ? 'active' : '' }}">
                 <i class="fas fa-shopping-cart mr-3"></i> Produk
             </a>
             
-            <a href="{{ route('user.sewa.index') }}" 
+            <a href="{{ route('sewa.index') }}" 
                class="mobile-nav-link {{ request()->routeIs('user.sewa.*') ? 'active' : '' }}">
                 <i class="fas fa-calendar-alt mr-3"></i> Sewa
             </a>

@@ -3,7 +3,6 @@
 @section('title', 'Manajemen Produk')
 
 @section('page-title', 'Manajemen Produk')
-@section('page-subtitle', 'Kelola produk jual dan sewa')
 
 @section('breadcrumbs')
     @php
@@ -19,7 +18,7 @@
     <div class="flex md:flex-row justify-between items-start md:items-start mb-6 gap-4 mr-8">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Produk</h1>
-            <p class="text-gray-600">Total {{ $produks->total() }} produk ditemukan</p>
+            <p class="text-gray-800">Total {{ $produks->total() }} produk ditemukan</p>
         </div>
         
         <div class="flex items-center space-x-3">
@@ -94,7 +93,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Produk</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ number_format($produks->total()) }}</p>
+                    <p class="text-2xl font-bold text-white">{{ number_format($produks->total()) }}</p>
                 </div>
             </div>
         </div>
@@ -106,7 +105,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-600">Produk Aktif</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ number_format($produks->where('is_active', true)->count()) }}</p>
+                    <p class="text-2xl font-bold text-white">{{ number_format($produks->where('is_active', true)->count()) }}</p>
                 </div>
             </div>
         </div>
@@ -118,7 +117,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-600">Stok Rendah</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ number_format($produks->where('stok_tersedia', '<', 5)->count()) }}</p>
+                    <p class="text-2xl font-bold text-white">{{ number_format($produks->where('stok_tersedia', '<', 5)->count()) }}</p>
                 </div>
             </div>
         </div>
@@ -130,7 +129,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-600">Sedang Disewa</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ number_format($produks->sum('stok_disewa')) }}</p>
+                    <p class="text-2xl font-bold text-white">{{ number_format($produks->sum('stok_disewa')) }}</p>
                 </div>
             </div>
         </div>

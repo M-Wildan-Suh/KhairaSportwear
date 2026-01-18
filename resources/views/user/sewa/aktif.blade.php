@@ -3,7 +3,7 @@
 @section('title', 'Sewa Aktif - SportWear')
 
 @section('content')
-<div class="py-8">
+<div class="container py-8">
     <!-- Breadcrumb -->
     <div class="container mx-auto px-4 lg:px-8">
         <nav class="flex items-center text-sm text-gray-600">
@@ -172,11 +172,11 @@
             <p class="text-gray-600 mb-6">Mulai sewa alat olahraga favorit Anda</p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                 <a href="{{ route('user.sewa.index') }}" 
-                   class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors">
+                   class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-primary-dark transition-colors">
                     <i class="fas fa-calendar-plus"></i>
                     <span>Sewa Sekarang</span>
                 </a>
-                <a href="{{ route('user.produk.index') }}" 
+                <a href="{{ route('produk.index') }}" 
                    class="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors">
                     <i class="fas fa-store"></i>
                     <span>Lihat Katalog</span>
@@ -248,8 +248,7 @@
                                 <h4 class="font-semibold text-gray-900 mb-4">Perhitungan Denda</h4>
                                 <div id="fineCalculation" class="space-y-3">
                                     <div class="text-center py-8">
-                                        <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                        <p class="text-gray-600">Menghitung denda...</p>
+                                        <p class="text-gray-600">Pilih tanggal kembali dan kondisi alat untuk menghitung denda</p>
                                     </div>
                                 </div>
                             </div>
@@ -369,10 +368,14 @@ function showReturnModal(sewaId) {
     // Set default return date to today
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('return_tanggal_kembali').value = today;
-    document.getElementById('return_tanggal_kembali').min = today;
     
-    // Calculate fines
-    calculateFines(sewaId);
+    // Reset form
+    document.getElementById('return_kondisi_alat').value = '';
+    document.getElementById('fineCalculation').innerHTML = `
+        <div class="text-center py-8">
+            <p class="text-gray-600">Pilih tanggal kembali dan kondisi alat untuk menghitung denda</p>
+        </div>
+    `;
     
     document.getElementById('returnModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -394,19 +397,45 @@ function closeExtendModal() {
     document.body.style.overflow = 'auto';
 }
 
-// Calculate fines
-async function calculateFines(sewaId) {
-    const tanggalKembali = document.getElementById('return_tanggal_kembali').value;
-    const kondisiAlat = document.getElementById('return_kondisi_alat').value;
+// Hitung denda saat input berubah
+function attachCalculationEvents() {
+    const tanggalInput = document.getElementById('return_tanggal_kembali');
+    const kondisiSelect = document.getElementById('return_kondisi_alat');
     
-    if (!tanggalKembali || !kondisiAlat) return;
+    const calculateHandler = () => {
+        const sewaId = document.getElementById('return_sewa_id').value;
+        const tanggalKembali = tanggalInput.value;
+        const kondisiAlat = kondisiSelect.value;
+        
+        if (sewaId && tanggalKembali && kondisiAlat) {
+            calculateFines(sewaId, tanggalKembali, kondisiAlat);
+        }
+    };
+    
+    tanggalInput?.addEventListener('change', calculateHandler);
+    kondisiSelect?.addEventListener('change', calculateHandler);
+}
+
+// Fungsi hitung denda
+async function calculateFines(sewaId, tanggalKembali, kondisiAlat) {
+    const fineCalculationDiv = document.getElementById('fineCalculation');
+    
+    // Tampilkan loading
+    fineCalculationDiv.innerHTML = `
+        <div class="text-center py-8">
+            <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-gray-600">Menghitung denda...</p>
+        </div>
+    `;
     
     try {
-        const response = await fetch('/user/sewa/calculate-denda', {
+        // PERBAIKAN: Gunakan URL langsung atau route dengan nama yang benar
+        const response = await fetch("{{ route('user.sewa.calculate-denda') }}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
             },
             body: JSON.stringify({
                 sewa_id: sewaId,
@@ -424,24 +453,28 @@ async function calculateFines(sewaId) {
             if (fines.total_denda > 0) {
                 fineHtml = `
                     <div class="space-y-3">
+                        ${fines.keterlambatan_hari > 0 ? `
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Keterlambatan:</span>
-                            <span class="font-medium">${fines.keterlambatan_hari} hari × Rp ${fines.tarif_denda_per_hari.toLocaleString()}</span>
+                            <span class="font-medium">${fines.keterlambatan_hari} hari × ${fines.formatted.tarif_denda_per_hari}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Denda Keterlambatan:</span>
-                            <span class="text-red-600 font-medium">Rp ${fines.denda_keterlambatan.toLocaleString()}</span>
+                            <span class="text-red-600 font-medium">${fines.formatted.denda_keterlambatan}</span>
                         </div>
+                        ` : ''}
+                        
                         ${fines.denda_kerusakan > 0 ? `
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Denda Kerusakan:</span>
-                            <span class="text-red-600 font-medium">Rp ${fines.denda_kerusakan.toLocaleString()}</span>
+                            <span class="text-red-600 font-medium">${fines.formatted.denda_kerusakan}</span>
                         </div>
                         ` : ''}
+                        
                         <div class="pt-3 border-t border-gray-300">
                             <div class="flex justify-between items-center">
                                 <span class="font-semibold text-gray-900">Total Denda:</span>
-                                <span class="text-xl font-bold text-red-600">Rp ${fines.total_denda.toLocaleString()}</span>
+                                <span class="text-xl font-bold text-red-600">${fines.formatted.total_denda}</span>
                             </div>
                         </div>
                     </div>
@@ -457,138 +490,157 @@ async function calculateFines(sewaId) {
                 `;
             }
             
-            document.getElementById('fineCalculation').innerHTML = fineHtml;
+            fineCalculationDiv.innerHTML = fineHtml;
+        } else {
+            fineCalculationDiv.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
+                    </div>
+                    <p class="text-red-600 font-medium">${data.message || 'Gagal menghitung denda'}</p>
+                </div>
+            `;
         }
     } catch (error) {
         console.error('Error:', error);
-        document.getElementById('fineCalculation').innerHTML = `
+        fineCalculationDiv.innerHTML = `
             <div class="text-center py-4">
                 <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
                     <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
                 </div>
-                <p class="text-red-600 font-medium">Gagal menghitung denda</p>
+                <p class="text-red-600 font-medium">Terjadi kesalahan jaringan</p>
             </div>
         `;
     }
 }
 
-// Event listeners for fine calculation
-document.getElementById('return_tanggal_kembali')?.addEventListener('change', function() {
-    const sewaId = document.getElementById('return_sewa_id').value;
-    if (sewaId) calculateFines(sewaId);
-});
-
-document.getElementById('return_kondisi_alat')?.addEventListener('change', function() {
-    const sewaId = document.getElementById('return_sewa_id').value;
-    if (sewaId) calculateFines(sewaId);
-});
-
-// Return form submission
-document.getElementById('returnForm')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
+// Form submission untuk pengembalian
+document.addEventListener('DOMContentLoaded', function() {
+    attachCalculationEvents();
     
-    const formData = new FormData(this);
-    const sewaId = formData.get('sewa_id');
-    
-    if (!confirm('Ajukan pengembalian alat?')) return;
-    
-    const submitButton = this.querySelector('button[type="submit"]');
-    const originalContent = submitButton.innerHTML;
-    
-    // Show loading
-    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengajukan...';
-    submitButton.disabled = true;
-    
-    try {
-        const response = await fetch(`/user/sewa/${sewaId}/pengembalian`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                tanggal_kembali: formData.get('tanggal_kembali'),
-                kondisi_alat: formData.get('kondisi_alat'),
-                catatan_kondisi: formData.get('catatan_kondisi')
-            })
-        });
+    document.getElementById('returnForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        const data = await response.json();
+        const form = this;
+        const sewaId = document.getElementById('return_sewa_id').value;
+        const tanggalKembali = document.getElementById('return_tanggal_kembali').value;
+        const kondisiAlat = document.getElementById('return_kondisi_alat').value;
+        const catatanKondisi = document.querySelector('textarea[name="catatan_kondisi"]').value;
         
-        // Restore button
-        submitButton.innerHTML = originalContent;
-        submitButton.disabled = false;
+        if (!confirm('Apakah Anda yakin ingin mengajukan pengembalian?')) return;
         
-        if (data.success) {
-            closeReturnModal();
-            showToast('success', data.message);
-            setTimeout(() => window.location.href = data.redirect, 1500);
-        } else {
-            showToast('error', data.message);
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalContent = submitButton.innerHTML;
+        
+        // Tampilkan loading
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengajukan...';
+        submitButton.disabled = true;
+        
+        try {
+            const response = await fetch(`/user/sewa/${sewaId}/pengembalian`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    tanggal_kembali: tanggalKembali,
+                    kondisi_alat: kondisiAlat,
+                    catatan_kondisi: catatanKondisi
+                })
+            });
+            
+            const data = await response.json();
+            
+            // Kembalikan tombol ke keadaan semula
+            submitButton.innerHTML = originalContent;
+            submitButton.disabled = false;
+            
+            if (data.success) {
+                showToast('success', data.message);
+                closeReturnModal();
+                
+                // Redirect setelah 1.5 detik
+                setTimeout(() => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                }, 1500);
+            } else {
+                showToast('error', data.message);
+            }
+        } catch (error) {
+            // Kembalikan tombol ke keadaan semula
+            submitButton.innerHTML = originalContent;
+            submitButton.disabled = false;
+            
+            console.error('Error:', error);
+            showToast('error', 'Terjadi kesalahan jaringan');
         }
-    } catch (error) {
-        // Restore button
-        submitButton.innerHTML = originalContent;
-        submitButton.disabled = false;
+    });
+    
+    // Form submission untuk perpanjangan
+    document.getElementById('extendForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        console.error('Error:', error);
-        showToast('error', 'Terjadi kesalahan');
-    }
-});
-
-// Extend form submission
-document.getElementById('extendForm')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const sewaId = formData.get('sewa_id');
-    
-    if (!confirm('Perpanjang sewa ini?')) return;
-    
-    const submitButton = this.querySelector('button[type="submit"]');
-    const originalContent = submitButton.innerHTML;
-    
-    // Show loading
-    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengajukan...';
-    submitButton.disabled = true;
-    
-    try {
-        const response = await fetch(`/user/sewa/${sewaId}/extend`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                tambahan_hari: formData.get('tambahan_hari'),
-                alasan: formData.get('alasan')
-            })
-        });
+        const form = this;
+        const sewaId = document.getElementById('extend_sewa_id').value;
+        const tambahanHari = document.querySelector('input[name="tambahan_hari"]').value;
+        const alasan = document.querySelector('textarea[name="alasan"]').value;
         
-        const data = await response.json();
+        if (!confirm('Perpanjang sewa ini?')) return;
         
-        // Restore button
-        submitButton.innerHTML = originalContent;
-        submitButton.disabled = false;
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalContent = submitButton.innerHTML;
         
-        if (data.success) {
-            closeExtendModal();
-            showToast('success', data.message);
-            setTimeout(() => window.location.href = data.redirect, 1500);
-        } else {
-            showToast('error', data.message);
+        // Show loading
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengajukan...';
+        submitButton.disabled = true;
+        
+        try {
+            const response = await fetch(`/user/sewa/${sewaId}/extend`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    tambahan_hari: tambahanHari,
+                    alasan: alasan
+                })
+            });
+            
+            const data = await response.json();
+            
+            // Restore button
+            submitButton.innerHTML = originalContent;
+            submitButton.disabled = false;
+            
+            if (data.success) {
+                closeExtendModal();
+                showToast('success', data.message);
+                setTimeout(() => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                }, 1500);
+            } else {
+                showToast('error', data.message);
+            }
+        } catch (error) {
+            // Restore button
+            submitButton.innerHTML = originalContent;
+            submitButton.disabled = false;
+            
+            console.error('Error:', error);
+            showToast('error', 'Terjadi kesalahan jaringan');
         }
-    } catch (error) {
-        // Restore button
-        submitButton.innerHTML = originalContent;
-        submitButton.disabled = false;
-        
-        console.error('Error:', error);
-        showToast('error', 'Terjadi kesalahan');
-    }
+    });
 });
 
-// Toast notification
+// Toast notification function
 function showToast(type, message) {
     const toast = document.createElement('div');
     toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in-right ${type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`;
@@ -596,8 +648,7 @@ function showToast(type, message) {
     document.body.appendChild(toast);
     
     setTimeout(() => {
-        toast.classList.add('animate-slide-out-right');
-        setTimeout(() => toast.remove(), 300);
+        toast.remove();
     }, 3000);
 }
 

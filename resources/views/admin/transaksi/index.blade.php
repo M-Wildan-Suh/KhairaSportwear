@@ -7,7 +7,7 @@
 @section('breadcrumbs')
     @php
         $breadcrumbs = [
-            ['url' => route('admin.dashboard'), 'label' => 'Dashboard'],
+            ['url' => route('admin.dashboard'), 'label' => 'Transaksi'],
             ['label' => 'Transaksi Penjualan']
         ];
     @endphp

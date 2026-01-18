@@ -102,24 +102,24 @@
                     </thead>
                     <tbody>
                         @foreach($mostRentedProducts as $product)
-                        <tr class="border-t border-gray-200 hover:bg-gray-50">
-                            <td class="p-3">
+                        <tr class="border-t border-gray-200">
+                            <td class="p-3 text-white">
                                 <div class="flex items-center">
                                     @if($product->gambar)
                                     <img src="{{ asset('storage/' . $product->gambar) }}" alt="{{ $product->nama }}" 
                                          class="h-10 w-10 rounded-lg object-cover mr-3">
                                     @endif
                                     <div>
-                                        <div class="font-medium">{{ $product->nama }}</div>
-                                        <div class="text-sm text-gray-500">Harga: Rp {{ number_format($product->harga_sewa_harian, 0, ',', '.') }}/hari</div>
+                                        <div class="font-medium text-white">{{ $product->nama }}</div>
+                                        <div class="text-sm text-white">Harga: Rp {{ number_format($product->harga_sewa_harian, 0, ',', '.') }}/hari</div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="p-3">{{ $product->kategori->nama ?? '-' }}</td>
-                            <td class="p-3">{{ $product->rental_count }}</td>
-                            <td class="p-3">{{ $product->total_duration }} hari</td>
-                            <td class="p-3 font-semibold">Rp {{ number_format($product->total_revenue, 0, ',', '.') }}</td>
-                            <td class="p-3">
+                            <td class="p-3 text-white">{{ $product->kategori->nama ?? '-' }}</td>
+                            <td class="p-3 text-white">{{ $product->rental_count }}</td>
+                            <td class="p-3 text-white">{{ $product->total_duration }} hari</td>
+                            <td class="p-3 text-white font-semibold">Rp {{ number_format($product->total_revenue, 0, ',', '.') }}</td>
+                            <td class="p-3 text-white">
                                 @if($product->stok_tersedia > 0)
                                 <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
                                     {{ $product->stok_tersedia }} tersedia
@@ -142,7 +142,7 @@
     <!-- Rental Details -->
     <div class="mb-8">
         <div class="bg-white p-6 rounded-lg shadow">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Detail Penyewaan</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">Detail Penyewaan</h3>
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse">
                     <thead>
@@ -159,28 +159,28 @@
                     </thead>
                     <tbody>
                         @foreach($sewas as $sewa)
-                        <tr class="border-t border-gray-200 hover:bg-gray-50">
-                            <td class="p-3 font-medium text-purple-600">
+                        <tr class="border-t border-gray-200">
+                            <td class="p-3 font-medium text-blue-600">
                                 <a href="{{ route('admin.sewa.show', $sewa->id) }}" class="hover:underline">
                                     {{ $sewa->kode_sewa }}
                                 </a>
                             </td>
-                            <td class="p-3">{{ $sewa->tanggal_mulai->format('d/m/Y') }}</td>
-                            <td class="p-3">{{ $sewa->user->name ?? 'Guest' }}</td>
-                            <td class="p-3">
-                                <div class="flex items-center">
+                            <td class="p-3 text-white">{{ $sewa->tanggal_mulai->format('d/m/Y') }}</td>
+                            <td class="p-3 text-white">{{ $sewa->user->name ?? 'Guest' }}</td>
+                            <td class="p-3 text-white">
+                                <div class="flex items-center text-white">
                                     @if($sewa->produk->gambar)
                                     <img src="{{ asset('storage/' . $sewa->produk->gambar) }}" alt="{{ $sewa->produk->nama }}" 
-                                         class="h-8 w-8 rounded-lg object-cover mr-2">
+                                         class="h-8 w-8 rounded-lg object-cover mr-2 text-white">
                                     @endif
                                     <span>{{ $sewa->produk->nama }}</span>
                                 </div>
                             </td>
-                            <td class="p-3">
+                            <td class="p-3 text-white">
                                 {{ $sewa->durasi }} hari
                             </td>
-                            <td class="p-3 font-semibold">Rp {{ number_format($sewa->total_harga, 0, ',', '.') }}</td>
-                            <td class="p-3">
+                            <td class="p-3 font-semibold text-white">Rp {{ number_format($sewa->total_harga, 0, ',', '.') }}</td>
+                            <td class="p-3 text-white">
                                 <span class="px-2 py-1 rounded text-xs font-bold 
                                     @if($sewa->status == 'selesai') bg-green-100 text-green-800
                                     @elseif($sewa->status == 'aktif') bg-blue-100 text-blue-800
@@ -189,7 +189,7 @@
                                     {{ strtoupper($sewa->status) }}
                                 </span>
                             </td>
-                            <td class="p-3 {{ $sewa->hitungKeterlambatan() > 0 ? 'text-red-600 font-bold' : '' }}">
+                            <td class="p-3 text-white{{ $sewa->hitungKeterlambatan() > 0 ? 'text-red-600 font-bold' : '' }}">
                                 {{ $sewa->tanggal_kembali_rencana->format('d/m/Y') }}
                                 @if($sewa->hitungKeterlambatan() > 0)
                                 <br><small class="text-red-500">(terlambat {{ $sewa->hitungKeterlambatan() }} hari)</small>
@@ -211,7 +211,7 @@
     </div>
     
     <!-- Overdue Rentals -->
-    @if($overdueRentals->count() > 0)
+   @if($overdueRentals > 0)
     <div class="mb-8">
         <div class="bg-red-50 border border-red-200 rounded-lg p-6">
             <h3 class="text-lg font-semibold text-red-900 mb-4">
@@ -255,64 +255,13 @@
     </div>
     @endif
     
-    <!-- Summary -->
-    <div class="bg-gray-50 p-6 rounded-lg">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Analisis Penyewaan</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <h4 class="font-medium text-gray-700 mb-2">Statistik Durasi</h4>
-                <ul class="space-y-2">
-                    <li class="flex justify-between">
-                        <span>Durasi Sewa Terpendek:</span>
-                        <span class="font-semibold">{{ $durationAnalysis['min_duration'] ?? 0 }} hari</span>
-                    </li>
-                    <li class="flex justify-between">
-                        <span>Durasi Sewa Terpanjang:</span>
-                        <span class="font-semibold">{{ $durationAnalysis['max_duration'] ?? 0 }} hari</span>
-                    </li>
-                    <li class="flex justify-between">
-                        <span>Rata-rata Durasi Sewa:</span>
-                        <span>{{ number_format($durationAnalysis['average_duration'] ?? 0, 1) }} hari</span>
-                    </li>
-                    <li class="flex justify-between">
-                        <span>Modus Durasi Sewa:</span>
-                        <span>{{ $durationAnalysis['most_common_duration'] ?? 0 }} hari</span>
-                    </li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-medium text-gray-700 mb-2">Analisis Keuangan</h4>
-                <ul class="space-y-2">
-                    <li class="flex justify-between">
-                        <span>Pendapatan Sewa/Hari:</span>
-                        <span class="font-semibold">Rp {{ number_format($financialAnalysis['revenue_per_day'] ?? 0, 0, ',', '.') }}</span>
-                    </li>
-                    <li class="flex justify-between">
-                        <span>Rata-rata Sewa/Transaksi:</span>
-                        <span>Rp {{ number_format($financialAnalysis['average_rental_value'] ?? 0, 0, ',', '.') }}</span>
-                    </li>
-                    <li class="flex justify-between">
-                        <span>Total Denda Diterima:</span>
-                        <span class="font-semibold">Rp {{ number_format($financialAnalysis['total_penalties'] ?? 0, 0, ',', '.') }}</span>
-                    </li>
-                    <li class="flex justify-between">
-                        <span>Tingkat Pengembalian Tepat Waktu:</span>
-                        <span class="font-bold {{ ($financialAnalysis['on_time_return_rate'] ?? 0) >= 90 ? 'text-green-600' : 'text-red-600' }}">
-                            {{ number_format($financialAnalysis['on_time_return_rate'] ?? 0, 1) }}%
-                        </span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
     <!-- Recommendations -->
     <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <h4 class="font-semibold text-blue-900 mb-2">
             <i class="fas fa-lightbulb mr-2"></i>Rekomendasi
         </h4>
         <ul class="list-disc pl-5 text-sm text-blue-800 space-y-1">
-            @if($overdueRentals->count() > 0)
+            @if($overdueRentals > 0)
             <li>Segera hubungi {{ $overdueRentals->count() }} customer yang terlambat mengembalikan barang.</li>
             @endif
             @if(($statusCounts['ongoing'] ?? 0) > 10)

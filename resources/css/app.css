@@ -24,3 +24,60 @@
         opacity: 0;
     }
 }
+
+/* public/css/product-show.css */
+.thumbnail-item.active {
+    border: 2px solid var(--primary);
+}
+
+.price-option.active {
+    border-color: var(--primary);
+    background-color: rgba(26, 54, 93, 0.05);
+}
+
+.tab-button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.faq-question.active i {
+    transform: rotate(180deg);
+}
+
+.duration-option input:checked + div {
+    border-color: var(--primary);
+    background-color: rgba(26, 54, 93, 0.05);
+}
+
+.size-option.selected {
+    border-color: var(--primary);
+    background-color: rgba(26, 54, 93, 0.1);
+    color: var(--primary);
+}
+
+/* Transition effects */
+.tab-content {
+    transition: opacity 0.3s ease;
+}
+
+.tab-content.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tab-content.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .price-option {
+        padding: 1rem 0.5rem;
+    }
+    
+    .tab-button {
+        padding: 1rem 0.75rem;
+        font-size: 0.875rem;
+    }
+}

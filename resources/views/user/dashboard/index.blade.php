@@ -8,8 +8,8 @@
     <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-secondary mb-8 p-8 text-white" data-aos="fade-down">
         <div class="flex flex-col md:flex-row items-center">
             <div class="md:w-2/3">
-                <h1 class="text-3xl md:text-4xl font-bold mb-4">Selamat Datang, <span class="text-yellow-300">{{ $user->name }}</span>! 👋</h1>
-                <p class="text-lg opacity-90 mb-0">Apa yang ingin Anda lakukan hari ini? Mari mulai perjalanan olahraga Anda!</p>
+                <h1 class="text-3xl md:text-4xl font-bold mb-4 text-black">Selamat Datang, <span class="text-yellow-300">{{ $user->name }}</span>! 👋</h1>
+                <p class="text-lg opacity-90 mb-0 text-black">Apa yang ingin Anda lakukan hari ini? Mari mulai perjalanan olahraga Anda!</p>
             </div>
             <div class="md:w-1/3 text-right mt-6 md:mt-0">
                 <div class="animate-float">
@@ -69,6 +69,75 @@
             </div>
         </div>
     </div>
+
+    {{-- NEW: Alert untuk sewa terlambat --}}
+@if($lateRentals->count() > 0)
+<div class="mb-8" data-aos="fade-up" data-aos-delay="500">
+    <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl p-6 text-white shadow-lg">
+        <div class="flex flex-col md:flex-row items-center justify-between">
+            <div class="flex items-center mb-4 md:mb-0">
+                <div class="bg-white bg-opacity-20 rounded-xl p-3 mr-4">
+                    <i class="fas fa-exclamation-triangle text-2xl"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold">Sewa Terlambat!</h4>
+                    <p class="opacity-90">Anda memiliki {{ $lateRentals->count() }} sewa yang melewati batas waktu pengembalian</p>
+                </div>
+            </div>
+            <a href="{{ route('user.sewa.terlambat') }}" 
+               class="bg-white text-red-600 hover:bg-red-50 px-6 py-3 rounded-lg font-bold transition-colors duration-300">
+                Lihat Detail
+            </a>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- NEW: Additional Stats Cards --}}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    {{-- Sewa Bulan Ini --}}
+    <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-purple-500" 
+         data-aos="fade-up" data-aos-delay="100">
+        <div class="flex items-center">
+            <div class="bg-purple-100 rounded-xl p-3 mr-4">
+                <i class="fas fa-chart-line text-purple-500 text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold mb-1">{{ $dashboardStats['total_sewa'] }}</h3>
+                <p class="text-gray-600 text-sm">Sewa Bulan Ini</p>
+            </div>
+        </div>
+    </div>
+    
+    {{-- Total Denda --}}
+    <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-red-500" 
+         data-aos="fade-up" data-aos-delay="200">
+        <div class="flex items-center">
+            <div class="bg-red-100 rounded-xl p-3 mr-4">
+                <i class="fas fa-money-bill-wave text-red-500 text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold mb-1">Rp {{ $dashboardStats['total_denda'] ?? 0 }}
+</h3>
+                <p class="text-gray-600 text-sm">Total Denda</p>
+            </div>
+        </div>
+    </div>
+    
+    {{-- Menunggu Verifikasi --}}
+    <div class="bg-white rounded-2xl p-6 shadow-md border-l-4 border-orange-500" 
+         data-aos="fade-up" data-aos-delay="300">
+        <div class="flex items-center">
+            <div class="bg-orange-100 rounded-xl p-3 mr-4">
+                <i class="fas fa-clock text-orange-500 text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold mb-1">{{ $pendingReturns->count() }}</h3>
+                <p class="text-gray-600 text-sm">Menunggu Verifikasi</p>
+            </div>
+        </div>
+    </div>
+</div>
     
     <!-- Main Content -->
     <div class="flex flex-col lg:flex-row gap-8">
@@ -125,7 +194,7 @@
                         <i class="fas fa-receipt text-5xl text-gray-300 mb-4"></i>
                         <h5 class="text-gray-500 font-medium mb-2">Belum ada transaksi</h5>
                         <p class="text-gray-400 mb-4">Mulai belanja untuk melihat transaksi Anda</p>
-                        <a href="{{ route('user.produk.index') }}" class="btn-primary inline-flex items-center">
+                        <a href="{{ route('produk.index') }}" class="btn-primary inline-flex items-center">
                             <i class="fas fa-shopping-cart mr-2"></i> Belanja Sekarang
                         </a>
                     </div>
@@ -199,7 +268,7 @@
                         <i class="fas fa-calendar-alt text-5xl text-gray-300 mb-4"></i>
                         <h5 class="text-gray-500 font-medium mb-2">Tidak ada sewa aktif</h5>
                         <p class="text-gray-400 mb-4">Mulai sewa alat olahraga favorit Anda</p>
-                        <a href="{{ route('user.sewa.index') }}" class="btn-primary inline-flex items-center">
+                        <a href="{{ route('sewa.index') }}" class="btn-primary inline-flex items-center">
                             <i class="fas fa-calendar-plus mr-2"></i> Sewa Sekarang
                         </a>
                     </div>
@@ -264,6 +333,76 @@
                     @endif
                 </div>
             </div>
+
+            {{-- NEW: Late Rentals Mini List --}}
+@if($lateRentals->count() > 0)
+<div class="bg-white rounded-2xl shadow-md mb-6" data-aos="fade-left">
+    <div class="px-6 pt-6">
+        <h5 class="text-xl font-bold mb-6 text-red-600">
+            <i class="fas fa-exclamation-circle mr-2"></i>Sewa Terlambat
+        </h5>
+    </div>
+    <div class="px-6 pb-6">
+        <div class="space-y-3">
+            @foreach($lateRentals as $rental)
+            <div class="flex justify-between items-center py-3 border-b border-red-100 last:border-0">
+                <div class="flex-1">
+                    <h6 class="text-sm font-medium text-gray-800">{{ $rental->produk->nama }}</h6>
+                    <p class="text-xs text-red-500">
+                        <i class="fas fa-clock mr-1"></i>
+                        Terlambat {{ $rental->hitungKeterlambatan() }} hari
+                    </p>
+                </div>
+                <div class="text-right">
+                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-bold">
+                        Rp {{ number_format($rental->total_harga * 0.1 * $rental->hitungKeterlambatan(), 0, ',', '.') }}
+                    </span>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        <div class="mt-4">
+            <a href="{{ route('user.sewa.terlambat') }}" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                <i class="fas fa-arrow-right mr-1"></i>Lihat Semua
+            </a>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- NEW: Pending Returns --}}
+@if($pendingReturns->count() > 0)
+<div class="bg-white rounded-2xl shadow-md mb-6" data-aos="fade-left" data-aos-delay="100">
+    <div class="px-6 pt-6">
+        <h5 class="text-xl font-bold mb-6 text-orange-600">
+            <i class="fas fa-hourglass-half mr-2"></i>Menunggu Verifikasi
+        </h5>
+    </div>
+    <div class="px-6 pb-6">
+        <div class="space-y-3">
+            @foreach($pendingReturns as $rental)
+            <div class="flex justify-between items-center py-3 border-b border-orange-100 last:border-0">
+                <div>
+                    <h6 class="text-sm font-medium text-gray-800">{{ $rental->produk->nama }}</h6>
+                    <p class="text-xs text-orange-500">
+                        <i class="fas fa-calendar-check mr-1"></i>
+                        Dikembalikan {{ $rental->tanggal_kembali_aktual ? $rental->tanggal_kembali_aktual->format('d/m') : '-' }}
+                    </p>
+                </div>
+                <span class="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
+                    Menunggu
+                </span>
+            </div>
+            @endforeach
+        </div>
+        <div class="mt-4">
+            <a href="{{ route('user.sewa.menunggu-verifikasi') }}" class="text-orange-600 hover:text-orange-800 font-medium text-sm">
+                <i class="fas fa-arrow-right mr-1"></i>Lihat Semua
+            </a>
+        </div>
+    </div>
+</div>
+@endif
             
             <!-- Quick Actions -->
             <div class="bg-white rounded-2xl shadow-md mb-6" data-aos="fade-left" data-aos-delay="200">
@@ -283,13 +422,13 @@
                             @endif
                         </a>
                         
-                        <a href="{{ route('user.produk.index') }}" 
+                        <a href="{{ route('produk.index') }}" 
                            class="btn-outline-success flex flex-col items-center justify-center p-4 rounded-xl hover:shadow-md transition-all duration-300">
                             <i class="fas fa-store text-2xl mb-2"></i>
                             <span>Belanja</span>
                         </a>
                         
-                        <a href="{{ route('user.sewa.index') }}" 
+                        <a href="{{ route('sewa.index') }}" 
                            class="btn-outline-info flex flex-col items-center justify-center p-4 rounded-xl hover:shadow-md transition-all duration-300">
                             <i class="fas fa-calendar-alt text-2xl mb-2"></i>
                             <span>Sewa</span>

@@ -181,7 +181,7 @@
 
                 <!-- Continue Shopping -->
                 <div class="mt-8 text-center">
-                    <a href="{{ route('user.produk.index') }}" 
+                    <a href="{{ route('produk.index') }}" 
                        class="inline-flex items-center px-6 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-300">
                         <i class="fas fa-arrow-left mr-3"></i>
                         <span>Lanjutkan Belanja</span>
@@ -283,12 +283,12 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-4">Keranjang Anda Kosong</h2>
             <p class="text-gray-600 text-lg mb-8">Tambahkan produk favorit Anda ke keranjang untuk memulai belanja</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('user.produk.index') }}" 
-                   class="inline-flex items-center justify-center px-8 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-300 gap-3">
+                <a href="{{ route('produk.index') }}" 
+                   class="inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-300 gap-3">
                     <i class="fas fa-store"></i>
-                    <span>Jelajahi Produk</span>
+                    <span >Jelajahi Produk</span>
                 </a>
-                <a href="{{ route('user.sewa.index') }}" 
+                <a href="{{ route('sewa.index') }}" 
                    class="inline-flex items-center justify-center px-8 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 gap-3">
                     <i class="fas fa-calendar-check"></i>
                     <span>Sewa Peralatan</span>
@@ -301,7 +301,7 @@
         <div class="mt-16">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-900">Rekomendasi untuk Anda</h2>
-                <a href="{{ route('user.produk.index') }}" class="text-primary font-semibold hover:text-primary-dark flex items-center gap-2">
+                <a href="{{ route('produk.index') }}" class="text-primary font-semibold hover:text-primary-dark flex items-center gap-2">
                     <span>Lihat Semua</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>

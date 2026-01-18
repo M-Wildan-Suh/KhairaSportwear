@@ -82,7 +82,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Sewa</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ number_format($totalSewa) }}</p>
+                    <p class="text-2xl font-bold text-white">{{ number_format($totalSewa) }}</p>
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-600">Sewa Aktif</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ number_format($aktifCount) }}</p>
+                    <p class="text-2xl font-bold text-white">{{ number_format($aktifCount) }}</p>
                 </div>
             </div>
         </div>
@@ -106,7 +106,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-600">Terlambat</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ number_format($terlambatCount) }}</p>
+                    <p class="text-2xl font-bold text-white">{{ number_format($terlambatCount) }}</p>
                 </div>
             </div>
         </div>
@@ -118,7 +118,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-600">Pendapatan</p>
-                    <p class="text-2xl font-bold text-gray-800">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
+                    <p class="text-2xl font-bold text-white">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
@@ -269,14 +269,6 @@
                                         <i class="fas fa-eye text-sm"></i>
                                     </a>
                                     
-                                    @if($sewa->status == 'aktif')
-                                        <button onclick="openPengembalianModal({{ $sewa->id }}, '{{ $sewa->kode_sewa }}')"
-                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors"
-                                                title="Pengembalian">
-                                            <i class="fas fa-undo text-sm"></i>
-                                        </button>
-                                    @endif
-                                    
                                     @if($sewa->denda > 0)
                                         <button onclick="showDendaInfo({{ $sewa->id }}, {{ $sewa->denda }})"
                                                 class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 transition-colors"
@@ -294,7 +286,7 @@
                                     <div class="mx-auto w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-4">
                                         <i class="fas fa-calendar-alt text-gray-400 text-3xl"></i>
                                     </div>
-                                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Belum ada transaksi sewa</h3>
+                                    <h3 class="text-lg font-semibold text-white mb-2">Belum ada transaksi sewa</h3>
                                     <p class="text-gray-600 mb-6 max-w-md mx-auto">Belum ada produk yang disewa oleh pelanggan.</p>
                                 </div>
                             </td>

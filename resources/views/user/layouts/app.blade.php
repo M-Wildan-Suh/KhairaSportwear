@@ -494,10 +494,10 @@
                     <a href="{{ route('home') }}" class="nav-link-sport {{ request()->routeIs('home') ? 'active' : '' }}">
                         <i class="fas fa-home mr-2"></i> Home
                     </a>
-                    <a href="{{ route('user.produk.index') }}" class="nav-link-sport {{ request()->routeIs('user.produk.*') ? 'active' : '' }}">
+                    <a href="{{ route('produk.index') }}" class="nav-link-sport {{ request()->routeIs('user.produk.*') ? 'active' : '' }}">
                         <i class="fas fa-store mr-2"></i> Produk
                     </a>
-                    <a href="{{ route('user.sewa.index') }}" class="nav-link-sport {{ request()->routeIs('user.sewa.*') ? 'active' : '' }}">
+                    <a href="{{ route('sewa.index') }}" class="nav-link-sport {{ request()->routeIs('user.sewa.*') ? 'active' : '' }}">
                         <i class="fas fa-calendar-alt mr-2"></i> Sewa
                     </a>
                     <a href="{{ route('user.transaksi.index') }}" class="nav-link-sport {{ request()->routeIs('user.transaksi.*') ? 'active' : '' }}">
@@ -572,10 +572,10 @@
                     <a href="{{ route('home') }}" class="mobile-nav-link {{ request()->routeIs('home') ? 'bg-blue-50 text-blue-600' : '' }}">
                         <i class="fas fa-home"></i> Home
                     </a>
-                    <a href="{{ route('user.produk.index') }}" class="mobile-nav-link {{ request()->routeIs('user.produk.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    <a href="{{ route('produk.index') }}" class="mobile-nav-link {{ request()->routeIs('user.produk.*') ? 'bg-blue-50 text-blue-600' : '' }}">
                         <i class="fas fa-store"></i> Produk
                     </a>
-                    <a href="{{ route('user.sewa.index') }}" class="mobile-nav-link {{ request()->routeIs('user.sewa.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    <a href="{{ route('sewa.index') }}" class="mobile-nav-link {{ request()->routeIs('user.sewa.*') ? 'bg-blue-50 text-blue-600' : '' }}">
                         <i class="fas fa-calendar-alt"></i> Sewa
                     </a>
                     <a href="{{ route('user.transaksi.index') }}" class="mobile-nav-link {{ request()->routeIs('user.transaksi.*') ? 'bg-blue-50 text-blue-600' : '' }}">
@@ -660,8 +660,8 @@
                     <h4 class="footer-title">Menu</h4>
                     <ul class="space-y-2 mt-3">
                         <li><a href="{{ route('home') }}" class="text-gray-300 hover:text-white transition-colors">Home</a></li>
-                        <li><a href="{{ route('user.produk.index') }}" class="text-gray-300 hover:text-white transition-colors">Produk</a></li>
-                        <li><a href="{{ route('user.sewa.index') }}" class="text-gray-300 hover:text-white transition-colors">Sewa</a></li>
+                        <li><a href="{{ route('produk.index') }}" class="text-gray-300 hover:text-white transition-colors">Produk</a></li>
+                        <li><a href="{{ route('sewa.index') }}" class="text-gray-300 hover:text-white transition-colors">Sewa</a></li>
                         <li><a href="{{ route('user.transaksi.index') }}" class="text-gray-300 hover:text-white transition-colors">Transaksi</a></li>
                     </ul>
                 </div>

@@ -28,6 +28,7 @@ class Sewa extends Model
 
     protected $fillable = [
         'transaksi_id',
+        'detail_transaksi_id',
         'user_id',
         'produk_id',
         'kode_sewa',
@@ -89,6 +90,12 @@ class Sewa extends Model
     {
         return $this->hasOne(Pengembalian::class);
     }
+
+        public function detailTransaksi()
+    {
+        return $this->belongsTo(DetailTransaksi::class);
+    }
+
 
     /* ================= KODE SEWA ================= */
     public static function generateKodeSewa()
@@ -256,7 +263,227 @@ class Sewa extends Model
     }
 
     // ================= BUSINESS LOGIC =================
-    
+        /**
+     * Hitung denda berdasarkan tanggal kembali dan kondisi alat
+     *
+     * @param string $tanggalKembali
+     * @param string $kondisiAlat
+     * @param float|null $tarifDendaPerHari
+     * @return array
+     */
+    public function hitungDenda($tanggalKembali, $kondisiAlat, $tarifDendaPerHari = null)
+    {
+        Log::debug('Sewa::hitungDenda dipanggil', [
+            'sewa_id' => $this->id,
+            'tanggal_kembali' => $tanggalKembali,
+            'kondisi_alat' => $kondisiAlat,
+            'current_status' => $this->status
+        ]);
+
+        // Validasi status
+        if ($this->status !== self::STATUS_AKTIF) {
+            throw new \Exception('Hanya sewa aktif yang dapat dihitung dendanya. Status saat ini: ' . $this->status);
+        }
+
+        // Parse tanggal
+        $tanggalKembaliDate = Carbon::parse($tanggalKembali);
+        $tanggalMulai = Carbon::parse($this->tanggal_mulai);
+        $tanggalKembaliRencana = Carbon::parse($this->tanggal_kembali_rencana);
+
+        // Validasi tanggal kembali
+        if ($tanggalKembaliDate->lt($tanggalMulai)) {
+            throw new \Exception('Tanggal kembali tidak boleh sebelum tanggal mulai sewa.');
+        }
+
+        // Hitung keterlambatan
+        $keterlambatan = 0;
+        if ($tanggalKembaliDate->gt($tanggalKembaliRencana)) {
+            $keterlambatan = $tanggalKembaliDate->diffInDays($tanggalKembaliRencana);
+        }
+
+        // Dapatkan tarif denda
+        if (is_null($tarifDendaPerHari)) {
+            $tarifDendaPerHari = Konfigurasi::getValue('denda_per_hari', 10000);
+        }
+
+        // Hitung denda keterlambatan
+        $dendaKeterlambatan = $keterlambatan * $tarifDendaPerHari;
+
+        // Hitung denda kerusakan
+        $dendaKerusakan = 0;
+        $hargaProduk = $this->getHargaProduk();
+
+        if ($kondisiAlat !== 'baik') {
+            switch ($kondisiAlat) {
+                case 'rusak_ringan':
+                    $dendaKerusakan = $hargaProduk * 0.1; // 10%
+                    break;
+                case 'rusak_berat':
+                    $dendaKerusakan = $hargaProduk * 0.5; // 50%
+                    break;
+                case 'hilang':
+                    $dendaKerusakan = $hargaProduk; // 100%
+                    break;
+            }
+        }
+
+        $totalDenda = $dendaKeterlambatan + $dendaKerusakan;
+
+        Log::debug('Hasil perhitungan denda:', [
+            'keterlambatan_hari' => $keterlambatan,
+            'tarif_denda_per_hari' => $tarifDendaPerHari,
+            'denda_keterlambatan' => $dendaKeterlambatan,
+            'denda_kerusakan' => $dendaKerusakan,
+            'total_denda' => $totalDenda,
+            'harga_produk' => $hargaProduk
+        ]);
+
+        return [
+            'keterlambatan_hari' => $keterlambatan,
+            'tarif_denda_per_hari' => $tarifDendaPerHari,
+            'denda_keterlambatan' => $dendaKeterlambatan,
+            'denda_kerusakan' => $dendaKerusakan,
+            'total_denda' => $totalDenda,
+            'harga_produk' => $hargaProduk,
+            'formatted' => [
+                'denda_keterlambatan' => 'Rp ' . number_format($dendaKeterlambatan, 0, ',', '.'),
+                'denda_kerusakan' => 'Rp ' . number_format($dendaKerusakan, 0, ',', '.'),
+                'total_denda' => 'Rp ' . number_format($totalDenda, 0, ',', '.'),
+                'tarif_denda_per_hari' => 'Rp ' . number_format($tarifDendaPerHari, 0, ',', '.'),
+                'harga_produk' => 'Rp ' . number_format($hargaProduk, 0, ',', '.')
+            ]
+        ];
+    }
+
+    /**
+     * Get harga produk untuk perhitungan denda
+     * Cek field alternatif jika harga_beli null
+     *
+     * @return float
+     */
+    private function getHargaProduk()
+    {
+        $produk = $this->produk;
+        
+        if (!$produk) {
+            Log::warning('Produk tidak ditemukan untuk sewa: ' . $this->id);
+            return 0;
+        }
+
+        // Cek harga_beli
+        if (!is_null($produk->harga_beli) && $produk->harga_beli > 0) {
+            return (float) $produk->harga_beli;
+        }
+
+        Log::debug('harga_beli null, mencari alternatif untuk produk: ' . $produk->id);
+
+        // Cek field alternatif
+        if (isset($produk->harga_sewa) && $produk->harga_sewa > 0) {
+            // Asumsi: harga beli = 5x harga sewa
+            $harga = $produk->harga_sewa * 5;
+            Log::debug('Menggunakan harga_sewa * 5: ' . $harga);
+            return $harga;
+        }
+
+        if (isset($produk->harga) && $produk->harga > 0) {
+            Log::debug('Menggunakan harga: ' . $produk->harga);
+            return (float) $produk->harga;
+        }
+
+        // Default jika tidak ada harga
+        Log::warning('Menggunakan harga default untuk produk: ' . $produk->id);
+        return 1000000; // Rp 1.000.000
+    }
+
+    /**
+     * Proses pengembalian alat dengan perhitungan denda
+     *
+     * @param string $tanggalKembali
+     * @param string $kondisiAlat
+     * @param string|null $catatanKondisi
+     * @return Pengembalian
+     */
+    public function prosesPengembalian($tanggalKembali, $kondisiAlat, $catatanKondisi = null)
+    {
+        Log::debug('Sewa::prosesPengembalian dipanggil', [
+            'sewa_id' => $this->id,
+            'tanggal_kembali' => $tanggalKembali,
+            'kondisi_alat' => $kondisiAlat
+        ]);
+
+        // Validasi status
+        if ($this->status !== self::STATUS_AKTIF) {
+            throw new \Exception('Hanya sewa aktif yang dapat dikembalikan. Status saat ini: ' . $this->status);
+        }
+
+        // Hitung denda
+        $denda = $this->hitungDenda($tanggalKembali, $kondisiAlat);
+
+        // Parse tanggal
+        $tanggalKembaliDate = Carbon::parse($tanggalKembali);
+
+        // Mulai transaction
+        DB::beginTransaction();
+
+        try {
+            // Update status sewa
+            $this->update([
+                'status' => self::STATUS_MENUNGGU_VERIFIKASI_PENGEMBALIAN,
+                'tanggal_kembali_aktual' => $tanggalKembaliDate,
+                'denda' => $denda['total_denda']
+            ]);
+
+            // Buat record pengembalian
+            $pengembalian = Pengembalian::create([
+                'sewa_id' => $this->id,
+                'tanggal_kembali' => $tanggalKembaliDate,
+                'keterlambatan_hari' => $denda['keterlambatan_hari'],
+                'kondisi_alat' => $kondisiAlat,
+                'catatan_kondisi' => $catatanKondisi,
+                'denda_keterlambatan' => $denda['denda_keterlambatan'],
+                'denda_kerusakan' => $denda['denda_kerusakan'],
+                'total_denda' => $denda['total_denda'],
+                'status' => 'menunggu'
+            ]);
+
+            // Buat record denda jika ada
+            if ($denda['total_denda'] > 0) {
+                $dendaRecord = Denda::create([
+                    'pengembalian_id' => $pengembalian->id,
+                    'user_id' => $this->user_id,
+                    'tarif_denda_per_hari' => $denda['tarif_denda_per_hari'],
+                    'jumlah_hari_terlambat' => $denda['keterlambatan_hari'],
+                    'jumlah_denda' => $denda['total_denda'],
+                    'status_pembayaran' => 'belum_dibayar',
+                    'tanggal_jatuh_tempo' => Carbon::now()->addDays(7),
+                    'keterangan' => 'Denda keterlambatan dan kerusakan alat'
+                ]);
+
+                Log::debug('Denda created:', ['denda_id' => $dendaRecord->id]);
+            }
+
+            // Kembalikan stok
+            if ($this->produk) {
+                $this->produk->updateStokSewa($this->getQuantity(), 'masuk');
+                Log::debug('Stok dikembalikan untuk produk: ' . $this->produk->id);
+            }
+
+            // Commit transaction
+            DB::commit();
+
+            Log::debug('Pengembalian berhasil diproses:', [
+                'pengembalian_id' => $pengembalian->id,
+                'total_denda' => $denda['total_denda']
+            ]);
+
+            return $pengembalian;
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error proses pengembalian: ' . $e->getMessage());
+            throw $e;
+        }
+    }
     /**
      * Aktifkan sewa setelah pembayaran diverifikasi
      */
@@ -364,6 +591,19 @@ class Sewa extends Model
 
         return $this;
     }
+
+    public function getStatusBadgeColor()
+{
+    $colors = [
+        'diproses' => 'warning',
+        'dibayar' => 'info',
+        'aktif' => 'success',
+        'selesai' => 'primary',
+        'dibatalkan' => 'danger'
+    ];
+    
+    return $colors[$this->status] ?? 'secondary';
+}
 
     /**
      * Get quantity from transaction details

@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sewa;
-use App\Models\Konfigurasi;
+use App\Models\Produk;
+use App\Models\Transaksi;
+use App\Models\Denda;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SewaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Sewa::with(['user', 'produk', 'pengembalian.denda'])
+        $query = Sewa::with(['user', 'produk', 'transaksi', 'pengembalian.denda'])
             ->latest();
         
         // Search
@@ -59,11 +63,14 @@ class SewaController extends Controller
         
         $sewas = $query->paginate(15);
         
-        // Statistics
+        // Statistics - gunakan konstanta dari model
         $totalSewa = Sewa::count();
-        $aktifCount = Sewa::where('status', 'aktif')->count();
-        $terlambatCount = Sewa::where('status', 'terlambat')->count();
-        $totalPendapatan = Sewa::where('status', '!=', 'dibatalkan')->sum('total_harga');
+        $aktifCount = Sewa::where('status', Sewa::STATUS_AKTIF)->count();
+        $terlambatCount = Sewa::where('status', 'aktif')
+            ->where('tanggal_kembali_rencana', '<', Carbon::today())
+            ->count();
+        $totalPendapatan = Sewa::where('status', '!=', Sewa::STATUS_DIBATALKAN)
+            ->sum('total_harga');
         
         return view('admin.sewa.index', compact(
             'sewas', 
@@ -76,25 +83,36 @@ class SewaController extends Controller
     
     public function aktif()
     {
-        // Update status sewa yang terlambat
-        $this->updateTerlambatSewa();
-        
-        $sewas = Sewa::with(['user', 'produk'])
-            ->where('status', 'aktif')
+        $sewas = Sewa::with(['user', 'produk', 'transaksi'])
+            ->where('status', Sewa::STATUS_AKTIF)
             ->orderBy('tanggal_kembali_rencana')
             ->paginate(15);
             
         return view('admin.sewa.aktif', compact('sewas'));
     }
     
+    public function terlambat()
+    {
+        $sewas = Sewa::with(['user', 'produk', 'transaksi'])
+            ->where('status', Sewa::STATUS_AKTIF)
+            ->where('tanggal_kembali_rencana', '<', Carbon::today())
+            ->orderBy('tanggal_kembali_rencana')
+            ->paginate(15);
+            
+        return view('admin.sewa.terlambat', compact('sewas'));
+    }
+    
     public function show(Sewa $sewa)
     {
-        $sewa->load(['user', 'produk', 'transaksi', 'pengembalian.denda']);
-        
-        // Hitung denda jika belum ada
-        if (!$sewa->denda && $sewa->hitungKeterlambatan() > 0) {
-            $denda = $sewa->hitungDenda();
-        }
+        // Load relations yang diperlukan
+        $sewa->load([
+            'user', 
+            'produk', 
+            'transaksi', 
+            'transaksi.detailTransaksis', // tambahkan ini untuk items
+            'pengembalian',
+            'pengembalian.denda'
+        ]);
         
         return view('admin.sewa.show', compact('sewa'));
     }
@@ -102,85 +120,185 @@ class SewaController extends Controller
     public function updateStatus(Request $request, Sewa $sewa)
     {
         $request->validate([
-            'status' => 'required|in:aktif,selesai,terlambat,dibatalkan'
+            'status' => 'required|in:aktif,selesai,dibatalkan',
+            'catatan' => 'nullable|string|max:500'
         ]);
         
-        $oldStatus = $sewa->status;
-        $sewa->status = $request->status;
+        DB::beginTransaction();
         
-        // Jika status diubah menjadi selesai, set tanggal kembali aktual
-        if ($request->status == 'selesai' && !$sewa->tanggal_kembali_aktual) {
-            $sewa->tanggal_kembali_aktual = Carbon::now();
+        try {
+            $oldStatus = $sewa->status;
             
-            // Kembalikan stok produk
-            if ($sewa->produk) {
-                $sewa->produk->updateStokSewa($sewa->jumlah_hari, 'masuk');
+            switch ($request->status) {
+                case 'aktif':
+                    // Aktifkan sewa (konfirmasi pembayaran)
+                    if ($oldStatus !== Sewa::STATUS_MENUNGGU_KONFIRMASI) {
+                        throw new \Exception('Hanya sewa menunggu konfirmasi yang dapat diaktifkan.');
+                    }
+                    
+                    $sewa->aktifkan();
+                    $sewa->catatan = $request->catatan;
+                    break;
+                    
+                case 'selesai':
+                    // Selesaikan sewa
+                    if ($oldStatus !== Sewa::STATUS_AKTIF) {
+                        throw new \Exception('Hanya sewa aktif yang dapat diselesaikan.');
+                    }
+                    
+                    $sewa->status = Sewa::STATUS_SELESAI;
+                    $sewa->tanggal_kembali_aktual = Carbon::now();
+                    $sewa->catatan = $request->catatan;
+                    
+                    // Kembalikan stok
+                    if ($sewa->produk) {
+                        // Cari quantity dari detail transaksi
+                        $quantity = 1;
+                        if ($sewa->transaksi && $sewa->transaksi->detailTransaksis) {
+                            $detail = $sewa->transaksi->detailTransaksis
+                                ->where('produk_id', $sewa->produk_id)
+                                ->first();
+                            $quantity = $detail->quantity ?? 1;
+                        }
+                        
+                        $sewa->produk->updateStokSewa($quantity, 'masuk');
+                    }
+                    break;
+                    
+                case 'dibatalkan':
+                    // Batalkan sewa
+                    $sewa->batalkan($request->catatan, auth()->id());
+                    break;
             }
+            
+            $sewa->save();
+            
+            DB::commit();
+            
+            return redirect()->route('admin.sewa.show', $sewa->id)
+                ->with('success', 'Status sewa berhasil diperbarui.');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Gagal memperbarui status: ' . $e->getMessage());
         }
-        
-        // Jika dibatalkan, kembalikan stok
-        if ($request->status == 'dibatalkan' && $sewa->produk) {
-            $sewa->produk->updateStokSewa($sewa->jumlah_hari, 'masuk');
-        }
-        
-        $sewa->save();
-        
-        return redirect()->back()->with('success', 'Status sewa berhasil diperbarui.');
     }
     
     public function pengembalian(Request $request, Sewa $sewa)
     {
         $request->validate([
-            'tanggal_kembali_aktual' => 'required|date',
-            'kondisi' => 'required|in:baik,rusak_ringan,rusak_berat',
-            'catatan' => 'nullable|string|max:500'
+            'tanggal_kembali' => 'required|date',
+            'kondisi_barang' => 'required|in:baik,rusak_ringan,rusak_berat,hilang',
+            'catatan' => 'nullable|string|max:500',
+            'denda' => 'nullable|numeric|min:0'
         ]);
         
-        // Update sewa
-        $sewa->tanggal_kembali_aktual = $request->tanggal_kembali_aktual;
-        $sewa->status = 'selesai';
-        $sewa->save();
+        DB::beginTransaction();
         
-        // Hitung denda jika terlambat
-        $keterlambatan = $sewa->hitungKeterlambatan();
-        if ($keterlambatan > 0) {
-            $denda = $sewa->hitungDenda();
-            $sewa->denda = $denda;
-            $sewa->save();
+        try {
+            // Validasi status
+            if ($sewa->status !== Sewa::STATUS_AKTIF) {
+                throw new \Exception('Hanya sewa aktif yang dapat diproses pengembaliannya.');
+            }
+            
+            // Proses pengembalian dengan method dari model
+            $pengembalian = $sewa->prosesPengembalian(
+                $request->tanggal_kembali,
+                $request->kondisi_barang,
+                $request->catatan
+            );
+            
+            // Jika ada input denda manual, update
+            if ($request->filled('denda')) {
+                $sewa->denda = $request->denda;
+                $sewa->save();
+                
+                // Update denda record jika ada
+                if ($pengembalian->denda) {
+                    $pengembalian->denda->update([
+                        'jumlah_denda' => $request->denda,
+                        'keterangan' => 'Denda manual: ' . ($request->catatan ?? '-')
+                    ]);
+                }
+            }
+            
+            DB::commit();
+            
+            return redirect()->route('admin.sewa.show', $sewa->id)
+                ->with('success', 'Pengembalian berhasil diproses.');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error proses pengembalian: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Gagal memproses pengembalian: ' . $e->getMessage());
         }
-        
-        // Kembalikan stok produk
-        if ($sewa->produk) {
-            $sewa->produk->updateStokSewa($sewa->jumlah_hari, 'masuk');
-        }
-        
-        return redirect()->route('admin.sewa.show', $sewa->id)
-            ->with('success', 'Pengembalian berhasil dicatat.');
     }
     
     public function destroy(Sewa $sewa)
     {
         // Hanya sewa dengan status tertentu yang bisa dihapus
-        if (!in_array($sewa->status, ['dibatalkan'])) {
+        $allowedStatus = [
+            Sewa::STATUS_DIBATALKAN,
+            Sewa::STATUS_EXPIRED
+        ];
+        
+        if (!in_array($sewa->status, $allowedStatus)) {
             return redirect()->back()
                 ->with('error', 'Sewa yang aktif/selesai tidak dapat dihapus.');
         }
         
-        $sewa->delete();
+        DB::beginTransaction();
         
-        return redirect()->route('admin.sewa.index')
-            ->with('success', 'Sewa berhasil dihapus.');
+        try {
+            // Hapus denda terkait jika ada
+            if ($sewa->pengembalian && $sewa->pengembalian->denda) {
+                $sewa->pengembalian->denda->delete();
+            }
+            
+            // Hapus pengembalian jika ada
+            if ($sewa->pengembalian) {
+                $sewa->pengembalian->delete();
+            }
+            
+            // Hapus sewa
+            $sewa->delete();
+            
+            DB::commit();
+            
+            return redirect()->route('admin.sewa.index')
+                ->with('success', 'Sewa berhasil dihapus.');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus sewa: ' . $e->getMessage());
+        }
     }
     
-    private function updateTerlambatSewa()
+    public function verifikasiPengembalian(Sewa $sewa)
     {
-        $sewas = Sewa::where('status', 'aktif')
-            ->whereDate('tanggal_kembali_rencana', '<', Carbon::today())
-            ->get();
+        DB::beginTransaction();
+        
+        try {
+            // Validasi status
+            if ($sewa->status !== Sewa::STATUS_MENUNGGU_VERIFIKASI_PENGEMBALIAN) {
+                throw new \Exception('Hanya sewa menunggu verifikasi yang dapat diverifikasi.');
+            }
             
-        foreach ($sewas as $sewa) {
-            $sewa->status = 'terlambat';
-            $sewa->save();
+            // Verifikasi pengembalian
+            $sewa->verifikasiPengembalian(auth()->id());
+            
+            DB::commit();
+            
+            return redirect()->route('admin.sewa.show', $sewa->id)
+                ->with('success', 'Pengembalian berhasil diverifikasi.');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Gagal verifikasi pengembalian: ' . $e->getMessage());
         }
     }
 }

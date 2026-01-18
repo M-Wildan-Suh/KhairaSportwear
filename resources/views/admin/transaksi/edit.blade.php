@@ -21,16 +21,16 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-xl font-semibold text-gray-900">Edit Transaksi Penjualan</h1>
-            <p class="text-gray-600 text-sm mt-1">Perbarui status transaksi {{ $transaction->kode_transaksi }}</p>
+            <h1 class="text-xl font-semibold text-black">Edit Transaksi Penjualan</h1>
+            <p class="text-black text-sm mt-1">Perbarui status transaksi {{ $transaction->kode_transaksi }}</p>
         </div>
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.transaksi.show', $transaction->id) }}" 
-               class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+               class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-white bg-white hover:bg-gray-50">
                 <i class="fas fa-eye mr-2"></i> Detail
             </a>
             <a href="{{ route('admin.transaksi.index') }}" 
-               class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+               class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-white bg-white hover:bg-gray-50">
                 <i class="fas fa-arrow-left mr-2"></i> Kembali
             </a>
         </div>
@@ -105,7 +105,7 @@
                     </p>
                 </div>
                 
-                <div>
+                <!-- <div>
                     <p class="text-xs text-blue-600 mb-1">Diverifikasi Oleh</p>
                     <p class="text-sm font-semibold text-blue-900">
                         @if($transaction->verifikasi_oleh && $transaction->verifikator)
@@ -119,7 +119,7 @@
                             <span class="text-yellow-600">Belum diverifikasi</span>
                         @endif
                     </p>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -230,7 +230,7 @@
 
                 <!-- Items -->
                 <div>
-                    <h3 class="text-sm font-medium text-gray-900 mb-3">Produk Dipesan</h3>
+                    <h3 class="text-sm font-medium text-black mb-3">Produk Dipesan</h3>
                     <div class="space-y-2">
                         @foreach($transaction->detailTransaksis as $item)
                             <div class="flex items-center justify-between text-xs bg-white p-2 rounded border border-gray-200">
@@ -250,31 +250,31 @@
 
                 <!-- Payment Summary -->
                 <div class="pt-4 border-t border-gray-200">
-                    <h3 class="text-sm font-medium text-gray-900 mb-3">Ringkasan Pembayaran</h3>
+                    <h3 class="text-sm font-medium text-black mb-3">Ringkasan Pembayaran</h3>
                     <div class="space-y-2">
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Subtotal</span>
+                            <span class="text-black">Subtotal</span>
                             <span class="font-medium">Rp {{ number_format($transaction->total_harga, 0, ',', '.') }}</span>
                         </div>
                         @if($transaction->diskon > 0)
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Diskon</span>
+                            <span class="text-black">Diskon</span>
                             <span class="font-medium text-green-600">-Rp {{ number_format($transaction->diskon, 0, ',', '.') }}</span>
                         </div>
                         @endif
                         <div class="flex justify-between pt-2 border-t border-gray-200 font-bold text-gray-900">
-                            <span>Total</span>
-                            <span class="text-lg">Rp {{ number_format($transaction->total_bayar, 0, ',', '.') }}</span>
+                            <span class="text-black">Total</span>
+                            <span class="text-lg text-black">Rp {{ number_format($transaction->total_bayar, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Current Status Info -->
                 <div class="pt-4 border-t border-gray-200">
-                    <h3 class="text-sm font-medium text-gray-900 mb-3">Informasi Status</h3>
+                    <h3 class="text-sm font-medium text-black mb-3">Informasi Status</h3>
                     <div class="space-y-2">
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Status Saat Ini:</span>
+                            <span class="text-black">Status Saat Ini:</span>
                             @php
                                 $config = $statusConfig[$transaction->status] ?? ['color'=>'bg-gray-50 text-gray-700 border-gray-200','label'=>$transaction->status];
                             @endphp
@@ -284,8 +284,8 @@
                             </span>
                         </div>
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Terakhir Update:</span>
-                            <span class="text-gray-900">{{ $transaction->updated_at->format('d M Y H:i') }}</span>
+                            <span class="text-black">Terakhir Update:</span>
+                            <span class="text-black">{{ $transaction->updated_at->format('d M Y H:i') }}</span>
                         </div>
                         
                         <!-- Stock Info -->

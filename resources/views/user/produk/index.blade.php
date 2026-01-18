@@ -9,8 +9,8 @@
         <div class="bg-gradient-to-r from-primary to-primary-dark rounded-2xl p-8 text-white">
             <div class="flex flex-col lg:flex-row items-center justify-between">
                 <div>
-                    <h1 class="text-4xl lg:text-5xl font-bold mb-3">Katalog Produk</h1>
-                    <p class="text-primary-light text-lg">Temukan alat olahraga premium untuk kebutuhan Anda</p>
+                    <h1 class="text-4xl lg:text-5xl font-bold mb-3 text-gray-800">Katalog Produk</h1>
+                    <p class="text-black text-lg">Temukan alat olahraga premium untuk kebutuhan Anda</p>
                 </div>
                 <div class="mt-6 lg:mt-0">
                     <div class="relative">
@@ -37,7 +37,7 @@
                             <i class="fas fa-search text-primary"></i>
                             Cari Produk
                         </h3>
-                        <form action="{{ route('user.produk.search') }}" method="GET">
+                        <form action="{{ route('produk.search') }}" method="GET">
                             <div class="relative">
                                 <input type="text" 
                                        name="q" 
@@ -58,7 +58,7 @@
                             Tipe Produk
                         </h3>
                         <div class="space-y-2">
-                            <a href="{{ route('user.produk.index') }}" 
+                            <a href="{{ route('produk.index') }}" 
                                class="flex items-center justify-between px-4 py-3 rounded-lg {{ !request('tipe') ? 'bg-primary/10 text-primary border-l-4 border-primary' : 'hover:bg-gray-50' }}">
                                 <span class="flex items-center gap-2">
                                     <i class="fas fa-boxes"></i>
@@ -66,7 +66,7 @@
                                 </span>
                                 <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ $totalProducts }}</span>
                             </a>
-                            <a href="{{ route('user.produk.index', ['tipe' => 'jual']) }}" 
+                            <a href="{{ route('produk.index', ['tipe' => 'jual']) }}" 
                                class="flex items-center justify-between px-4 py-3 rounded-lg {{ request('tipe') == 'jual' ? 'bg-primary/10 text-primary border-l-4 border-primary' : 'hover:bg-gray-50' }}">
                                 <span class="flex items-center gap-2">
                                     <i class="fas fa-shopping-cart"></i>
@@ -74,7 +74,7 @@
                                 </span>
                                 <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ $jualCount }}</span>
                             </a>
-                            <a href="{{ route('user.produk.index', ['tipe' => 'sewa']) }}" 
+                            <a href="{{ route('produk.index', ['tipe' => 'sewa']) }}" 
                                class="flex items-center justify-between px-4 py-3 rounded-lg {{ request('tipe') == 'sewa' ? 'bg-primary/10 text-primary border-l-4 border-primary' : 'hover:bg-gray-50' }}">
                                 <span class="flex items-center gap-2">
                                     <i class="fas fa-calendar-alt"></i>
@@ -93,7 +93,7 @@
                         </h3>
                         <div class="space-y-2">
                             @foreach($kategoris as $kategori)
-                            <a href="{{ route('user.produk.index', ['kategori' => $kategori->slug]) }}" 
+                            <a href="{{ route('produk.index', ['kategori' => $kategori->slug]) }}" 
                                class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-50 {{ request('kategori') == $kategori->slug ? 'bg-primary/10 text-primary border-l-4 border-primary' : '' }}">
                                 <span class="flex items-center gap-2">
                                     <i class="fas fa-{{ $kategori->icon ?? 'tag' }}"></i>
@@ -111,7 +111,7 @@
                             <i class="fas fa-sort-amount-down text-primary"></i>
                             Urutkan
                         </h3>
-                        <form id="sortForm" action="{{ route('user.produk.index') }}" method="GET">
+                        <form id="sortForm" action="{{ route('produk.index') }}" method="GET">
                             <!-- Preserve existing filters -->
                             @if(request('tipe'))
                                 <input type="hidden" name="tipe" value="{{ request('tipe') }}">
@@ -137,36 +137,6 @@
                             </select>
                         </form>
                     </div>
-                    
-                    <!-- Featured Products -->
-                    @if($featuredProducts->count() > 0)
-                    <div>
-                        <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <i class="fas fa-crown text-accent"></i>
-                            Unggulan
-                        </h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            @foreach($featuredProducts as $featured)
-                            <a href="{{ route('user.produk.show', $featured->slug) }}" 
-                               class="group">
-                                <div class="bg-gray-50 rounded-lg p-3 hover:bg-primary/5 transition-colors border border-gray-200 hover:border-primary/30">
-                                    <img src="{{ $featured->gambar_url }}" 
-                                         alt="{{ $featured->nama }}"
-                                         class="w-full h-20 object-cover rounded-lg mb-2">
-                                    <h6 class="font-medium text-gray-900 text-sm truncate group-hover:text-primary">{{ Str::limit($featured->nama, 20) }}</h6>
-                                    <div class="text-primary font-semibold text-sm">
-                                        @if($featured->tipe === 'jual')
-                                        Rp {{ number_format($featured->harga_beli, 0, ',', '.') }}
-                                        @else
-                                        Rp {{ number_format($featured->harga_sewa_harian, 0, ',', '.') }}/hr
-                                        @endif
-                                    </div>
-                                </div>
-                            </a>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -193,7 +163,7 @@
                 <div class="flex items-center gap-4">
                     <!-- Clear Filters Button -->
                     @if(request()->anyFilled(['tipe', 'kategori', 'search', 'sort']))
-                    <a href="{{ route('user.produk.index') }}" 
+                    <a href="{{ route('produk.index') }}" 
                        class="inline-flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
                         <i class="fas fa-times"></i>
                         Reset Filter
@@ -273,7 +243,7 @@
                                     </div>
                                     
                                     <div class="flex items-center gap-2">
-                                        <a href="{{ route('user.produk.show', $produk->slug) }}" 
+                                        <a href="{{ route('produk.show', $produk->slug) }}" 
                                            class="px-3 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors">
                                             <i class="fas fa-eye"></i>
                                         </a>
@@ -307,7 +277,7 @@
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">Produk tidak ditemukan</h3>
                     <p class="text-gray-600 mb-6">Coba gunakan filter yang berbeda</p>
-                    <a href="{{ route('user.produk.index') }}" 
+                    <a href="{{ route('produk.index') }}" 
                        class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors">
                         <i class="fas fa-redo"></i> Reset Pencarian
                     </a>
@@ -383,7 +353,7 @@
                                                 
                                                 <!-- Actions -->
                                                 <div class="flex items-center gap-2">
-                                                    <a href="{{ route('user.produk.show', $produk->slug) }}" 
+                                                    <a href="{{ route('produk.show', $produk->slug) }}" 
                                                        class="flex-1 px-4 py-2 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors text-center">
                                                         <i class="fas fa-eye mr-2"></i> Detail
                                                     </a>

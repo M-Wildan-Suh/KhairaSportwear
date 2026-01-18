@@ -229,7 +229,7 @@
                             <span>Kembali ke Dashboard</span>
                         </a>
                         
-                        <a href="{{ route('user.produk.index') }}" 
+                        <a href="{{ route('produk.index') }}" 
                            class="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors">
                             <i class="fas fa-store"></i>
                             <span>Lihat Produk</span>

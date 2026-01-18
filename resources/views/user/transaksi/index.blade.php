@@ -333,13 +333,13 @@
             <h3 class="text-2xl font-bold text-gray-900 mb-3">Belum Ada Transaksi</h3>
             <p class="text-gray-600 mb-8">Mulai berbelanja untuk melihat riwayat transaksi Anda. Transaksi Anda akan muncul di sini.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a href="{{ route('user.produk.index') }}" 
+                <a href="{{ route('produk.index') }}" 
                    class="group inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-all duration-300 hover:shadow-lg">
                     <i class="fas fa-store group-hover:scale-110 transition-transform"></i>
                     <span>Belanja Sekarang</span>
                     <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </a>
-                <a href="{{ route('user.sewa.index') }}" 
+                <a href="{{ route('sewa.index') }}" 
                    class="group inline-flex items-center justify-center gap-3 px-8 py-3.5 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary/5 transition-all duration-300">
                     <i class="fas fa-calendar-alt group-hover:rotate-12 transition-transform"></i>
                     <span>Sewa Alat</span>

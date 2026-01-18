@@ -111,6 +111,42 @@ class TransaksiController extends Controller
             'bankInfo', 'noRekening', 'namaRekening'
         ));
     }
+
+     private function createSewaFromKeranjang($transaksi, $detailTransaksi, $keranjangItem)
+    {
+        $opsiSewa = $keranjangItem->opsi_sewa;
+        $tanggalMulai = Carbon::parse($opsiSewa['tanggal_mulai']);
+        $jumlahHari = $opsiSewa['jumlah_hari'] ?? 1;
+        $durasi = $opsiSewa['durasi'] ?? 'harian';
+        
+        // Hitung tanggal selesai
+        $tanggalSelesai = $tanggalMulai->copy()->addDays($jumlahHari);
+        
+        // Buat entri Sewa
+        $sewa = Sewa::create([
+            'transaksi_id' => $transaksi->id,
+            'detail_transaksi_id' => $detailTransaksi->id, // Hubungkan ke detail transaksi
+            'user_id' => $transaksi->user_id,
+            'produk_id' => $keranjangItem->produk_id,
+            'kode_sewa' => Sewa::generateKodeSewa(),
+            'durasi' => $durasi,
+            'jumlah_hari' => $jumlahHari,
+            'tanggal_mulai' => $tanggalMulai,
+            'tanggal_selesai' => $tanggalSelesai,
+            'tanggal_kembali_rencana' => $tanggalSelesai,
+            'status' => Sewa::STATUS_MENUNGGU_PEMBAYARAN,
+            'total_harga' => $detailTransaksi->subtotal,
+            'data_tambahan' => [
+                'quantity' => $keranjangItem->quantity,
+                'harga_per_hari' => $keranjangItem->harga,
+                'durasi' => $durasi,
+                'tanggal_mulai' => $tanggalMulai->toDateString(),
+                'tanggal_selesai' => $tanggalSelesai->toDateString()
+            ]
+        ]);
+        
+        return $sewa;
+    }
     
 public function store(Request $request)
 {

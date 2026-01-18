@@ -27,22 +27,16 @@
             </div>
         </div>
         
-        <div class="relative z-10 container mx-auto px-4 lg:px-8">
+        <div class="relative z-10 container mx-auto px-4 lg:px-8 mt-8">
             <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
                 <!-- Left Content -->
                 <div class="lg:w-1/2 text-center lg:text-left" data-aos="fade-right">
-                    <!-- Elegant Badge -->
-                    <div class="inline-flex items-center gap-3 px-6 py-3 bg-white border border-gray-200 rounded-full mb-8 shadow-sm hover:shadow-md transition-shadow duration-300">
-                        <span class="w-2 h-2 bg-accent rounded-full"></span>
-                        <span class="text-sm font-semibold text-primary uppercase tracking-wider">Premium Platform</span>
-                        <i class="fas fa-gem text-accent ml-2"></i>
-                    </div>
                     
                     <!-- Main Headline -->
                     <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
                         <span class="text-gray-900">Elevate Your</span>
                         <span class="block mt-2">
-                            <span class="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+                            <span class="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-gray-800">
                                 Sports Experience
                             </span>
                         </span>
@@ -56,15 +50,15 @@
                     
                     <!-- CTA Buttons -->
                     <div class="flex flex-col sm:flex-row gap-4 mb-16 justify-center lg:justify-start">
-                        <a href="{{ route('user.produk.index') }}" 
-                           class="group relative overflow-hidden bg-gradient-to-r from-primary to-primary-dark text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 flex items-center justify-center gap-3">
+                        <a href="{{ route('produk.index') }}" 
+                           class="group relative overflow-hidden bg-gradient-to-r from-blue-600 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 flex items-center justify-center gap-3">
                             <i class="fas fa-shopping-bag"></i>
                             <span>Browse Products</span>
                             <i class="fas fa-arrow-right transform group-hover:translate-x-2 transition-transform duration-300"></i>
                         </a>
                         
-                        <a href="{{ route('user.sewa.index') }}" 
-                           class="group bg-white border-2 border-primary text-primary font-semibold py-4 px-8 rounded-xl transition-all duration-300 hover:bg-primary hover:text-white hover:shadow-lg flex items-center justify-center gap-3">
+                        <a href="{{ route('sewa.index') }}" 
+                           class="group bg-white border-2 border-primary text-primary font-semibold py-4 px-8 rounded-xl transition-all duration-300 hover:bg-primary hover:text-black hover:shadow-lg flex items-center justify-center gap-3">
                             <i class="fas fa-calendar-check"></i>
                             <span>Rent Equipment</span>
                             <i class="fas fa-external-link-alt transform group-hover:rotate-12 transition-transform"></i>
@@ -197,7 +191,7 @@
                     <p class="text-gray-600 text-lg">Premium selection for serious athletes</p>
                 </div>
                 
-                <a href="{{ route('user.produk.index') }}" 
+                <a href="{{ route('produk.index') }}" 
                    class="mt-6 lg:mt-0 flex items-center gap-3 text-primary font-semibold hover:text-primary-dark transition-colors">
                     <span>View all products</span>
                     <i class="fas fa-arrow-right"></i>
@@ -289,84 +283,6 @@
         </div>
     </section>
     
-    <!-- Testimonials -->
-    <section class="py-20 bg-primary text-white">
-        <div class="container mx-auto px-4 lg:px-8">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-4xl md:text-5xl font-bold mb-4">
-                    What Our <span class="text-accent">Clients Say</span>
-                </h2>
-                <p class="text-primary-light text-lg max-w-2xl mx-auto">
-                    Trusted by athletes and professionals
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                @foreach([
-                    ['name' => 'Andi Pratama', 'role' => 'Professional Athlete', 'text' => 'Exceptional quality and service. Highly recommended!'],
-                    ['name' => 'Sari Dewi', 'role' => 'Fitness Trainer', 'text' => 'Premium equipment that exceeds expectations.'],
-                    ['name' => 'Budi Santoso', 'role' => 'Sports Coach', 'text' => 'Reliable service and top-notch gear quality.']
-                ] as $testimonial)
-                <div data-aos="fade-up" data-aos-delay="{{ $loop->index * 150 }}">
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20">
-                        <!-- Rating -->
-                        <div class="flex text-accent mb-6">
-                            @for($i = 1; $i <= 5; $i++)
-                            <i class="fas fa-star"></i>
-                            @endfor
-                        </div>
-                        
-                        <!-- Testimonial Text -->
-                        <p class="text-primary-light mb-8 italic">"{{ $testimonial['text'] }}"</p>
-                        
-                        <!-- Author -->
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                                <span class="font-bold">{{ substr($testimonial['name'], 0, 1) }}</span>
-                            </div>
-                            <div>
-                                <h6 class="font-semibold">{{ $testimonial['name'] }}</h6>
-                                <p class="text-primary-light text-sm">{{ $testimonial['role'] }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-    
-    <!-- CTA Section -->
-    <section class="py-20">
-        <div class="container mx-auto px-4 lg:px-8">
-            <div class="bg-gradient-to-r from-primary to-primary-dark rounded-2xl p-12 text-center" data-aos="zoom-in">
-                <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
-                    Ready to Elevate Your Game?
-                </h2>
-                <p class="text-primary-light text-xl mb-12 max-w-2xl mx-auto">
-                    Join thousands of satisfied customers using our premium sports equipment
-                </p>
-                
-                <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                    @auth
-                    <a href="{{ route('user.produk.index') }}" 
-                       class="bg-white text-primary font-semibold py-4 px-8 rounded-xl hover:bg-gray-50 transition-colors shadow-lg">
-                       <i class="fas fa-store mr-3"></i>Start Shopping
-                    </a>
-                    @else
-                    <a href="{{ route('register') }}" 
-                       class="bg-white text-primary font-semibold py-4 px-8 rounded-xl hover:bg-gray-50 transition-colors shadow-lg">
-                       <i class="fas fa-user-plus mr-3"></i>Create Account
-                    </a>
-                    <a href="{{ route('login') }}" 
-                       class="bg-transparent border-2 border-white text-white font-semibold py-4 px-8 rounded-xl hover:bg-white/10 transition-colors">
-                       <i class="fas fa-sign-in-alt mr-3"></i>Sign In
-                    </a>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </section>
 @endsection
 
 @push('styles')

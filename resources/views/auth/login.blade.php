@@ -332,28 +332,6 @@
                     Masuk ke Akun
                 </button>
                 
-                <!-- Pemisah -->
-                <div class="relative my-8">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-4 bg-white text-gray-500">Atau masuk dengan</span>
-                    </div>
-                </div>
-                
-                <!-- Login sosial -->
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <button type="button" class="social-btn flex items-center justify-center py-3 rounded-xl bg-white">
-                        <i class="fab fa-google text-red-500 mr-2"></i>
-                        <span class="font-medium text-gray-700">Google</span>
-                    </button>
-                    <button type="button" class="social-btn flex items-center justify-center py-3 rounded-xl bg-white">
-                        <i class="fab fa-facebook text-blue-600 mr-2"></i>
-                        <span class="font-medium text-gray-700">Facebook</span>
-                    </button>
-                </div>
-                
                 <!-- Link registrasi -->
                 <div class="text-center pt-6 border-t border-gray-200">
                     <p class="text-gray-600">
@@ -365,11 +343,6 @@
                 </div>
             </form>
         </div>
-    </div>
-    
-    <!-- Footer copyright -->
-    <div class="absolute bottom-4 left-0 right-0 text-center text-white text-sm opacity-80">
-        &copy; {{ date('Y') }} SportWear. Semua hak dilindungi.
     </div>
     
     <script>

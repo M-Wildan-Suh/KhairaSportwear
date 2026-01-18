@@ -44,7 +44,7 @@
         
         .btn-register {
             transition: all 0.3s ease;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         .btn-register:hover {
@@ -352,7 +352,7 @@
         </div>
         
         <!-- Bagian kanan: Ilustrasi -->
-        <div class="hidden md:flex md:w-2/5 bg-gradient-to-br from-green-600 to-emerald-800 p-8 flex-col justify-between text-white relative overflow-hidden">
+        <div class="hidden md:flex md:w-2/5 bg-gradient-to-br from-blue-600 to-emerald-800 p-8 flex-col justify-between text-white relative overflow-hidden">
             <!-- Background pattern -->
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute top-10 right-10 w-32 h-32 rounded-full bg-white"></div>
@@ -384,36 +384,12 @@
                         <i class="fas fa-check-circle text-green-300 mr-3"></i>
                         <span>Akses ke produk eksklusif SportWear</span>
                     </li>
-                    <li class="flex items-center">
-                        <i class="fas fa-check-circle text-green-300 mr-3"></i>
-                        <span>Program loyalty dengan hadiah menarik</span>
-                    </li>
                 </ul>
-            </div>
-            
-            <!-- Ilustrasi -->
-            <div class="relative z-10">
-                <div class="bg-white bg-opacity-20 p-5 rounded-2xl backdrop-blur-sm">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center mr-4">
-                            <i class="fas fa-gift text-white text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="font-semibold">Bonus Member Baru!</p>
-                            <p class="text-sm opacity-90">Voucher Rp 50.000 untuk pembelian pertama</p>
-                        </div>
-                    </div>
-                </div>
             </div>
             
             <!-- Elemen dekoratif floating -->
             <div class="absolute -bottom-4 -left-4 w-48 h-48 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full opacity-20 floating-animation"></div>
         </div>
-    </div>
-    
-    <!-- Footer copyright -->
-    <div class="absolute bottom-4 left-0 right-0 text-center text-white text-sm opacity-80">
-        &copy; {{ date('Y') }} SportWear. Semua hak dilindungi.
     </div>
     
     <script>

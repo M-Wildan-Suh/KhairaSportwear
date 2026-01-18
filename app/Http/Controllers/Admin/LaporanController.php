@@ -135,98 +135,176 @@ class LaporanController extends Controller
         ));
     }
 
-    /**
-     * Generate laporan penyewaan
-     */
+/**
+ * Generate laporan penyewaan
+ */
+/**
+ * Generate laporan penyewaan
+ */
 public function penyewaan(Request $request)
 {
     $request->validate([
         'start_date' => 'nullable|date',
         'end_date' => 'nullable|date|after_or_equal:start_date',
-        'status' => 'nullable|in:all,ongoing,completed,overdue,cancelled',
+        'status' => 'nullable|in:all,menunggu_pembayaran,menunggu_konfirmasi,aktif,selesai,dibatalkan,expired,menunggu_verifikasi_pengembalian,terlambat',
+        'download' => 'nullable|in:pdf,excel',
     ]);
 
-    $startDate = $request->start_date ? Carbon::parse($request->start_date) : now()->subDays(30);
-    $endDate = $request->end_date ? Carbon::parse($request->end_date) : now();
+    // Set tanggal default - 30 hari terakhir
+    $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : now()->subDays(30)->startOfDay();
+    $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : now()->endOfDay();
 
-    $query = Sewa::with(['user', 'produk.kategori'])
-        ->whereBetween('tanggal_mulai', [$startDate, $endDate]);
+    // Query utama
+    $query = Sewa::with(['user', 'produk.kategori', 'transaksi', 'pengembalian'])
+        ->whereBetween('created_at', [$startDate, $endDate]);
 
+    // Filter status
     if ($request->filled('status') && $request->status !== 'all') {
-        $statusMap = [
-            'ongoing' => 'aktif',
-            'completed' => 'selesai', 
-            'overdue' => 'terlambat',
-            'cancelled' => 'dibatalkan'
-        ];
-
-        if (isset($statusMap[$request->status])) {
-            $query->where('status', $statusMap[$request->status]);
+        if ($request->status === 'terlambat') {
+            // Sewa aktif yang sudah melewati tanggal kembali rencana
+            $query->where('status', Sewa::STATUS_AKTIF)
+                ->where('tanggal_kembali_rencana', '<', now());
+        } else {
+            $query->where('status', $request->status);
         }
     }
 
-    $sewas = $query->paginate(20); // atau 10, 15, sesuai kebutuhan
+    $sewas = $query->orderBy('created_at', 'desc')->paginate(20);
     
-    // Hitung semua variabel yang dibutuhkan view
+    // Hitung semua statistik
     $summary = $this->calculateRentalSummary($sewas);
     
-    // Variabel yang dibutuhkan view
-    $totalRentalRevenue = $summary['total_amount'] ?? 0;
-    $totalRentals = $summary['total_rentals'] ?? 0;
-    $totalItemsRented = $totalRentals; // Sama dengan total rentals karena 1 sewa = 1 item
-    $averageRentalDuration = $summary['average_duration'] ?? 0;
-    
-    // Status counts sesuai dengan mapping di view
-    $statusCounts = [
-        'ongoing' => $sewas->where('status', 'aktif')->count(),
-        'completed' => $sewas->where('status', 'selesai')->count(),
-        'overdue' => $sewas->where('status', 'terlambat')->count()
-    ];
-    
-    // Top products - perlu disesuaikan dengan getTopProducts
-    $topProducts = $this->getTopProducts($startDate, $endDate, 'sewa');
-    
-    // Most rented products dengan detail lengkap
-    $mostRentedProducts = $this->getMostRentedProducts($sewas);
-    
-    // Daily rentals data untuk chart
+    // Data untuk chart
     $dailyRentals = $this->getDailyRentalData($sewas);
     
-    // Overdue rentals
-    $overdueRentals = $sewas->where('status', 'terlambat');
+    // Produk paling banyak disewa
+    $mostRentedProducts = $this->getMostRentedProducts($sewas);
     
-    // Rental duration analysis
-    $durationAnalysis = $this->calculateDurationAnalysis($sewas);
+    // Analisis status
+    $statusAnalysis = $this->getStatusAnalysis($startDate, $endDate);
     
-    // Financial analysis
-    $financialAnalysis = $this->calculateFinancialAnalysis($sewas);
+    // Rentals terlambat
+    $overdueRentals = Sewa::where('status', Sewa::STATUS_AKTIF)
+        ->where('tanggal_kembali_rencana', '<', now())
+        ->count();
     
+    // Rentals akan berakhir (3 hari ke depan)
+    $upcomingReturns = Sewa::where('status', Sewa::STATUS_AKTIF)
+        ->whereBetween('tanggal_kembali_rencana', [now(), now()->addDays(3)])
+        ->count();
+
+    // Variabel untuk view lama (backward compatibility)
+    $totalRentalRevenue = $summary['total_pendapatan'] ?? 0;
+    $totalRentals = $summary['total_sewa'] ?? 0;
+    $totalItemsRented = $totalRentals; // Sama dengan total rentals karena 1 sewa = 1 item
+    $averageRentalDuration = $summary['durasi_rata_rata'] ?? 0;
+    
+    // Status counts untuk view lama
+    $statusCounts = [
+        'ongoing' => $sewas->where('status', Sewa::STATUS_AKTIF)->count(),
+        'completed' => $sewas->where('status', Sewa::STATUS_SELESAI)->count(),
+        'overdue' => $sewas->where('status', Sewa::STATUS_AKTIF)
+            ->where('tanggal_kembali_rencana', '<', now())
+            ->count()
+    ];
+    
+    // Export PDF
     if ($request->has('download') && $request->download === 'pdf') {
-        return $this->generateRentalPdf($startDate, $endDate, $request, $sewas, $summary, $topProducts);
+        return $this->generateRentalPdf($sewas, $startDate, $endDate, $summary);
     }
 
-    return view('admin.laporan.penyewaan',array_merge (
-    compact(
+    // Export Excel
+    if ($request->has('download') && $request->download === 'excel') {
+        return $this->exportRentalExcel($sewas, $startDate, $endDate, $summary);
+    }
+
+    return view('admin.laporan.penyewaan', compact(
         'sewas',
         'summary',
-        'topProducts',
         'startDate',
         'endDate',
         'request',
+        'dailyRentals',
+        'mostRentedProducts',
+        'statusAnalysis',
+        'overdueRentals',
+        'upcomingReturns',
+        // Variabel untuk view lama
         'totalRentalRevenue',
         'totalRentals',
         'totalItemsRented',
         'averageRentalDuration',
-        'statusCounts',
-        'mostRentedProducts',
-        'dailyRentals',
-        'overdueRentals',
-        'durationAnalysis',
-        'financialAnalysis'
-    ),
-    ['rentals' => $sewas] // Tambahkan alias $rentals untuk $sewas
+        'statusCounts'
     ));
 }
+
+/**
+ * Analisis status
+ */
+private function getStatusAnalysis($startDate, $endDate)
+{
+    $statuses = Sewa::whereBetween('created_at', [$startDate, $endDate])
+        ->selectRaw('status, COUNT(*) as count, SUM(total_harga) as revenue')
+        ->groupBy('status')
+        ->get();
+    
+    $statusMap = [
+        Sewa::STATUS_MENUNGGU_PEMBAYARAN => [
+            'label' => 'Menunggu Pembayaran',
+            'color' => 'warning',
+            'icon' => 'clock',
+        ],
+        Sewa::STATUS_MENUNGGU_KONFIRMASI => [
+            'label' => 'Menunggu Konfirmasi',
+            'color' => 'info',
+            'icon' => 'check-circle',
+        ],
+        Sewa::STATUS_AKTIF => [
+            'label' => 'Aktif',
+            'color' => 'success',
+            'icon' => 'play-circle',
+        ],
+        Sewa::STATUS_SELESAI => [
+            'label' => 'Selesai',
+            'color' => 'primary',
+            'icon' => 'check-circle',
+        ],
+        Sewa::STATUS_DIBATALKAN => [
+            'label' => 'Dibatalkan',
+            'color' => 'danger',
+            'icon' => 'x-circle',
+        ],
+        Sewa::STATUS_EXPIRED => [
+            'label' => 'Expired',
+            'color' => 'secondary',
+            'icon' => 'clock',
+        ],
+        Sewa::STATUS_MENUNGGU_VERIFIKASI_PENGEMBALIAN => [
+            'label' => 'Menunggu Verifikasi',
+            'color' => 'purple',
+            'icon' => 'shield-check',
+        ],
+    ];
+    
+    return $statuses->map(function ($item) use ($statusMap) {
+        $info = $statusMap[$item->status] ?? [
+            'label' => ucfirst(str_replace('_', ' ', $item->status)),
+            'color' => 'secondary',
+            'icon' => 'circle',
+        ];
+        
+        return [
+            'status' => $item->status,
+            'label' => $info['label'],
+            'color' => $info['color'],
+            'icon' => $info['icon'],
+            'count' => $item->count,
+            'revenue' => $item->revenue,
+            'percentage' => $item->count, // Akan dihitung di view
+        ];
+    });
+}
+
 
     /**
      * Download sales PDF
@@ -532,24 +610,6 @@ private function calculateMode($values)
         $pdf = Pdf::loadView('admin.laporan.pdf.penjualan', $data);
 
         $filename = 'laporan_penjualan_' . $startDate->format('Ymd') . '_' . $endDate->format('Ymd') . '.pdf';
-
-        return $pdf->download($filename);
-    }
-
-    private function generateRentalPdf($startDate, $endDate, $request, $sewas, $summary, $topProducts)
-    {
-        $data = [
-            'sewas' => $sewas,
-            'summary' => $summary,
-            'topProducts' => $topProducts,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-            'filters' => $request->all(),
-        ];
-
-        $pdf = Pdf::loadView('admin.laporan.pdf.penyewaan', $data);
-
-        $filename = 'laporan_penyewaan_' . $startDate->format('Ymd') . '_' . $endDate->format('Ymd') . '.pdf';
 
         return $pdf->download($filename);
     }
