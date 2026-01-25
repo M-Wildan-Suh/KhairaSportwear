@@ -63,12 +63,11 @@ class Keranjang extends Model
         if ($this->tipe === 'sewa') {
             $durasi = $this->opsi_sewa['durasi'] ?? 'harian';
             $jumlahHari = $this->opsi_sewa['jumlah_hari'] ?? 1;
-            $hargaPerHari = $this->produk->getHargaSewa($durasi);
-            $this->harga = $hargaPerHari;
-            $this->subtotal = $hargaPerHari * $jumlahHari * $this->quantity;
+            $this->harga = $this->opsi_sewa['durasi'] == 'harian' ? $this->produk->harga_sewa_harian : ($this->opsi_sewa['durasi'] == 'mingguan' ? $this->produk->harga_sewa_mingguan : $this->produk->harga_sewa_bulanan);
+            $this->subtotal = $this->harga * $this->quantity;
         } else {
             $this->harga = $this->produk->harga_beli;
-            $this->subtotal = $this->produk->harga_beli * $this->quantity;
+            $this->subtotal = $this->harga * $this->quantity;
         }
         
         $this->save();

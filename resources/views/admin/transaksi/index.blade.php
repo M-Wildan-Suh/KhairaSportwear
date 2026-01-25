@@ -223,7 +223,7 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($transactions as $transaction)
-                            <tr class="hover:bg-gray-500 {{ $transaction->status == 'dibatalkan' ? 'bg-red-50' : '' }}">
+                            <tr class="hover:bg-gray-500">
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     <div class="font-mono text-xs font-semibold text-gray-900">
                                         {{ $transaction->kode_transaksi }}

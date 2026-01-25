@@ -40,11 +40,16 @@ class SewaController extends Controller
     {
         $sewas = auth()->user()->sewas()
             ->with('produk')
-            ->aktif()
             ->orderBy('tanggal_kembali_rencana')
             ->paginate(10);
         
         return view('user.sewa.aktif', compact('sewas'));
+    }
+
+    public function struk(Request $request)
+    {
+        $data = Sewa::find($request->struk);
+        return view('user.sewa.struk', compact('data'));
     }
     
     public function riwayat()
@@ -667,7 +672,7 @@ public function calculateDenda(Request $request)
             
             // Extend rental
             $sewa->jumlah_hari = $totalHari;
-            $sewa->tanggal_selesai = Carbon::parse($sewa->tanggal_selesai)->addDays($request->tambahan_hari);
+            $sewa->tanggal_selesai = Carbon::parse($sewa->tanggal_selesai)->addDays((int) $request->tambahan_hari);
             $sewa->tanggal_kembali_rencana = $sewa->tanggal_selesai;
             $sewa->total_harga += $tambahanBiaya;
             $sewa->save();

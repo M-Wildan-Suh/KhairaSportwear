@@ -3,7 +3,7 @@
     <div class="relative top-4 mx-auto p-4 w-full max-w-lg">
         <div class="bg-white rounded-2xl shadow-xl">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-primary to-primary-dark rounded-t-2xl">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-800 to-gray-950 rounded-t-2xl">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -163,7 +163,7 @@
                         <div class="pt-4">
                             <button type="submit" 
                                     id="submitRentalBtn"
-                                    class="w-full px-6 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-3">
+                                    class="w-full px-6 py-4 bg-gray-800 text-white font-bold rounded-xl hover:bg-gray-950 transition-colors duration-200 flex items-center justify-center gap-3">
                                 <i class="fas fa-cart-plus"></i>
                                 <span>Tambah ke Keranjang</span>
                             </button>

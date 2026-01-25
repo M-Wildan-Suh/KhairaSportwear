@@ -3,17 +3,17 @@
 @section('title', 'Sewa Aktif - SportWear')
 
 @section('content')
-<div class="container py-8">
+<div class="container mx-auto px-4 py-8">
     <!-- Breadcrumb -->
     <div class="container mx-auto px-4 lg:px-8">
         <nav class="flex items-center text-sm text-gray-600">
-            <a href="{{ route('home') }}" class="hover:text-primary transition-colors">
+            <a href="{{ route('home') }}" class="hover:text-gray-800 transition-colors">
                 <i class="fas fa-home mr-2"></i> Home
             </a>
             <i class="fas fa-chevron-right mx-2 text-gray-400"></i>
-            <a href="{{ route('user.sewa.index') }}" class="hover:text-primary transition-colors">Sewa</a>
+            <a href="{{ route('user.sewa.index') }}" class="hover:text-gray-800 transition-colors">Sewa</a>
             <i class="fas fa-chevron-right mx-2 text-gray-400"></i>
-            <span class="text-primary font-medium">Sewa Aktif</span>
+            <span class="text-gray-800 font-medium">Sewa Aktif</span>
         </nav>
     </div>
 
@@ -26,7 +26,7 @@
             </div>
             
             <a href="{{ route('user.sewa.index') }}" 
-               class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors">
+               class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-800-dark transition-colors">
                 <i class="fas fa-plus"></i>
                 <span>Sewa Baru</span>
             </a>
@@ -59,8 +59,8 @@
                         <div class="flex-1">
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-calendar-alt text-primary text-sm"></i>
+                                    <div class="w-8 h-8 bg-gray-800/10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-calendar-alt text-gray-800 text-sm"></i>
                                     </div>
                                     <div>
                                         <p class="text-xs text-gray-600">Durasi</p>
@@ -117,12 +117,12 @@
                                 $percentage = min(100, ($elapsedDays / $totalDays) * 100);
                             @endphp
                             <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-primary to-green-500 rounded-full transition-all duration-500"
+                                <div class="h-full bg-gradient-to-r from-gray-800 to-green-500 rounded-full transition-all duration-500"
                                      style="width: {{ $percentage }}%"></div>
                             </div>
                             <div class="absolute inset-0 flex justify-between items-center px-1">
                                 @for($i = 0; $i <= $totalDays; $i++)
-                                <div class="w-px h-3 {{ $i <= $elapsedDays ? 'bg-primary' : 'bg-gray-300' }}"></div>
+                                <div class="w-px h-3 {{ $i <= $elapsedDays ? 'bg-gray-800' : 'bg-gray-300' }}"></div>
                                 @endfor
                             </div>
                         </div>
@@ -134,9 +134,9 @@
                     
                     <!-- Action Buttons -->
                     <div class="flex flex-wrap gap-2">
-                        <a href="{{ route('user.sewa.show', $sewa->id) }}" 
-                           class="flex-1 min-w-[120px] px-4 py-2 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors text-center">
-                            <i class="fas fa-eye mr-2"></i> Detail
+                        <a href="{{ route('user.sewa.struk', ['struk' => $sewa->id]) }}" target="_blank" {{$sewa->status === 'aktif' ? '' : 'disable'}}
+                           class="flex-1 min-w-[120px] px-4 py-2 border {{$sewa->status === 'aktif' ? '' : 'opacity-50 cursor-not-allowed'}} border-gray-800 text-gray-800 font-medium rounded-lg hover:bg-gray-800/5 transition-colors text-center">
+                            <i class="fas fa-eye mr-2"></i> Struk
                         </a>
                         
                         <button onclick="showExtendModal('{{ $sewa->id }}')" 
@@ -172,12 +172,12 @@
             <p class="text-gray-600 mb-6">Mulai sewa alat olahraga favorit Anda</p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                 <a href="{{ route('user.sewa.index') }}" 
-                   class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-primary-dark transition-colors">
+                   class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-gray-800-dark transition-colors">
                     <i class="fas fa-calendar-plus"></i>
                     <span>Sewa Sekarang</span>
                 </a>
                 <a href="{{ route('produk.index') }}" 
-                   class="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors">
+                   class="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-800 text-gray-800 font-medium rounded-lg hover:bg-gray-800/5 transition-colors">
                     <i class="fas fa-store"></i>
                     <span>Lihat Katalog</span>
                 </a>
@@ -213,7 +213,7 @@
                                 <input type="date" 
                                        name="tanggal_kembali" 
                                        id="return_tanggal_kembali"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
                                        required>
                                 <p class="mt-2 text-sm text-gray-500">Tanggal saat Anda mengembalikan alat</p>
                             </div>
@@ -224,7 +224,7 @@
                                 </label>
                                 <select name="kondisi_alat" 
                                         id="return_kondisi_alat"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
                                         required>
                                     <option value="">Pilih kondisi</option>
                                     <option value="baik">Baik (Tidak ada kerusakan)</option>
@@ -239,7 +239,7 @@
                                 <textarea name="catatan_kondisi" 
                                           rows="3"
                                           placeholder="Deskripsi kondisi alat..."
-                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"></textarea>
+                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-gray-800"></textarea>
                             </div>
                         </div>
                         
@@ -266,7 +266,7 @@
                     </div>
                     
                     <button type="submit" 
-                            class="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+                            class="w-full py-3 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-800-dark transition-colors flex items-center justify-center gap-2">
                         <i class="fas fa-check-circle"></i>
                         <span>Ajukan Pengembalian</span>
                     </button>
@@ -301,7 +301,7 @@
                            min="1" 
                            max="30" 
                            value="1"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
                            required>
                     <p class="mt-2 text-sm text-gray-500">Maksimal 30 hari per sewa</p>
                 </div>
@@ -311,7 +311,7 @@
                     <textarea name="alasan" 
                               rows="2"
                               placeholder="Alasan perpanjangan sewa..."
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"></textarea>
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-gray-800"></textarea>
                 </div>
                 
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -325,7 +325,7 @@
                 </div>
                 
                 <button type="submit" 
-                        class="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+                        class="w-full py-3 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-800-dark transition-colors flex items-center justify-center gap-2">
                     <i class="fas fa-check"></i>
                     <span>Ajukan Perpanjangan</span>
                 </button>
@@ -423,7 +423,7 @@ async function calculateFines(sewaId, tanggalKembali, kondisiAlat) {
     // Tampilkan loading
     fineCalculationDiv.innerHTML = `
         <div class="text-center py-8">
-            <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div class="w-8 h-8 border-4 border-gray-800 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p class="text-gray-600">Menghitung denda...</p>
         </div>
     `;

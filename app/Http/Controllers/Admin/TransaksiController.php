@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
 use App\Models\Produk;
+use App\Models\Sewa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+
+use function Symfony\Component\Clock\now;
 
 class TransaksiController extends Controller
 {
@@ -19,7 +22,6 @@ class TransaksiController extends Controller
     {
         // Hanya ambil transaksi penjualan
         $query = Transaksi::with(['user', 'detailTransaksis.produk'])
-            ->where('tipe', 'penjualan')
             ->withCount('detailTransaksis as items_count') // TAMBAHKAN INI
             ->latest();
 
@@ -241,7 +243,6 @@ class TransaksiController extends Controller
     public function edit($id)
     {
         $transaction = Transaksi::with(['user', 'detailTransaksis.produk'])
-            ->where('tipe', 'penjualan')
             ->findOrFail($id);
         
         // Statuses khusus penjualan
@@ -266,7 +267,6 @@ class TransaksiController extends Controller
 public function update(Request $request, $id)
 {
     $transaction = Transaksi::with(['detailTransaksis.produk'])
-        ->where('tipe', 'penjualan')
         ->findOrFail($id);
 
     // Validasi khusus penjualan
@@ -288,9 +288,19 @@ public function update(Request $request, $id)
         // 1. Jika status berubah ke DIBAYAR (Verifikasi pembayaran)
         if ($newStatus == 'dibayar' && $oldStatus != 'dibayar') {
             // Set tanggal pembayaran dan verifikasi
-            $validated['tanggal_pembayaran'] = now();
+            if (!$transaction->tanggal_pembayaran) {
+                $transaction->tanggal_pembayaran = now();
+                // $validated['tanggal_pembayaran'] = now();
+            }
             $validated['verifikasi_oleh'] = auth()->id();
             $validated['tanggal_verifikasi'] = now();
+
+            $sewa = Sewa::find($transaction->sewa->id);
+
+            if ($sewa) {
+                $sewa->status = 'aktif';
+                $sewa->save();
+            }
             
             // Hanya kurangi stok jika sebelumnya PENDING
             if ($oldStatus == 'pending') {
@@ -323,10 +333,24 @@ public function update(Request $request, $id)
         // 3. Jika status berubah ke SELESAI
         if ($newStatus == 'selesai' && $oldStatus != 'selesai') {
             $validated['completed_at'] = now();
+
+            $sewa = Sewa::find($transaction->sewa->id);
+
+            if ($sewa) {
+                $sewa->status = 'aktif';
+                $sewa->save();
+            }
         }
         
         // 4. Jika status berubah ke DIBATALKAN
         if ($newStatus == 'dibatalkan' && $oldStatus != 'dibatalkan') {
+
+            $sewa = Sewa::find($transaction->sewa->id);
+
+            if ($sewa) {
+                $sewa->status = 'aktif';
+                $sewa->save();
+            }
             // Kembalikan stok jika sebelumnya sudah dibayar atau diproses
             if (in_array($oldStatus, ['dibayar', 'diproses', 'dikirim'])) {
                 foreach ($transaction->detailTransaksis as $detail) {
@@ -352,6 +376,13 @@ public function update(Request $request, $id)
         
         // 5. Jika status berubah dari DIBATALKAN ke status lain
         if ($oldStatus == 'dibatalkan' && $newStatus != 'dibatalkan') {
+
+            $sewa = Sewa::find($transaction->sewa->id);
+
+            if ($sewa) {
+                $sewa->status = 'aktif';
+                $sewa->save();
+            }
             // Kurangi stok lagi untuk status yang membutuhkan stok
             if (in_array($newStatus, ['dibayar', 'diproses', 'dikirim'])) {
                 foreach ($transaction->detailTransaksis as $detail) {

@@ -7,11 +7,11 @@
     <!-- Breadcrumb -->
     <div class="container mx-auto px-4 lg:px-8">
         <nav class="flex items-center text-sm text-gray-600">
-            <a href="{{ route('home') }}" class="hover:text-primary transition-colors duration-200">
+            <a href="{{ route('home') }}" class="hover:text-gray-800 transition-colors duration-200">
                 <i class="fas fa-home mr-2"></i> Home
             </a>
             <i class="fas fa-chevron-right mx-2 text-gray-400"></i>
-            <span class="text-primary font-medium">Histori Transaksi</span>
+            <span class="text-gray-800 font-medium">Histori Transaksi</span>
         </nav>
     </div>
 
@@ -36,7 +36,7 @@
                      class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 hidden z-20">
                     <div class="p-2">
                         <a href="{{ route('user.transaksi.index') }}" 
-                           class="flex items-center px-4 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ !request('status') && !request('tipe') ? 'text-primary bg-primary/5' : '' }}">
+                           class="flex items-center px-4 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ !request('status') && !request('tipe') ? 'text-gray-800 bg-gray-800/5' : '' }}">
                             <i class="fas fa-receipt mr-3 text-gray-400"></i>
                             Semua Transaksi
                         </a>
@@ -44,17 +44,17 @@
                     <div class="py-2 border-t border-gray-100">
                         <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</div>
                         <a href="{{ route('user.transaksi.index', ['status' => 'pending']) }}" 
-                           class="flex items-center px-4 py-2.5 mx-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ request('status') == 'pending' ? 'text-primary bg-primary/5' : '' }}">
+                           class="flex items-center px-4 py-2.5 mx-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ request('status') == 'pending' ? 'text-gray-800 bg-gray-800/5' : '' }}">
                             <div class="w-2 h-2 rounded-full bg-yellow-400 mr-3"></div>
                             Pending
                         </a>
                         <a href="{{ route('user.transaksi.index', ['status' => 'diproses']) }}" 
-                           class="flex items-center px-4 py-2.5 mx-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ request('status') == 'diproses' ? 'text-primary bg-primary/5' : '' }}">
+                           class="flex items-center px-4 py-2.5 mx-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ request('status') == 'diproses' ? 'text-gray-800 bg-gray-800/5' : '' }}">
                             <div class="w-2 h-2 rounded-full bg-blue-400 mr-3"></div>
                             Diproses
                         </a>
                         <a href="{{ route('user.transaksi.index', ['status' => 'selesai']) }}" 
-                           class="flex items-center px-4 py-2.5 mx-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ request('status') == 'selesai' ? 'text-primary bg-primary/5' : '' }}">
+                           class="flex items-center px-4 py-2.5 mx-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ request('status') == 'selesai' ? 'text-gray-800 bg-gray-800/5' : '' }}">
                             <div class="w-2 h-2 rounded-full bg-green-400 mr-3"></div>
                             Selesai
                         </a>
@@ -62,12 +62,12 @@
                     <div class="py-2 border-t border-gray-100">
                         <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipe</div>
                         <a href="{{ route('user.transaksi.index', ['tipe' => 'penjualan']) }}" 
-                           class="flex items-center px-4 py-2.5 mx-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ request('tipe') == 'penjualan' ? 'text-primary bg-primary/5' : '' }}">
+                           class="flex items-center px-4 py-2.5 mx-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ request('tipe') == 'penjualan' ? 'text-gray-800 bg-gray-800/5' : '' }}">
                             <i class="fas fa-shopping-cart mr-3 text-green-400"></i>
                             Penjualan
                         </a>
                         <a href="{{ route('user.transaksi.index', ['tipe' => 'penyewaan']) }}" 
-                           class="flex items-center px-4 py-2.5 mx-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ request('tipe') == 'penyewaan' ? 'text-primary bg-primary/5' : '' }}">
+                           class="flex items-center px-4 py-2.5 mx-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 {{ request('tipe') == 'penyewaan' ? 'text-gray-800 bg-gray-800/5' : '' }}">
                             <i class="fas fa-calendar-alt mr-3 text-blue-400"></i>
                             Penyewaan
                         </a>
@@ -80,15 +80,15 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total Transaksi -->
-            <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/30" data-aos="fade-up">
+            <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover:border-gray-800/30" data-aos="fade-up">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-600 text-sm mb-2 font-medium">Total Transaksi</p>
                         <h3 class="text-2xl font-bold text-gray-900">{{ $transaksis->total() }}</h3>
                         <p class="text-xs text-gray-500 mt-1">Semua transaksi</p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-receipt text-primary text-lg"></i>
+                    <div class="w-12 h-12 bg-gradient-to-br from-gray-800/10 to-gray-800/5 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-receipt text-gray-800 text-lg"></i>
                     </div>
                 </div>
                 <div class="mt-4 pt-4 border-t border-gray-100">
@@ -197,11 +197,11 @@
                             <!-- Kode Transaksi -->
                             <td class="py-5 px-6">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                        <i class="fas fa-receipt text-primary text-sm"></i>
+                                    <div class="w-10 h-10 rounded-lg bg-gray-800/10 flex items-center justify-center group-hover:bg-gray-800/20 transition-colors">
+                                        <i class="fas fa-receipt text-gray-800 text-sm"></i>
                                     </div>
                                     <div>
-                                        <div class="font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                                        <div class="font-semibold text-gray-900 group-hover:text-gray-800 transition-colors">
                                             {{ $transaksi->kode_transaksi }}
                                         </div>
                                         <div class="text-xs text-gray-500 mt-0.5">{{ $transaksi->detailTransaksis->count() }} item</div>
@@ -268,10 +268,10 @@
                                     </div>
                                     
                                     @if($transaksi->status === 'pending')
-                                    <div class="flex items-center gap-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        <span>Upload bukti pembayaran</span>
-                                    </div>
+                                        <div class="flex items-center gap-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            <span>{{$transaksi->metode_pembayaran == 'tunai' ? 'Lunasi produk di toko' : 'Upload bukti pembayaran'}}</span>
+                                        </div>
                                     @endif
                                 </div>
                             </td>
@@ -281,13 +281,13 @@
                                 <div class="flex items-center gap-2">
                                     <!-- Detail -->
                                     <a href="{{ route('user.transaksi.show', $transaksi->id) }}" 
-                                       class="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg border border-gray-200 hover:border-primary/30 transition-all duration-200 group/btn"
+                                       class="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-800 hover:bg-gray-800/10 rounded-lg border border-gray-200 hover:border-gray-800/30 transition-all duration-200 group/btn"
                                        title="Lihat Detail">
                                         <i class="fas fa-eye group-hover/btn:scale-110 transition-transform"></i>
                                     </a>
                                     
                                     <!-- Upload Bukti (hanya untuk pending) -->
-                                    @if($transaksi->status === 'pending')
+                                    @if($transaksi->status === 'pending' && $transaksi->metode_pembayaran != 'tunai')
                                     <button onclick="showUploadModal('{{ $transaksi->id }}')" 
                                             class="w-10 h-10 flex items-center justify-center text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg border border-gray-200 hover:border-green-300 transition-all duration-200 group/btn"
                                             title="Upload Bukti">
@@ -326,21 +326,21 @@
                 <div class="w-32 h-32 mx-auto bg-gradient-to-br from-gray-100 to-gray-50 rounded-full flex items-center justify-center">
                     <i class="fas fa-receipt text-gray-400 text-5xl"></i>
                 </div>
-                <div class="absolute -top-2 -right-2 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                    <i class="fas fa-search text-primary"></i>
+                <div class="absolute -top-2 -right-2 w-12 h-12 bg-gray-800/10 rounded-full flex items-center justify-center">
+                    <i class="fas fa-search text-gray-800"></i>
                 </div>
             </div>
             <h3 class="text-2xl font-bold text-gray-900 mb-3">Belum Ada Transaksi</h3>
             <p class="text-gray-600 mb-8">Mulai berbelanja untuk melihat riwayat transaksi Anda. Transaksi Anda akan muncul di sini.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <a href="{{ route('produk.index') }}" 
-                   class="group inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-all duration-300 hover:shadow-lg">
+                   class="group inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-gray-800 text-white font-semibold rounded-xl hover:bg-gray-800-dark transition-all duration-300 hover:shadow-lg">
                     <i class="fas fa-store group-hover:scale-110 transition-transform"></i>
                     <span>Belanja Sekarang</span>
                     <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </a>
                 <a href="{{ route('sewa.index') }}" 
-                   class="group inline-flex items-center justify-center gap-3 px-8 py-3.5 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary/5 transition-all duration-300">
+                   class="group inline-flex items-center justify-center gap-3 px-8 py-3.5 border-2 border-gray-800 text-gray-800 font-semibold rounded-xl hover:bg-gray-800/5 transition-all duration-300">
                     <i class="fas fa-calendar-alt group-hover:rotate-12 transition-transform"></i>
                     <span>Sewa Alat</span>
                 </a>
@@ -362,8 +362,8 @@
             <div class="px-8 pt-8 pb-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-upload text-primary text-lg"></i>
+                        <div class="w-12 h-12 bg-gray-800/10 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-upload text-gray-800 text-lg"></i>
                         </div>
                         <div>
                             <h3 class="text-xl font-bold text-gray-900">Upload Bukti Pembayaran</h3>
@@ -379,6 +379,7 @@
             
             <!-- Form -->
             <form id="uploadForm" enctype="multipart/form-data" class="p-8 space-y-6">
+
                 @csrf
                 <input type="hidden" id="transaksi_id" name="transaksi_id">
                 
@@ -390,7 +391,7 @@
                     </label>
                     <div class="relative">
                         <div id="uploadArea" 
-                             class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary hover:bg-primary/5 transition-all duration-300 cursor-pointer">
+                             class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-gray-800 hover:bg-gray-800/5 transition-all duration-300 cursor-pointer">
                             <div id="uploadContent">
                                 <i class="fas fa-cloud-upload-alt text-gray-400 text-4xl mb-4"></i>
                                 <p class="font-medium text-gray-900 mb-1">Klik untuk upload</p>
@@ -440,7 +441,7 @@
                 <!-- Submit Button -->
                 <button type="submit" 
                         id="submitBtn"
-                        class="w-full py-3.5 bg-gradient-to-r from-primary to-primary-dark text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3">
+                        class="w-full py-3.5 bg-gradient-to-r from-gray-800 to-gray-800-dark text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3">
                     <i class="fas fa-upload"></i>
                     <span>Upload Bukti Pembayaran</span>
                 </button>
@@ -806,11 +807,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         function highlight() {
-            uploadArea.classList.add('border-primary', 'bg-primary/10');
+            uploadArea.classList.add('border-gray-800', 'bg-gray-800/10');
         }
         
         function unhighlight() {
-            uploadArea.classList.remove('border-primary', 'bg-primary/10');
+            uploadArea.classList.remove('border-gray-800', 'bg-gray-800/10');
         }
         
         uploadArea.addEventListener('drop', handleDrop, false);

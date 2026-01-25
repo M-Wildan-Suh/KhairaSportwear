@@ -26,13 +26,13 @@
                 <div class="space-y-6">
                     <!-- Product Card -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                             <i class="fas fa-cube text-primary mr-2"></i> Informasi Produk
                         </h3>
                         
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Produk *</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Nama Produk *</label>
                                 <input type="text" name="nama" required
                                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
                                        value="{{ old('nama') }}"
@@ -46,10 +46,10 @@
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori *</label>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Kategori *</label>
                                     <div class="relative">
                                         <select name="kategori_id" required
-                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 appearance-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200 bg-white">
+                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 appearance-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200 bg-gray-50">
                                             <option value="">Pilih Kategori</option>
                                             @foreach($kategoris as $kategori)
                                                 <option value="{{ $kategori->id }}" {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
@@ -57,7 +57,7 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300">
                                             <i class="fas fa-chevron-down"></i>
                                         </div>
                                     </div>
@@ -69,17 +69,17 @@
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Produk *</label>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Tipe Produk *</label>
                                     <div class="relative">
                                         <select name="tipe" required id="tipe"
-                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 appearance-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200 bg-white"
+                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 appearance-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200 bg-gray-50"
                                                 onchange="updateFormFields()">
                                             <option value="">Pilih Tipe</option>
                                             <option value="jual" {{ old('tipe') == 'jual' ? 'selected' : '' }}>Jual</option>
                                             <option value="sewa" {{ old('tipe') == 'sewa' ? 'selected' : '' }}>Sewa</option>
                                             <option value="both" {{ old('tipe') == 'both' ? 'selected' : '' }}>Jual & Sewa</option>
                                         </select>
-                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300">
                                             <i class="fas fa-chevron-down"></i>
                                         </div>
                                     </div>
@@ -95,13 +95,13 @@
                     
                     <!-- Stock Card -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                             <i class="fas fa-boxes text-primary mr-2"></i> Manajemen Stok
                         </h3>
                         
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Stok Total *</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Stok Total *</label>
                                 <div class="relative">
                                     <input type="number" name="stok_total" required min="0"
                                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
@@ -120,8 +120,8 @@
                             
                             <div id="stock-fields" class="space-y-4">
                                 <!-- Stok Tersedia -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Stok Tersedia</label>
+                                {{-- <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Stok Tersedia</label>
                                     <div class="relative">
                                         <input type="number" name="stok_tersedia" min="0" id="stok_tersedia"
                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
@@ -138,11 +138,11 @@
                                             <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
                                         </p>
                                     @enderror
-                                </div>
+                                </div> --}}
                                 
                                 <!-- Stok Sewa (conditional) -->
                                 <div id="stok-disewa-group" class="hidden">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Stok untuk Disewa</label>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Stok untuk Disewa</label>
                                     <div class="relative">
                                         <input type="number" name="stok_disewa" min="0" id="stok_disewa"
                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
@@ -167,12 +167,12 @@
                     
                     <!-- Description Card -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                             <i class="fas fa-align-left text-primary mr-2"></i> Deskripsi Produk
                         </h3>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Deskripsi</label>
                             <textarea name="deskripsi" rows="4"
                                       class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
                                       placeholder="Deskripsikan produk Anda...">{{ old('deskripsi') }}</textarea>
@@ -189,14 +189,14 @@
                 <div class="space-y-6">
                     <!-- Price Card -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                             <i class="fas fa-tags text-primary mr-2"></i> Informasi Harga
                         </h3>
                         
                         <div id="price-fields" class="space-y-4">
                             <!-- Harga Beli -->
                             <div id="harga-beli-group" class="hidden">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Harga Beli *</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Harga Beli *</label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3">
                                         <span class="text-gray-500">Rp</span>
@@ -216,7 +216,7 @@
                             <!-- Harga Sewa -->
                             <div id="harga-sewa-group" class="hidden space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Harga Sewa Harian *</label>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Harga Sewa Harian *</label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 flex items-center pl-3">
                                             <span class="text-gray-500">Rp</span>
@@ -235,7 +235,7 @@
                                 
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Harga Mingguan</label>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">Harga Mingguan</label>
                                         <div class="relative">
                                             <div class="absolute inset-y-0 left-0 flex items-center pl-3">
                                                 <span class="text-gray-500">Rp</span>
@@ -248,7 +248,7 @@
                                     </div>
                                     
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Harga Bulanan</label>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">Harga Bulanan</label>
                                         <div class="relative">
                                             <div class="absolute inset-y-0 left-0 flex items-center pl-3">
                                                 <span class="text-gray-500">Rp</span>
@@ -273,14 +273,14 @@
                     
                     <!-- Variants Card -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                             <i class="fas fa-palette text-primary mr-2"></i> Variasi Produk
                         </h3>
                         
                         <div class="space-y-6">
                             <!-- Warna -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-3">Warna</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-3">Warna</label>
                                 <div class="flex flex-wrap gap-2 mb-3" id="warna-container">
                                     <!-- Warna akan ditambahkan secara dinamis -->
                                 </div>
@@ -306,7 +306,7 @@
                             
                             <!-- Size -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-3">Ukuran (Size)</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-3">Ukuran (Size)</label>
                                 <div class="flex flex-wrap gap-2 mb-3" id="size-container">
                                     <!-- Size akan ditambahkan secara dinamis -->
                                 </div>
@@ -334,14 +334,14 @@
                     
                     <!-- Image & Status Card -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                             <i class="fas fa-image text-primary mr-2"></i> Media & Status
                         </h3>
                         
                         <div class="space-y-6">
                             <!-- Image Upload -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-3">Gambar Produk</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-3">Gambar Produk</label>
                                 <div class="relative">
                                     <input type="file" name="gambar" id="gambar" accept="image/*"
                                            class="hidden"
@@ -370,7 +370,7 @@
                             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                 <div>
                                     <label class="text-sm font-medium text-gray-700">Status Produk</label>
-                                    <p class="text-xs text-gray-500">Produk akan langsung aktif setelah disimpan</p>
+                                    <p class="text-xs text-gray-700">Produk akan langsung aktif setelah disimpan</p>
                                 </div>
                                 <div class="relative">
                                     <input type="checkbox" name="is_active" value="1" id="is_active" {{ old('is_active', true) ? 'checked' : '' }}
@@ -386,7 +386,7 @@
             <!-- Submit Buttons -->
             <div class="mt-8 pt-6 border-t border-gray-200 flex justify-end space-x-3">
                 <a href="{{ route('admin.produk.index') }}" 
-                   class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200 flex items-center">
+                   class="px-6 py-3 border border-gray-300 rounded-lg text-gray-300 hover:bg-gray-50 transition duration-200 flex items-center">
                     <i class="fas fa-times mr-2"></i> Batal
                 </a>
                 <button type="submit" class="btn-admin-primary px-8 py-3 flex items-center group">

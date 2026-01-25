@@ -58,124 +58,124 @@
                 <!-- Cart Items -->
                 <div class="space-y-4">
                     @foreach($keranjangs as $item)
-                    <div class="cart-item bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300" data-id="{{ $item->id }}">
-                        <div class="p-6">
-                            <div class="flex flex-col md:flex-row gap-6">
-                                <!-- Product Image -->
-                                <div class="md:w-1/4">
-                                    <div class="relative rounded-xl overflow-hidden bg-gray-100" style="padding-bottom: 100%;">
-                                        <img src="{{ $item->produk->gambar_url }}" 
-                                             alt="{{ $item->produk->nama }}"
-                                             class="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                                        @if($item->tipe === 'jual')
-                                        <span class="absolute top-3 left-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                            Beli
-                                        </span>
-                                        @else
-                                        <span class="absolute top-3 left-3 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                            Sewa
-                                        </span>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <!-- Product Details -->
-                                <div class="md:w-3/4">
-                                    <div class="flex flex-col h-full">
-                                        <!-- Header -->
-                                        <div class="flex-1">
-                                            <div class="flex justify-between items-start mb-2">
-                                                <h3 class="text-lg font-bold text-gray-900">{{ $item->produk->nama }}</h3>
-                                                <button onclick="removeFromCart({{ $item->id }})" 
-                                                        class="text-gray-400 hover:text-red-500 transition-colors">
-                                                    <i class="fas fa-times text-lg"></i>
-                                                </button>
-                                            </div>
-                                            
-                                            <p class="text-gray-600 text-sm mb-4">{{ Str::limit($item->produk->deskripsi, 80) }}</p>
-                                            
-                                            <!-- Category and Type -->
-                                            <div class="flex flex-wrap gap-2 mb-4">
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                                                    <i class="fas fa-tag mr-1.5 text-xs"></i>
-                                                    {{ $item->produk->kategori->nama }}
-                                                </span>
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                    <i class="fas fa-box mr-1.5 text-xs"></i>
-                                                    Stok: {{ $item->produk->stok_tersedia }}
-                                                </span>
-                                            </div>
-
-                                            <!-- Sewa Details -->
-                                            @if($item->tipe === 'sewa' && $item->opsi_sewa)
-                                            <div class="bg-blue-50 rounded-xl p-4 mb-4">
-                                                <h4 class="text-sm font-semibold text-blue-900 mb-2">Detail Sewa</h4>
-                                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                    <div>
-                                                        <p class="text-xs text-blue-600">Durasi</p>
-                                                        <p class="text-sm font-semibold text-blue-900">{{ $item->opsi_sewa['durasi'] }}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p class="text-xs text-blue-600">Jumlah Hari</p>
-                                                        <p class="text-sm font-semibold text-blue-900">{{ $item->opsi_sewa['jumlah_hari'] }}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p class="text-xs text-blue-600">Mulai</p>
-                                                        <p class="text-sm font-semibold text-blue-900">{{ date('d/m/Y', strtotime($item->opsi_sewa['tanggal_mulai'])) }}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p class="text-xs text-blue-600">Harga/hari</p>
-                                                        <p class="text-sm font-semibold text-blue-900">Rp {{ number_format($item->harga, 0, ',', '.') }}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                        <div class="cart-item bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300" data-id="{{ $item->id }}">
+                            <div class="p-6">
+                                <div class="flex flex-col md:flex-row gap-6">
+                                    <!-- Product Image -->
+                                    <div class="md:w-1/4">
+                                        <div class="relative rounded-xl overflow-hidden bg-gray-100" style="padding-bottom: 100%;">
+                                            <img src="{{ $item->produk->gambar_url }}" 
+                                                alt="{{ $item->produk->nama }}"
+                                                class="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                                            @if($item->tipe === 'jual')
+                                            <span class="absolute top-3 left-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                                Beli
+                                            </span>
+                                            @else
+                                            <span class="absolute top-3 left-3 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                                Sewa
+                                            </span>
                                             @endif
                                         </div>
+                                    </div>
 
-                                        <!-- Footer with Quantity and Price -->
-                                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t border-gray-200">
-                                            <!-- Quantity Control -->
-                                            <div>
-                                                <p class="text-sm font-medium text-gray-700 mb-2">Jumlah</p>
-                                                <div class="flex items-center">
-                                                    <button onclick="updateQuantity({{ $item->id }}, -1)" 
-                                                            class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-l-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                            {{ $item->quantity <= 1 ? 'disabled' : '' }}>
-                                                        <i class="fas fa-minus text-gray-600"></i>
-                                                    </button>
-                                                    <input type="number" 
-                                                           value="{{ $item->quantity }}" 
-                                                           min="1" 
-                                                           max="{{ $item->produk->stok_tersedia }}"
-                                                           onchange="updateQuantityInput({{ $item->id }}, this.value)"
-                                                           class="w-16 h-10 text-center bg-white border-y border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                                    <button onclick="updateQuantity({{ $item->id }}, 1)" 
-                                                            class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-r-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                            {{ $item->quantity >= $item->produk->stok_tersedia ? 'disabled' : '' }}>
-                                                        <i class="fas fa-plus text-gray-600"></i>
+                                    <!-- Product Details -->
+                                    <div class="md:w-3/4">
+                                        <div class="flex flex-col h-full">
+                                            <!-- Header -->
+                                            <div class="flex-1">
+                                                <div class="flex justify-between items-start mb-2">
+                                                    <h3 class="text-lg font-bold text-gray-900">{{ $item->produk->nama }}</h3>
+                                                    <button onclick="removeFromCart({{ $item->id }})" 
+                                                            class="text-gray-400 hover:text-red-500 transition-colors">
+                                                        <i class="fas fa-times text-lg"></i>
                                                     </button>
                                                 </div>
+                                                
+                                                <p class="text-gray-600 text-sm mb-4">{{ Str::limit($item->produk->deskripsi, 80) }}</p>
+                                                
+                                                <!-- Category and Type -->
+                                                <div class="flex flex-wrap gap-2 mb-4">
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                                        <i class="fas fa-tag mr-1.5 text-xs"></i>
+                                                        {{ $item->produk->kategori->nama }}
+                                                    </span>
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                        <i class="fas fa-box mr-1.5 text-xs"></i>
+                                                        Stok: {{ $item->produk->stok_tersedia }}
+                                                    </span>
+                                                </div>
+
+                                                <!-- Sewa Details -->
+                                                @if($item->tipe === 'sewa' && $item->opsi_sewa)
+                                                <div class="bg-blue-50 rounded-xl p-4 mb-4">
+                                                    <h4 class="text-sm font-semibold text-blue-900 mb-2">Detail Sewa</h4>
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                        <div>
+                                                            <p class="text-xs text-blue-600">Durasi</p>
+                                                            <p class="text-sm font-semibold text-blue-900">{{ $item->opsi_sewa['durasi'] }}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p class="text-xs text-blue-600">Jumlah Hari</p>
+                                                            <p class="text-sm font-semibold text-blue-900">{{ $item->opsi_sewa['jumlah_hari'] }}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p class="text-xs text-blue-600">Mulai</p>
+                                                            <p class="text-sm font-semibold text-blue-900">{{ date('d/m/Y', strtotime($item->opsi_sewa['tanggal_mulai'])) }}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p class="text-xs text-blue-600">Harga/{{$item->opsi_sewa['durasi'] == 'harian' ? 'Hari' : ($item->opsi_sewa['durasi'] == 'mingguan' ? 'Minggu' : 'Bulan')}}</p>
+                                                            <p class="text-sm font-semibold text-blue-900">Rp {{ number_format($item->harga, 0, ',', '.') }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
                                             </div>
 
-                                            <!-- Price -->
-                                            <div class="text-right">
-                                                <p class="text-sm text-gray-600 mb-1">
-                                                    @if($item->tipe === 'jual')
-                                                    @ Rp {{ number_format($item->produk->harga_beli, 0, ',', '.') }}
-                                                    @else
-                                                    @ Rp {{ number_format($item->harga, 0, ',', '.') }}/hari
-                                                    @endif
-                                                </p>
-                                                <p class="text-xl font-bold text-primary">
-                                                    Rp {{ number_format($item->subtotal, 0, ',', '.') }}
-                                                </p>
+                                            <!-- Footer with Quantity and Price -->
+                                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t border-gray-200">
+                                                <!-- Quantity Control -->
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-700 mb-2">Jumlah</p>
+                                                    <div class="flex items-center">
+                                                        <button onclick="updateQuantity({{ $item->id }}, -1)" 
+                                                                class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-l-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                {{ $item->quantity <= 1 ? 'disabled' : '' }}>
+                                                            <i class="fas fa-minus text-gray-600"></i>
+                                                        </button>
+                                                        <input type="number" 
+                                                            value="{{ $item->quantity }}" 
+                                                            min="1" 
+                                                            max="{{ $item->produk->stok_tersedia }}"
+                                                            onchange="updateQuantityInput({{ $item->id }}, this.value)"
+                                                            class="w-16 h-10 text-center bg-white border-y border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                                        <button onclick="updateQuantity({{ $item->id }}, 1)" 
+                                                                class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-r-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                {{ $item->quantity >= $item->produk->stok_tersedia ? 'disabled' : '' }}>
+                                                            <i class="fas fa-plus text-gray-600"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Price -->
+                                                <div class="text-right">
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        @if($item->tipe === 'jual')
+                                                        @ Rp {{ number_format($item->produk->harga_beli, 0, ',', '.') }}
+                                                        @else
+                                                        @ Rp {{ number_format($item->harga, 0, ',', '.') }}/{{$item->opsi_sewa['durasi'] == 'harian' ? 'Hari' : ($item->opsi_sewa['durasi'] == 'mingguan' ? 'Minggu' : 'Bulan')}}
+                                                        @endif
+                                                    </p>
+                                                    <p class="text-xl font-bold text-primary">
+                                                        Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     @endforeach
                 </div>
 
@@ -234,10 +234,10 @@
 
                             <!-- Checkout Button -->
                             <a href="{{ route('user.transaksi.create') }}" 
-                               class="w-full mt-6 bg-gradient-to-r from-primary to-primary-dark text-white font-bold py-4 px-6 rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 flex items-center justify-center gap-3">
+                               class="w-full mt-6 bg-gradient-to-r from-gray-800 to-gray-950 text-white font-bold py-4 px-6 rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 flex items-center justify-center gap-3 group">
                                 <i class="fas fa-shopping-bag"></i>
                                 <span>Lanjut ke Checkout</span>
-                                <i class="fas fa-arrow-right"></i>
+                                <i class="fas fa-arrow-right group-hover:translate-x-2 duration-300"></i>
                             </a>
 
                             <!-- Payment Methods -->
@@ -296,25 +296,6 @@
             </div>
         </div>
         @endif
-
-        <!-- Recommended Products -->
-        <div class="mt-16">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-900">Rekomendasi untuk Anda</h2>
-                <a href="{{ route('produk.index') }}" class="text-primary font-semibold hover:text-primary-dark flex items-center gap-2">
-                    <span>Lihat Semua</span>
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                @foreach(\App\Models\Produk::with('kategori')->active()->inRandomOrder()->limit(4)->get() as $product)
-                <div class="group" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-                    @include('components.product-card', ['product' => $product])
-                </div>
-                @endforeach
-            </div>
-        </div>
     </div>
 </div>
 @endsection
@@ -455,17 +436,6 @@ function updateQuantityInput(itemId, value) {
 
 // Update cart item via AJAX
 async function updateCartItem(itemId, quantity) {
-    const itemElement = document.querySelector(`.cart-item[data-id="${itemId}"]`);
-    
-    // Show loading
-    const originalContent = itemElement.innerHTML;
-    itemElement.innerHTML = `
-        <div class="flex items-center justify-center p-12">
-            <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full loading-spinner"></div>
-            <span class="ml-3 text-gray-600">Memperbarui...</span>
-        </div>
-    `;
-    
     try {
         const response = await fetch(`/user/keranjang/${itemId}`, {
             method: 'PUT',
@@ -474,38 +444,29 @@ async function updateCartItem(itemId, quantity) {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ quantity: quantity })
+            body: JSON.stringify({ quantity })
         });
-        
+
         const data = await response.json();
-        
-        if (data.success) {
-            // Recreate cart item with updated data
-            const newItem = await createCartItemHtml(data.item);
-            itemElement.outerHTML = newItem;
-            
-            // Update order summary
-            updateOrderSummary(data);
-            
-            // Show success message
-            Toast.fire({
-                icon: 'success',
-                title: 'Keranjang berhasil diperbarui'
-            });
-        } else {
-            itemElement.innerHTML = originalContent;
-            throw new Error(data.message);
-        }
+
+        if (!data.success) throw new Error(data.message);
+
+        // update input value saja
+        const itemElement = document.querySelector(`.cart-item[data-id="${itemId}"]`);
+        const input = itemElement.querySelector('input[type="number"]');
+        input.value = quantity;
+
+        updateOrderSummary(data);
+
     } catch (error) {
-        itemElement.innerHTML = originalContent;
         Swal.fire({
             icon: 'error',
-            title: 'Gagal Memperbarui',
-            text: error.message || 'Terjadi kesalahan',
-            confirmButtonColor: '#2B6CB0'
+            title: 'Gagal',
+            text: error.message
         });
     }
 }
+
 
 // Remove item from cart
 async function removeFromCart(itemId) {

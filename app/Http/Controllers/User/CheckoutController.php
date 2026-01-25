@@ -178,7 +178,7 @@ class CheckoutController extends Controller
                             ->addDays($cartItem->opsi_sewa['jumlah_hari'] ?? 1),
                         'tanggal_kembali_rencana' => Carbon::parse($cartItem->opsi_sewa['tanggal_mulai'] ?? now())
                             ->addDays($cartItem->opsi_sewa['jumlah_hari'] ?? 1),
-                        'status' => 'menunggu_pembayaran',
+                        'status' => 'tidak aktif',
                         'total_harga' => $cartItem->subtotal,
                     ]);
                     
@@ -283,7 +283,7 @@ class CheckoutController extends Controller
                 'tanggal_mulai' => $request->tanggal_mulai,
                 'tanggal_selesai' => Carbon::parse($request->tanggal_mulai)->addDays($request->jumlah_hari),
                 'tanggal_kembali_rencana' => Carbon::parse($request->tanggal_mulai)->addDays($request->jumlah_hari),
-                'status' => 'menunggu_pembayaran',
+                'status' => 'tidak aktif',
                 'total_harga' => $subtotal,
             ]);
             

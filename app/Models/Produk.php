@@ -83,21 +83,6 @@ class Produk extends Model
         return $query->where('stok_tersedia', '>', 0);
     }
 
-    // Custom methods
-    public function getHargaSewa($durasi)
-    {
-        switch ($durasi) {
-            case 'harian':
-                return $this->harga_sewa_harian;
-            case 'mingguan':
-                return $this->harga_sewa_mingguan;
-            case 'bulanan':
-                return $this->harga_sewa_bulanan;
-            default:
-                return $this->harga_sewa_harian;
-        }
-    }
-
     public function updateStok($quantity, $tipe = 'keluar')
     {
         if ($tipe === 'keluar') {
@@ -105,7 +90,7 @@ class Produk extends Model
         } else {
             $this->stok_tersedia += $quantity;
         }
-        
+
         $this->save();
     }
 
@@ -116,13 +101,13 @@ class Produk extends Model
         \Log::info('Action: ' . $tipe);
         \Log::info('Quantity: ' . $quantity);
         \Log::info('Before - stok_disewa: ' . $this->stok_disewa . ', stok_tersedia: ' . $this->stok_tersedia);
-        
+
         if ($tipe === 'keluar') {
             // Produk DISEWA: stok_disewa berkurang, stok_tersedia berkurang
-            if ($this->stok_disewa < $quantity) {
+            if ($this->stok_tersedia < $quantity) {
                 throw new \Exception("Stok sewa tidak mencukupi. Stok tersedia: {$this->stok_disewa}, dibutuhkan: {$quantity}");
             }
-            
+
             $this->stok_disewa -= $quantity;
             $this->stok_tersedia -= $quantity;
         } else {
@@ -130,12 +115,12 @@ class Produk extends Model
             $this->stok_disewa += $quantity;
             $this->stok_tersedia += $quantity;
         }
-        
+
         $this->save();
         $this->refresh();
-        
+
         \Log::info('After - stok_disewa: ' . $this->stok_disewa . ', stok_tersedia: ' . $this->stok_tersedia);
-        
+
         return $this;
     }
 
@@ -183,7 +168,7 @@ class Produk extends Model
         if (!$this->warna || empty($this->warna)) {
             return '-';
         }
-        
+
         return implode(', ', $this->warna);
     }
 
@@ -193,7 +178,7 @@ class Produk extends Model
         if (!$this->size || empty($this->size)) {
             return '-';
         }
-        
+
         return implode(', ', $this->size);
     }
 
@@ -213,13 +198,13 @@ class Produk extends Model
     public function addWarna($warna)
     {
         $warnaList = $this->warna ?: [];
-        
+
         if (!in_array($warna, $warnaList)) {
             $warnaList[] = $warna;
             $this->warna = $warnaList;
             $this->save();
         }
-        
+
         return $this;
     }
 
@@ -227,47 +212,45 @@ class Produk extends Model
     public function addSize($size)
     {
         $sizeList = $this->size ?: [];
-        
+
         if (!in_array($size, $sizeList)) {
             $sizeList[] = $size;
             $this->size = $sizeList;
             $this->save();
         }
-        
+
         return $this;
     }
 
     public function getGambarUrlAttribute()
     {
-        // Jika tidak ada gambar
+        // Jika tidak ada gambar sama sekali
         if (!$this->gambar) {
             return $this->getDefaultImage();
         }
-        
-        // Cek jika gambar adalah URL lengkap
+
+        // Jika sudah berupa URL lengkap
         if (filter_var($this->gambar, FILTER_VALIDATE_URL)) {
             return $this->gambar;
         }
-        
-        // Untuk gambar di storage (yang paling umum)
-        try {
-            if (Storage::disk('public')->exists($this->gambar)) {
-                return Storage::disk('public')->url($this->gambar);
-            }
-        } catch (\Exception $e) {
-            // Log error jika diperlukan
-            \Log::error('Error getting image URL: ' . $e->getMessage());
+
+        // Path relatif di storage
+        $path = 'produk/' . ltrim($this->gambar, '/');
+
+        // Cek apakah file benar-benar ada
+        if (file_exists(public_path('storage/' . $path))) {
+            return asset('storage/' . $path);
         }
-        
-        // Fallback: coba path lain
+
+        // Jika file tidak ditemukan → placeholder
         return $this->getDefaultImage();
     }
 
     protected function getDefaultImage()
     {
-        // Gunakan placeholder yang pasti bekerja
         return 'https://placehold.co/400x400/e5e7eb/6b7280?text=Produk&font=roboto';
     }
+
 
     // Accessor untuk harga format
     public function getHargaBeliFormattedAttribute()
@@ -280,6 +263,11 @@ class Produk extends Model
         return 'Rp ' . number_format($this->harga_sewa_harian, 0, ',', '.');
     }
 
+    public function getHargaSewa()
+    {
+        return $this->harga_sewa_harian;
+    }
+
     // Method untuk validasi stok consistency
     public function validateStokConsistency()
     {
@@ -290,38 +278,38 @@ class Produk extends Model
                 throw new \Exception("Stok tidak konsisten. Total stok ({$this->stok_total}) lebih kecil dari stok tersedia ({$this->stok_tersedia}) + stok disewa ({$this->stok_disewa}) = {$totalUsed}");
             }
         }
-        
+
         // Untuk produk jual, stok_disewa harus 0
         if ($this->tipe === 'jual' && $this->stok_disewa > 0) {
             throw new \Exception("Produk jual tidak boleh memiliki stok disewa");
         }
-        
+
         // Untuk produk sewa, stok_tersedia bisa berapa saja (untuk display)
         return true;
     }
 
     // app/Models/Produk.php
-public static function getColorCode($colorName)
-{
-    $colorMap = [
-        'merah' => '#ef4444',
-        'biru' => '#3b82f6',
-        'hijau' => '#10b981',
-        'kuning' => '#f59e0b',
-        'hitam' => '#000000',
-        'putih' => '#ffffff',
-        'abu-abu' => '#6b7280',
-        'coklat' => '#92400e',
-        'ungu' => '#8b5cf6',
-        'pink' => '#ec4899',
-        'orange' => '#f97316',
-        'emas' => '#fbbf24',
-        'perak' => '#9ca3af'
-    ];
-    
-    $lowerColor = strtolower($colorName);
-    return $colorMap[$lowerColor] ?? '#6b7280';
-}
+    public static function getColorCode($colorName)
+    {
+        $colorMap = [
+            'merah' => '#ef4444',
+            'biru' => '#3b82f6',
+            'hijau' => '#10b981',
+            'kuning' => '#f59e0b',
+            'hitam' => '#000000',
+            'putih' => '#ffffff',
+            'abu-abu' => '#6b7280',
+            'coklat' => '#92400e',
+            'ungu' => '#8b5cf6',
+            'pink' => '#ec4899',
+            'orange' => '#f97316',
+            'emas' => '#fbbf24',
+            'perak' => '#9ca3af'
+        ];
+
+        $lowerColor = strtolower($colorName);
+        return $colorMap[$lowerColor] ?? '#6b7280';
+    }
 
     // Generate slug
     protected static function boot()

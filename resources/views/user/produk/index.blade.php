@@ -1,880 +1,687 @@
 @extends('user.layouts.app')
 
-@section('title', 'Katalog Produk - SportWear')
+@section('title', 'Sewa Alat Olahraga - SportWear')
 
 @section('content')
-<div class="container py-8">
-    <!-- Page Header -->
-    <div class="mb-8" data-aos="fade-down">
-        <div class="bg-gradient-to-r from-primary to-primary-dark rounded-2xl p-8 text-white">
-            <div class="flex flex-col lg:flex-row items-center justify-between">
-                <div>
-                    <h1 class="text-4xl lg:text-5xl font-bold mb-3 text-gray-800">Katalog Produk</h1>
-                    <p class="text-black text-lg">Temukan alat olahraga premium untuk kebutuhan Anda</p>
-                </div>
-                <div class="mt-6 lg:mt-0">
-                    <div class="relative">
-                        <div class="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center">
-                            <i class="fas fa-dumbbell text-white text-3xl"></i>
-                        </div>
-                        <div class="absolute -top-2 -right-2 w-12 h-12 bg-accent rounded-full flex items-center justify-center">
-                            <i class="fas fa-star text-white"></i>
-                        </div>
-                    </div>
+    <div class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <section class="py-12 bg-gradient-to-r from-yellow-400 relative overf to-amber-600 overlow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute inset-0"
+                    style="background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 40px 40px;">
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <div class="flex flex-col lg:flex-row gap-8">
-        <!-- Sidebar Filter -->
-        <div class="lg:w-1/4" data-aos="fade-right">
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm sticky top-32">
-                <div class="p-6">
-                    <!-- Search -->
-                    <div class="mb-6">
-                        <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <i class="fas fa-search text-primary"></i>
-                            Cari Produk
-                        </h3>
-                        <form action="{{ route('produk.search') }}" method="GET">
-                            <div class="relative">
-                                <input type="text" 
-                                       name="q" 
-                                       value="{{ request('search') }}"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                                       placeholder="Cari produk...">
-                                <button type="submit" class="absolute right-3 top-3 text-primary hover:text-primary-dark">
-                                    <i class="fas fa-search"></i>
-                                </button>
+
+            <div class="container mx-auto px-4 lg:px-8 relative z-10">
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-8">
+                    <!-- Hero Content -->
+                    <div class="lg:w-2/3" data-aos="fade-right">
+                        <!-- Badge -->
+                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-6">
+                            <span class="w-2 h-2 bg-yellow-400 rounded-full"></span>
+                            <span class="text-white font-semibold text-sm">Beli & Hemat</span>
+                        </div>
+
+                        <!-- Title -->
+                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+                            Beli Alat Olahraga
+                            <span class="block text-yellow-100 mt-2">Berkualitas Premium</span>
+                        </h1>
+
+                        <!-- Description -->
+                        <p class="text-xl text-white/90 mb-8 max-w-2xl">
+                            Miliki alat olahraga sendiri di rumah. Fleksibel, praktis, dan lebih hemat dengan kualitas yang
+                            terjamin!
+                        </p>
+
+                        <!-- Quick Stats -->
+                        <div class="flex flex-wrap gap-6 mb-8">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-dumbbell text-white text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white text-2xl font-bold">200+</p>
+                                    <p class="text-white/80 text-sm">Alat Tersedia</p>
+                                </div>
                             </div>
-                        </form>
-                    </div>
-                    
-                    <!-- Product Type Filter -->
-                    <div class="mb-6">
-                        <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <i class="fas fa-filter text-primary"></i>
-                            Tipe Produk
-                        </h3>
-                        <div class="space-y-2">
-                            <a href="{{ route('produk.index') }}" 
-                               class="flex items-center justify-between px-4 py-3 rounded-lg {{ !request('tipe') ? 'bg-primary/10 text-primary border-l-4 border-primary' : 'hover:bg-gray-50' }}">
-                                <span class="flex items-center gap-2">
-                                    <i class="fas fa-boxes"></i>
-                                    Semua Produk
-                                </span>
-                                <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ $totalProducts }}</span>
-                            </a>
-                            <a href="{{ route('produk.index', ['tipe' => 'jual']) }}" 
-                               class="flex items-center justify-between px-4 py-3 rounded-lg {{ request('tipe') == 'jual' ? 'bg-primary/10 text-primary border-l-4 border-primary' : 'hover:bg-gray-50' }}">
-                                <span class="flex items-center gap-2">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    Untuk Dibeli
-                                </span>
-                                <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ $jualCount }}</span>
-                            </a>
-                            <a href="{{ route('produk.index', ['tipe' => 'sewa']) }}" 
-                               class="flex items-center justify-between px-4 py-3 rounded-lg {{ request('tipe') == 'sewa' ? 'bg-primary/10 text-primary border-l-4 border-primary' : 'hover:bg-gray-50' }}">
-                                <span class="flex items-center gap-2">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    Untuk Disewa
-                                </span>
-                                <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ $sewaCount }}</span>
-                            </a>
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-clock text-white text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white text-2xl font-bold">24/7</p>
+                                    <p class="text-white/80 text-sm">Ketersediaan</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-star text-white text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white text-2xl font-bold">4.9</p>
+                                    <p class="text-white/80 text-sm">Rating</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <!-- Categories -->
-                    <div class="mb-6">
-                        <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <i class="fas fa-tags text-primary"></i>
-                            Kategori
-                        </h3>
-                        <div class="space-y-2">
-                            @foreach($kategoris as $kategori)
-                            <a href="{{ route('produk.index', ['kategori' => $kategori->slug]) }}" 
-                               class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-50 {{ request('kategori') == $kategori->slug ? 'bg-primary/10 text-primary border-l-4 border-primary' : '' }}">
-                                <span class="flex items-center gap-2">
-                                    <i class="fas fa-{{ $kategori->icon ?? 'tag' }}"></i>
-                                    {{ $kategori->nama }}
-                                </span>
-                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">{{ $kategori->produks_count ?? 0 }}</span>
-                            </a>
-                            @endforeach
+
+                    <!-- Hero Illustration -->
+                    <div class="lg:w-1/3" data-aos="fade-left">
+                        <div class="relative">
+                            <div
+                                class="w-64 h-64 mx-auto bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 flex items-center justify-center">
+                                <i class="fas fa-store text-white text-8xl opacity-50"></i>
+                            </div>
+                            <!-- Floating Elements -->
+                            <div class="absolute -top-4 -left-4 w-20 h-20 bg-yellow-400 rounded-full opacity-20 blur-xl">
+                            </div>
+                            <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-cyan-400 rounded-full opacity-20 blur-xl">
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Sort -->
-                    <div class="mb-6">
-                        <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <i class="fas fa-sort-amount-down text-primary"></i>
-                            Urutkan
-                        </h3>
-                        <form id="sortForm" action="{{ route('produk.index') }}" method="GET">
-                            <!-- Preserve existing filters -->
-                            @if(request('tipe'))
-                                <input type="hidden" name="tipe" value="{{ request('tipe') }}">
-                            @endif
-                            @if(request('kategori'))
-                                <input type="hidden" name="kategori" value="{{ request('kategori') }}">
-                            @endif
-                            @if(request('search'))
-                                <input type="hidden" name="search" value="{{ request('search') }}">
-                            @endif
-                            @if(request('view'))
-                                <input type="hidden" name="view" value="{{ request('view') }}">
-                            @endif
-                            
-                            <select name="sort" 
-                                    onchange="this.form.submit()"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                                <option value="terbaru" {{ request('sort') == 'terbaru' ? 'selected' : '' }}>Terbaru</option>
-                                <option value="harga_terendah" {{ request('sort') == 'harga_terendah' ? 'selected' : '' }}>Harga Terendah</option>
-                                <option value="harga_tertinggi" {{ request('sort') == 'harga_tertinggi' ? 'selected' : '' }}>Harga Tertinggi</option>
-                                <option value="nama_az" {{ request('sort') == 'nama_az' ? 'selected' : '' }}>Nama A-Z</option>
-                                <option value="nama_za" {{ request('sort') == 'nama_za' ? 'selected' : '' }}>Nama Z-A</option>
-                            </select>
-                        </form>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Main Content -->
-        <div class="lg:w-3/4">
-            <!-- Header & Controls -->
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4" data-aos="fade-left">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900">
-                        @if(request('kategori'))
-                            {{ $currentKategori->nama ?? 'Kategori' }}
-                        @elseif(request('search'))
-                            Hasil Pencarian: "{{ request('search') }}"
-                        @elseif(request('tipe'))
-                            {{ request('tipe') == 'jual' ? 'Produk Dijual' : 'Produk Disewa' }}
-                        @else
-                            Semua Produk
-                        @endif
+        </section>
+
+        <!-- Benefits Section -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4 lg:px-8">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                        Mengapa beli di <span class="text-primary">SportWear?</span>
                     </h2>
-                    <p class="text-gray-600">{{ $produks->total() }} produk ditemukan</p>
+                    <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                        Solusi cerdas untuk kebutuhan alat olahraga Anda
+                    </p>
                 </div>
-                
-                <div class="flex items-center gap-4">
-                    <!-- Clear Filters Button -->
-                    @if(request()->anyFilled(['tipe', 'kategori', 'search', 'sort']))
-                    <a href="{{ route('produk.index') }}" 
-                       class="inline-flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
-                        <i class="fas fa-times"></i>
-                        Reset Filter
-                    </a>
-                    @endif
-                    
-                    <!-- View Toggle -->
-                    <div class="flex items-center gap-2">
-                        <button class="p-2 rounded-lg border {{ $view == 'grid' ? 'border-primary bg-primary/10 text-primary' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}"
-                                onclick="switchView('grid')">
-                            <i class="fas fa-th"></i>
-                        </button>
-                        <button class="p-2 rounded-lg border {{ $view == 'list' ? 'border-primary bg-primary/10 text-primary' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}"
-                                onclick="switchView('list')">
-                            <i class="fas fa-list"></i>
-                        </button>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-aos="fade-up" data-aos-delay="100">
+                    @foreach ([['icon' => 'fas fa-wallet', 'title' => 'Hemat Biaya', 'desc' => 'Bayar sesuai durasi tanpa biaya perawatan', 'color' => 'emerald'], ['icon' => 'fas fa-bolt', 'title' => 'Proses Cepat', 'desc' => 'Booking online, ambil langsung di toko', 'color' => 'amber'], ['icon' => 'fas fa-shield-alt', 'title' => 'Terjamin', 'desc' => 'Alat berkualitas dengan garansi service', 'color' => 'blue'], ['icon' => 'fas fa-sync-alt', 'title' => 'Fleksibel', 'desc' => 'Berbagai macam metode pembayaran', 'color' => 'purple']] as $benefit)
+                        <div class="group">
+                            <div
+                                class="bg-white rounded-2xl p-6 border border-gray-200 hover:border-{{ $benefit['color'] }}-300 hover:shadow-lg transition-all duration-300 h-full">
+                                <div
+                                    class="w-16 h-16 rounded-xl bg-{{ $benefit['color'] }}-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="{{ $benefit['icon'] }} text-{{ $benefit['color'] }}-600 text-2xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-3">{{ $benefit['title'] }}</h3>
+                                <p class="text-gray-600">{{ $benefit['desc'] }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- Search & Filter Section -->
+        <section class="py-8 bg-gray-50">
+            <div class="container mx-auto px-4 lg:px-8">
+                <div class="max-w-4xl mx-auto" data-aos="fade-up">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 md:p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Search -->
+                            <div class="md:col-span-2">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="searchInput"
+                                        class="pl-10 w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
+                                        placeholder="Cari alat olahraga untuk dibeli...">
+                                </div>
+                            </div>
+
+                            <!-- Category Filter -->
+                            <div>
+                                <select id="categoryFilter"
+                                    class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary">
+                                    <option value="">Semua Kategori</option>
+                                    @foreach ($kategoris as $kategori)
+                                        <option value="{{ $kategori->id }}">{{ $kategori->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Quick Filters -->
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <button
+                                class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors">
+                                Semua
+                            </button>
+                            <button
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                Populer
+                            </button>
+                            <button
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                Harga Terendah
+                            </button>
+                            <button
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                                Stok Tersedia
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Products Grid View -->
-            <div id="gridView" class="{{ $view == 'grid' ? 'block' : 'hidden' }}">
-                @if($produks->count() > 0)
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="productsContainer">
-                    @foreach($produks as $produk)
-                    <div data-aos="fade-up" data-aos-delay="{{ $loop->index * 50 }}">
-                        <div class="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden group">
-                            <!-- Product Image -->
-                            <div class="relative h-48 overflow-hidden">
-                                <img src="{{ $produk->gambar_url }}" 
-                                     alt="{{ $produk->nama }}"
-                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                                
-                                <!-- Badges -->
-                                <div class="absolute top-3 left-3 flex flex-col gap-2">
-                                    @if($produk->tipe === 'jual')
-                                    <span class="px-2 py-1 bg-primary text-white text-xs font-semibold rounded-full">Dijual</span>
-                                    @elseif($produk->tipe === 'sewa')
-                                    <span class="px-2 py-1 bg-accent text-white text-xs font-semibold rounded-full">Disewa</span>
-                                    @else
-                                    <span class="px-2 py-1 bg-gradient-to-r from-primary to-accent text-white text-xs font-semibold rounded-full">Dijual/Disewa</span>
-                                    @endif
-                                    @if($produk->stok_tersedia == 0)
-                                    <span class="px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded-full">Habis</span>
-                                    @endif
-                                </div>
-                            </div>
-                            
-                            <!-- Product Info -->
-                            <div class="p-5">
-                                <div class="mb-3">
-                                    <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{{ $produk->kategori->nama }}</span>
-                                </div>
-                                
-                                <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-primary transition-colors">{{ $produk->nama }}</h3>
-                                <p class="text-gray-600 text-sm mb-4">{{ Str::limit($produk->deskripsi, 80) }}</p>
-                                
-                                <!-- Prices -->
-                                <div class="mb-4">
-                                    @if($produk->tipe === 'jual' || $produk->tipe === 'both')
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-lg font-bold text-primary">Rp {{ number_format($produk->harga_beli, 0, ',', '.') }}</span>
+        </section>
+
+        <!-- Products Grid -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4 lg:px-8">
+                <!-- Section Header -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8" data-aos="fade-up">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Alat Tersedia untuk Disewa</h2>
+                        <p class="text-gray-600">Pilih dari koleksi alat olahraga premium kami</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <p class="text-sm text-gray-500">
+                            <span class="font-semibold text-primary">{{ $produks->count() }}</span> alat tersedia
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Products -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="productsGrid">
+                    @forelse($produks as $produk)
+                        <div class="group" data-aos="fade-up" data-aos-delay="{{ $loop->index * 50 }}">
+                            <div
+                                class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                                <!-- Image Container -->
+                                <div class="relative overflow-hidden" style="height: 200px;">
+                                    <img src="{{ $produk->gambar_url }}" alt="{{ $produk->nama }}"
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+
+                                    <!-- Badges -->
+                                    <div class="absolute top-4 left-4">
+                                        <span class="px-3 py-1 bg-[#1A365D] text-white text-xs font-semibold rounded-full">
+                                            <i class="fas fa-calendar-alt mr-1"></i> Jual
+                                        </span>
                                     </div>
-                                    @endif
-                                    
-                                    @if($produk->tipe === 'sewa' || $produk->tipe === 'both')
-                                    <div class="text-gray-600 text-sm mt-1">
-                                        Sewa: <span class="font-semibold">Rp {{ number_format($produk->harga_sewa_harian, 0, ',', '.') }}/hari</span>
+
+                                    <!-- Stock Badge -->
+                                    <div class="absolute top-4 right-4">
+                                        <span
+                                            class="px-3 py-1 {{ $produk->stok_tersedia > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }} text-xs font-semibold rounded-full">
+                                            <i class="fas fa-box mr-1"></i>
+                                            {{ $produk->stok_tersedia > 0 ? $produk->stok_tersedia . ' tersedia' : 'Habis' }}
+                                        </span>
                                     </div>
-                                    @endif
+
+                                    <!-- Overlay Gradient -->
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent">
+                                    </div>
                                 </div>
-                                
-                                <!-- Actions -->
-                                <div class="flex items-center justify-between">
-                                    <div class="text-sm text-gray-500">
-                                        <i class="fas fa-box mr-1"></i> {{ $produk->stok_tersedia }} tersedia
+
+                                <!-- Content -->
+                                <div class="p-5 flex-1 flex flex-col">
+                                    <!-- Category -->
+                                    <div class="mb-3">
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <i class="fas fa-tag mr-1.5 text-xs"></i>
+                                            {{ $produk->kategori->nama }}
+                                        </span>
                                     </div>
-                                    
-                                    <div class="flex items-center gap-2">
-                                        <a href="{{ route('produk.show', $produk->slug) }}" 
-                                           class="px-3 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                                            <i class="fas fa-eye"></i>
+
+                                    <!-- Product Name -->
+                                    <h3 class="font-bold text-gray-900 mb-2 text-lg">{{ $produk->nama }}</h3>
+
+                                    <!-- Description -->
+                                    <p class="text-gray-600 text-sm mb-4 flex-1">{{ Str::limit($produk->deskripsi, 80) }}
+                                    </p>
+
+                                    <!-- Sale Prices -->
+                                    <div class="mb-6 bg-gray-50 rounded-xl p-4">
+                                        <div class="font-bold text-emerald-600 text-lg">
+                                            Rp {{ number_format($produk->harga_beli, 0, ',', '.') }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="flex gap-3">
+                                        <a href="{{ route('produk.show', $produk->slug) }}"
+                                            class="flex-1 px-4 py-2.5 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:bg-gray-200 transition-all duration-200 flex items-center justify-center gap-2">
+                                            <i class="fas fa-info-circle"></i>
+                                            <span>Detail</span>
                                         </a>
-                                        
-                                        @if($produk->stok_tersedia > 0)
-                                            @if($produk->tipe === 'jual' || $produk->tipe === 'both')
-                                            <button onclick="addToCart({{ $produk->id }}, 'jual')" 
-                                                    class="px-3 py-2 bg-primary text-white hover:bg-primary-dark rounded-lg transition-colors">
+
+                                        @if ($produk->stok_tersedia > 0)
+                                            <button onclick="addToCart({{ $produk->id }}, 'jual')"
+                                                class="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-800 text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
                                                 <i class="fas fa-cart-plus"></i>
+                                                <span>Keranjang</span>
                                             </button>
-                                            @endif
-                                            @if($produk->tipe === 'sewa' || $produk->tipe === 'both')
-                                            <button onclick="addToCart({{ $produk->id }}, 'sewa')" 
-                                                    class="px-3 py-2 bg-accent text-white hover:bg-accent-dark rounded-lg transition-colors">
-                                                <i class="fas fa-calendar-plus"></i>
+                                        @else
+                                            <button disabled
+                                                class="flex-1 px-4 py-2.5 bg-gray-300 text-gray-500 font-semibold rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
+                                                <i class="fas fa-times"></i>
+                                                <span>Habis</span>
                                             </button>
-                                            @endif
                                         @endif
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    @endforeach
+                    @empty
+                        <!-- Empty State -->
+                        <div class="col-span-full py-16 text-center" data-aos="fade-up">
+                            <div class="w-32 h-32 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                                <i class="fas fa-search text-gray-400 text-5xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-3">Tidak Ada Alat Tersedia</h3>
+                            <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                                Saat ini tidak ada alat olahraga yang tersedia untuk disewa. Silakan cek kembali nanti atau
+                                gunakan kata kunci pencarian yang berbeda.
+                            </p>
+                            <button onclick="clearFilters()"
+                                class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200">
+                                <i class="fas fa-redo mr-2"></i>
+                                Reset Pencarian
+                            </button>
+                        </div>
+                    @endforelse
                 </div>
-                @else
-                <!-- Empty State -->
-                <div class="text-center py-12" data-aos="fade-up">
-                    <div class="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-search text-gray-400 text-3xl"></i>
+
+                <!-- Load More -->
+                @if ($produks->hasMorePages())
+                    <div class="text-center mt-12" data-aos="fade-up">
+                        <button id="loadMoreBtn"
+                            class="px-8 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-gray-200 transition-all duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            <span>Muat Lebih Banyak</span>
+                        </button>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Produk tidak ditemukan</h3>
-                    <p class="text-gray-600 mb-6">Coba gunakan filter yang berbeda</p>
-                    <a href="{{ route('produk.index') }}" 
-                       class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors">
-                        <i class="fas fa-redo"></i> Reset Pencarian
-                    </a>
-                </div>
                 @endif
             </div>
-            
-            <!-- Products List View -->
-            <div id="listView" class="{{ $view == 'list' ? 'block' : 'hidden' }}">
-                @if($produks->count() > 0)
-                <div class="space-y-4" id="listProductsContainer">
-                    @foreach($produks as $produk)
-                    <div data-aos="fade-up" data-aos-delay="{{ $loop->index * 50 }}">
-                        <div class="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
-                            <div class="flex flex-col md:flex-row">
-                                <!-- Product Image -->
-                                <div class="md:w-1/4">
-                                    <img src="{{ $produk->gambar_url }}" 
-                                         alt="{{ $produk->nama }}"
-                                         class="w-full h-48 md:h-full object-cover">
+        </section>
+
+        <!-- How It Works -->
+        <section class="py-16 bg-gray-50">
+            <div class="container mx-auto px-4 lg:px-8">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                        Cara Membeli <span class="text-primary">Mudah</span> di SportWear
+                    </h2>
+                    <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                        Hanya 3 langkah sederhana untuk mendapatkan alat olahraga premium
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-aos="fade-up" data-aos-delay="100">
+                    @foreach ([['number' => '01', 'title' => 'Pilih Alat', 'desc' => 'Cari dan pilih alat olahraga yang ingin disewa dari katalog kami', 'icon' => 'fas fa-search'], ['number' => '02', 'title' => 'Selesaikan Pesanan', 'desc' => 'Proses pemesanan mudah dan aman', 'icon' => 'fas fa-calendar-check'], ['number' => '03', 'title' => 'Bayar & Ambil', 'desc' => 'Selesaikan pembayaran dan ambil alat di toko kami', 'icon' => 'fas fa-shopping-bag']] as $step)
+                        <div class="relative">
+                            <div
+                                class="bg-white rounded-2xl p-8 border border-gray-200 hover:border-primary hover:shadow-lg transition-all duration-300 h-full">
+                                <!-- Step Number -->
+                                <div class="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
+                                    <span class="text-primary font-bold text-xl">{{ $step['number'] }}</span>
                                 </div>
-                                
-                                <!-- Product Details -->
-                                <div class="md:w-3/4 p-6">
-                                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                                        <div class="flex-1">
-                                            <!-- Badges -->
-                                            <div class="flex flex-wrap gap-2 mb-3">
-                                                <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">{{ $produk->kategori->nama }}</span>
-                                                @if($produk->tipe === 'jual')
-                                                <span class="px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">Dijual</span>
-                                                @elseif($produk->tipe === 'sewa')
-                                                <span class="px-2 py-1 bg-accent/10 text-accent text-xs font-medium rounded-full">Disewa</span>
-                                                @else
-                                                <span class="px-2 py-1 bg-gradient-to-r from-primary/10 to-accent/10 text-primary text-xs font-medium rounded-full">Dijual/Disewa</span>
-                                                @endif
-                                            </div>
-                                            
-                                            <!-- Title & Description -->
-                                            <h3 class="font-semibold text-gray-900 text-lg mb-2">{{ $produk->nama }}</h3>
-                                            <p class="text-gray-600 text-sm mb-4">{{ Str::limit($produk->deskripsi, 150) }}</p>
-                                            
-                                            <!-- Stock & Rating -->
-                                            <div class="flex items-center gap-4 text-sm text-gray-500">
-                                                <span class="flex items-center gap-1">
-                                                    <i class="fas fa-box"></i> {{ $produk->stok_tersedia }} tersedia
-                                                </span>
-                                                @if($produk->rating > 0)
-                                                <span class="flex items-center gap-1">
-                                                    <i class="fas fa-star text-yellow-400"></i> {{ number_format($produk->rating, 1) }}
-                                                </span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Price & Actions -->
-                                        <div class="lg:w-1/3">
-                                            <div class="space-y-4">
-                                                <!-- Prices -->
-                                                @if($produk->tipe === 'jual' || $produk->tipe === 'both')
-                                                <div>
-                                                    <div class="text-lg font-bold text-primary">Rp {{ number_format($produk->harga_beli, 0, ',', '.') }}</div>
-                                                    <div class="text-gray-600 text-sm">Harga beli</div>
-                                                </div>
-                                                @endif
-                                                
-                                                @if($produk->tipe === 'sewa' || $produk->tipe === 'both')
-                                                <div>
-                                                    <div class="text-lg font-bold text-accent">Rp {{ number_format($produk->harga_sewa_harian, 0, ',', '.') }}/hari</div>
-                                                    <div class="text-gray-600 text-sm">Harga sewa harian</div>
-                                                </div>
-                                                @endif
-                                                
-                                                <!-- Actions -->
-                                                <div class="flex items-center gap-2">
-                                                    <a href="{{ route('produk.show', $produk->slug) }}" 
-                                                       class="flex-1 px-4 py-2 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors text-center">
-                                                        <i class="fas fa-eye mr-2"></i> Detail
-                                                    </a>
-                                                    
-                                                    @if($produk->stok_tersedia > 0)
-                                                        @if($produk->tipe === 'jual' || $produk->tipe === 'both')
-                                                        <button onclick="addToCart({{ $produk->id }}, 'jual')" 
-                                                                class="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors">
-                                                            <i class="fas fa-cart-plus"></i>
-                                                        </button>
-                                                        @endif
-                                                        @if($produk->tipe === 'sewa' || $produk->tipe === 'both')
-                                                        <button onclick="addToCart({{ $produk->id }}, 'sewa')" 
-                                                                class="px-4 py-2 bg-accent text-white font-medium rounded-lg hover:bg-accent-dark transition-colors">
-                                                            <i class="fas fa-calendar-plus"></i>
-                                                        </button>
-                                                        @endif
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
+
+                                <!-- Icon -->
+                                <div
+                                    class="w-14 h-14 bg-primary text-white rounded-xl flex items-center justify-center mb-6">
+                                    <i class="{{ $step['icon'] }} text-lg"></i>
+                                </div>
+
+                                <!-- Content -->
+                                <h3 class="text-xl font-bold text-gray-900 mb-4">{{ $step['title'] }}</h3>
+                                <p class="text-gray-600">{{ $step['desc'] }}</p>
+                            </div>
+
+                            <!-- Arrow for Desktop -->
+                            @if (!$loop->last)
+                                <div class="hidden md:block absolute top-1/2 left-full ml-1.5 transform -translate-y-1/2">
+                                    <i class="fas fa-arrow-right text-gray-300 text-2xl"></i>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4 lg:px-8">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                        Pertanyaan yang <span class="text-primary">Sering Ditanyakan</span>
+                    </h2>
+                    <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                        Temukan jawaban untuk pertanyaan umum seputar penyewaan alat olahraga
+                    </p>
+                </div>
+
+                <div class="max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+                    <div class="space-y-4">
+                        @foreach ([
+            ['question' => 'Berapa lama maksimal durasi sewa?', 'answer' => 'Maksimal durasi sewa adalah 30 hari. Untuk kebutuhan lebih lama dari itu, silakan hubungi customer service kami untuk penawaran khusus.'],
+            ['question' => 'Bagaimana jika alat rusak selama disewa?', 'answer' => 'Kerusakan ringan akan dikenakan denda 10% dari harga alat. Kerusakan berat 50%, dan jika alat hilang atau rusak total, dikenakan biaya 100% harga alat. Semua alat sudah melalui pemeriksaan sebelum disewa.'],
+            ['question' => 'Bisakah memperpanjang durasi sewa?', 'answer' => 'Ya, Anda bisa memperpanjang durasi sewa dengan menghubungi kami minimal 1 hari sebelum tanggal pengembalian. Perpanjangan tergantung ketersediaan alat.'],
+            ['question' => 'Bagaimana cara pengambilan alat?', 'answer' => 'Setelah booking dan pembayaran, Anda bisa mengambil alat langsung di toko kami dengan menunjukkan bukti booking. Atau gunakan layanan delivery dengan biaya tambahan.'],
+            ['question' => 'Apakah ada deposit?', 'answer' => 'Ya, untuk alat dengan harga di atas Rp 5 juta, kami meminta deposit sebesar 30% dari harga alat yang akan dikembalikan setelah alat dikembalikan dalam kondisi baik.'],
+        ] as $faq)
+                            <div
+                                class="border border-gray-200 rounded-2xl overflow-hidden hover:border-primary transition-colors duration-200">
+                                <button
+                                    class="faq-question w-full p-6 text-left flex justify-between items-center bg-white hover:bg-gray-50 transition-colors duration-200">
+                                    <span class="font-semibold text-gray-900 text-lg">{{ $faq['question'] }}</span>
+                                    <i class="fas fa-chevron-down text-primary transition-transform duration-300"></i>
+                                </button>
+                                <div class="faq-answer overflow-hidden transition-all duration-300 max-h-0">
+                                    <div class="p-6 pt-0 text-gray-600">
+                                        {{ $faq['answer'] }}
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        @endforeach
                     </div>
-                    @endforeach
-                </div>
-                @endif
-            </div>
-            
-            <!-- Pagination (Tetap dipertahankan untuk fallback) -->
-            @if($produks->hasPages())
-            <div class="mt-8" data-aos="fade-up" id="paginationContainer">
-                {{ $produks->withQueryString()->onEachSide(1)->links('vendor.pagination.custom') }}
-            </div>
-            @endif
-            
-            <!-- Loading Indicator untuk Infinite Scroll -->
-            <div id="loadingIndicator" class="hidden mt-8 text-center">
-                <div class="inline-flex flex-col items-center">
-                    <div class="spinner w-12 h-12 mb-4"></div>
-                    <p class="text-gray-600">Memuat produk...</p>
                 </div>
             </div>
-            
-            <!-- End of Content Marker -->
-            <div id="endOfContent" class="hidden mt-8 text-center py-4">
-                <p class="text-gray-500">😊 Anda telah mencapai akhir daftar produk</p>
-            </div>
-        </div>
+        </section>
     </div>
-</div>
 
-<!-- Quick View Modal -->
-<div id="quickViewModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="flex min-h-full items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/50" onclick="closeModal()"></div>
-        <div class="relative bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <!-- Content loaded via AJAX -->
-        </div>
-    </div>
-</div>
-
+    <!-- Include Modal Component -->
+    @include('user.components.sewa-modal')
 @endsection
 
 @push('styles')
-<style>
-.sticky-top {
-    position: sticky;
-    top: 2rem;
-}
+    <style>
+        /* Custom animations */
+        @keyframes float {
 
-/* View toggle animation */
-#gridView, #listView {
-    transition: opacity 0.3s ease;
-}
+            0%,
+            100% {
+                transform: translateY(0);
+            }
 
-/* Product card hover effects */
-.group:hover .group-hover\:scale-110 {
-    transform: scale(1.1);
-}
+            50% {
+                transform: translateY(-10px);
+            }
+        }
 
-/* Custom scrollbar for modal */
-#quickViewModal::-webkit-scrollbar {
-    width: 8px;
-}
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
 
-#quickViewModal::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
+        /* Duration option active state */
+        .duration-option input:checked+div {
+            border-color: #2B6CB0;
+            background-color: rgba(43, 108, 176, 0.05);
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+        }
 
-#quickViewModal::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 4px;
-}
+        /* FAQ animations */
+        .faq-question.active i {
+            transform: rotate(180deg);
+        }
 
-/* Loading spinner */
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid var(--primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
+        .faq-answer.open {
+            max-height: 500px;
+        }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-</style>
+        /* Smooth transitions */
+        .transition-all {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Gradient borders */
+        .border-gradient {
+            border: 2px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #38B2AC, #2B6CB0) border-box;
+        }
+    </style>
 @endpush
 
 @push('scripts')
-<script>
-// Global variables
-let isLoading = false;
-let currentPage = 1;
-let hasMorePages = true;
-let observer = null;
-let currentView = 'grid';
+    <!-- Include Modal JavaScript -->
+    @vite('resources/js/sewa-modal.js')
 
-// Switch between grid and list view
-function switchView(view) {
-    const gridView = document.getElementById('gridView');
-    const listView = document.getElementById('listView');
-    const url = new URL(window.location.href);
-    
-    currentView = view;
-    
-    if (view === 'grid') {
-        gridView.classList.remove('hidden');
-        listView.classList.add('hidden');
-        url.searchParams.set('view', 'grid');
-    } else {
-        gridView.classList.add('hidden');
-        listView.classList.remove('hidden');
-        url.searchParams.set('view', 'list');
-    }
-    
-    // Save preference
-    localStorage.setItem('productView', view);
-    
-    // Update URL without page reload
-    window.history.pushState({}, '', url);
-    
-    // Re-initialize infinite scroll for the current view
-    setTimeout(() => initInfiniteScroll(), 100);
-}
-
-// Add to cart function
-function addToCart(productId, type) {
-    const productName = document.querySelector(`[data-product-id="${productId}"]`)?.dataset.productName || 'produk';
-    
-    Swal.fire({
-        title: 'Tambahkan ke Keranjang?',
-        text: `Tambahkan ${productName} ke keranjang ${type === 'jual' ? 'pembelian' : 'penyewaan'}`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#1A365D',
-        cancelButtonColor: '#718096',
-        confirmButtonText: 'Ya, Tambahkan',
-        cancelButtonText: 'Batal',
-        showLoaderOnConfirm: true,
-        preConfirm: async () => {
-            try {
-                const response = await fetch('/user/keranjang', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        type: type,
-                        quantity: 1
-                    })
-                });
-                
-                if (!response.ok) throw new Error('Network response was not ok');
-                return await response.json();
-            } catch (error) {
-                Swal.showValidationMessage(`Gagal: ${error.message}`);
-            }
-        }
-    }).then((result) => {
-        if (result.isConfirmed && result.value) {
-            if (result.value.success) {
-                // Update cart badge
-                window.dispatchEvent(new CustomEvent('cartUpdated', {
-                    detail: { count: result.value.cart_count }
-                }));
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Produk telah ditambahkan ke keranjang',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            } else {
-                Swal.fire('Error', result.value.message, 'error');
-            }
-        }
-    });
-}
-
-// Quick view modal
-function showQuickView(slug) {
-    const modal = document.getElementById('quickViewModal');
-    const content = modal.querySelector('div > div');
-    
-    // Show loading
-    content.innerHTML = `
-        <div class="p-8">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-semibold">Memuat...</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            <div class="flex justify-center py-12">
-                <div class="spinner"></div>
-            </div>
-        </div>
-    `;
-    
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    
-    // Load product details
-    fetch(`/user/produk/${slug}/quick-view`)
-        .then(response => response.json())
-        .then(data => {
-            content.innerHTML = data.html;
-            
-            // Initialize AOS for modal content
+    <script>
+        // Initialize AOS
+        document.addEventListener('DOMContentLoaded', function() {
             if (typeof AOS !== 'undefined') {
-                AOS.refresh();
+                AOS.init({
+                    duration: 800,
+                    once: true,
+                    offset: 100
+                });
             }
-            
-            // Re-initialize cart buttons in modal
-            initCartButtonsInModal();
-        })
-        .catch(error => {
-            content.innerHTML = `
-                <div class="p-8">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xl font-semibold">Error</h3>
-                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
-                    </div>
-                    <div class="text-center py-12">
-                        <p class="text-gray-600">Gagal memuat detail produk.</p>
-                        <button onclick="showQuickView('${slug}')" 
-                                class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">
-                            Coba Lagi
-                        </button>
-                    </div>
-                </div>
-            `;
+
+            // Initialize FAQ functionality
+            initFAQ();
+
+            // Initialize search functionality
+            initSearch();
         });
-}
 
-function closeModal() {
-    const modal = document.getElementById('quickViewModal');
-    modal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
+        function addToCart(productId, type) {
+            const productName = document.querySelector(`[data-product-id="${productId}"]`)?.dataset.productName || 'produk';
 
-function initCartButtonsInModal() {
-    document.querySelectorAll('[onclick^="addToCart"]').forEach(button => {
-        const onclick = button.getAttribute('onclick');
-        const match = onclick.match(/addToCart\((\d+),\s*'(\w+)'\)/);
-        if (match) {
-            button.onclick = () => {
-                addToCart(match[1], match[2]);
-                closeModal();
-            };
-        }
-    });
-}
+            Swal.fire({
+                title: 'Tambahkan ke Keranjang?',
+                text: `Tambahkan ${productName} ke keranjang ${type === 'jual' ? 'pembelian' : 'penyewaan'}`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#1A365D',
+                cancelButtonColor: '#718096',
+                confirmButtonText: 'Ya, Tambahkan',
+                cancelButtonText: 'Batal',
+                showLoaderOnConfirm: true,
+                preConfirm: async () => {
+                    try {
+                        const response = await fetch('/user/keranjang', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                product_id: productId,
+                                type: type,
+                                quantity: 1
+                            })
+                        });
 
-// Initialize infinite scroll
-function initInfiniteScroll() {
-    // Hentikan observer sebelumnya jika ada
-    if (observer) {
-        observer.disconnect();
-        observer = null;
-    }
-    
-    // Reset state
-    isLoading = false;
-    currentPage = {{ $produks->currentPage() }};
-    
-    // Cek apakah ada halaman berikutnya dari data Laravel
-    hasMorePages = {{ $produks->hasMorePages() ? 'true' : 'false' }};
-    
-    // Jika tidak ada halaman berikutnya, tidak perlu setup infinite scroll
-    if (!hasMorePages) {
-        const endOfContent = document.getElementById('endOfContent');
-        if (endOfContent) endOfContent.classList.remove('hidden');
-        return;
-    }
-    
-    // Buat sentinel element untuk diamati
-    let sentinel = document.getElementById('infiniteScrollSentinel');
-    if (!sentinel) {
-        sentinel = document.createElement('div');
-        sentinel.id = 'infiniteScrollSentinel';
-        sentinel.className = 'h-10 w-full';
-        
-        // Tambahkan sentinel di tempat yang tepat
-        if (currentView === 'grid') {
-            const container = document.getElementById('productsContainer');
-            if (container) {
-                const pagination = document.getElementById('paginationContainer');
-                if (pagination) {
-                    container.parentNode.insertBefore(sentinel, pagination);
-                } else {
-                    container.appendChild(sentinel);
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return await response.json();
+                    } catch (error) {
+                        Swal.showValidationMessage(`Gagal: ${error.message}`);
+                    }
                 }
-            }
-        } else {
-            const container = document.getElementById('listProductsContainer');
-            if (container) {
-                const pagination = document.getElementById('paginationContainer');
-                if (pagination) {
-                    container.parentNode.insertBefore(sentinel, pagination);
-                } else {
-                    container.appendChild(sentinel);
-                }
-            }
-        }
-    }
-    
-    // Setup Intersection Observer
-    observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !isLoading && hasMorePages) {
-                    loadMoreProducts();
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    if (result.value.success) {
+                        // Update cart badge
+                        window.dispatchEvent(new CustomEvent('cartUpdated', {
+                            detail: {
+                                count: result.value.cart_count
+                            }
+                        }));
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Produk telah ditambahkan ke keranjang',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire('Error', result.value.message, 'error');
+                    }
                 }
             });
-        },
-        {
-            rootMargin: '100px',
-            threshold: 0.1
         }
-    );
-    
-    if (sentinel) observer.observe(sentinel);
-}
 
-// Load more products for infinite scroll
-async function loadMoreProducts() {
-    if (isLoading || !hasMorePages) return;
-    
-    isLoading = true;
-    currentPage++;
-    
-    // Show loading indicator
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const endOfContent = document.getElementById('endOfContent');
-    loadingIndicator.classList.remove('hidden');
-    
-    try {
-        // Build URL with current query parameters
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('page', currentPage);
-        
-        // Fetch next page
-        const response = await fetch(currentUrl.toString(), {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
+
+        // FAQ Functionality
+        function initFAQ() {
+            const faqQuestions = document.querySelectorAll('.faq-question');
+
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', function() {
+                    const answer = this.nextElementSibling;
+                    const icon = this.querySelector('i');
+
+                    // Toggle active class
+                    this.classList.toggle('active');
+
+                    // Toggle answer
+                    if (answer.classList.contains('open')) {
+                        answer.classList.remove('open');
+                        answer.style.maxHeight = '0';
+                    } else {
+                        answer.classList.add('open');
+                        answer.style.maxHeight = answer.scrollHeight + 'px';
+                    }
+
+                    // Toggle icon
+                    icon.style.transform = this.classList.contains('active') ? 'rotate(180deg)' :
+                        'rotate(0)';
+                });
+            });
+        }
+
+        // Search Functionality
+        let searchTimeout;
+
+        function initSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilter = document.getElementById('categoryFilter');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        searchProducts();
+                    }, 500);
+                });
+            }
+
+            if (categoryFilter) {
+                categoryFilter.addEventListener('change', searchProducts);
+            }
+        }
+
+        function searchProducts() {
+            const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const categoryId = document.getElementById('categoryFilter')?.value || '';
+
+            document.querySelectorAll('.group').forEach(card => {
+                const productName = card.querySelector('h3')?.textContent.toLowerCase() || '';
+                const productCategory = card.dataset.category || '';
+
+                const shouldShow =
+                    (!searchTerm || productName.includes(searchTerm)) &&
+                    (!categoryId || productCategory === categoryId);
+
+                card.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        // Clear Filters
+        function clearFilters() {
+            if (document.getElementById('searchInput')) {
+                document.getElementById('searchInput').value = '';
+            }
+            if (document.getElementById('categoryFilter')) {
+                document.getElementById('categoryFilter').value = '';
+            }
+
+            // Show all products
+            document.querySelectorAll('.group').forEach(el => {
+                el.style.display = 'block';
+            });
+        }
+
+        // Load More Products
+        let currentPage = 1;
+        document.getElementById('loadMoreBtn')?.addEventListener('click', async function() {
+            const button = this;
+            const originalText = button.innerHTML;
+
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memuat...';
+            button.disabled = true;
+
+            try {
+                const response = await fetch(`/user/produk?page=${currentPage + 1}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const html = await response.text();
+
+                if (html) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const newProducts = tempDiv.querySelector('#productsGrid').innerHTML;
+
+                    document.getElementById('productsGrid').innerHTML += newProducts;
+                    currentPage++;
+
+                    // Reinitialize AOS for new elements
+                    if (typeof AOS !== 'undefined') {
+                        AOS.refresh();
+                    }
+                }
+
+                button.innerHTML = originalText;
+                button.disabled = false;
+            } catch (error) {
+                console.error('Error loading more products:', error);
+                button.innerHTML = originalText;
+                button.disabled = false;
             }
         });
-        
-        if (!response.ok) throw new Error('Network response was not ok');
-        
-        const html = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        
-        // Extract products based on current view
-        if (currentView === 'grid') {
-            const newProductsContainer = doc.querySelector('#productsContainer');
-            const container = document.getElementById('productsContainer');
-            if (newProductsContainer && container) {
-                // Convert HTML string to DOM elements
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = newProductsContainer.innerHTML;
-                
-                // Append each new product
-                while (tempDiv.firstChild) {
-                    container.appendChild(tempDiv.firstChild);
+
+        // Make sure showSewaModal is available globally
+        // (Already exported from sewa-modal.js, but just in case)
+        window.showSewaModal = window.showSewaModal || function(productId) {
+            console.warn('showSewaModal not loaded from sewa-modal.js');
+            alert('Fungsi sewa belum siap. Silakan refresh halaman.');
+        };
+
+        // Quick filter buttons functionality (optional enhancement)
+        document.querySelectorAll('.bg-gray-100').forEach(button => {
+            button.addEventListener('click', function() {
+                const text = this.textContent.trim();
+
+                // Reset all buttons
+                document.querySelectorAll('.bg-gray-100, .bg-primary').forEach(btn => {
+                    btn.classList.remove('bg-primary', 'text-white');
+                    btn.classList.add('bg-gray-100', 'text-gray-700');
+                });
+
+                // Activate clicked button
+                this.classList.remove('bg-gray-100', 'text-gray-700');
+                this.classList.add('bg-primary', 'text-white');
+
+                // Implement filter logic based on text
+                switch (text) {
+                    case 'Populer':
+                        // Add your popular filter logic
+                        break;
+                    case 'Harga Terendah':
+                        // Add your price sort logic
+                        break;
+                    case 'Stok Tersedia':
+                        // Filter by stock
+                        document.querySelectorAll('.group').forEach(card => {
+                            const stockBadge = card.querySelector('.bg-red-100');
+                            card.style.display = stockBadge ? 'none' : 'block';
+                        });
+                        break;
                 }
-            }
-        } else {
-            const newProductsContainer = doc.querySelector('#listProductsContainer');
-            const container = document.getElementById('listProductsContainer');
-            if (newProductsContainer && container) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = newProductsContainer.innerHTML;
-                
-                while (tempDiv.firstChild) {
-                    container.appendChild(tempDiv.firstChild);
-                }
-            }
-        }
-        
-        // Check if there are more pages
-        const newPagination = doc.querySelector('#paginationContainer');
-        if (newPagination) {
-            const nextPageLink = newPagination.querySelector('a[rel="next"]');
-            if (!nextPageLink) {
-                hasMorePages = false;
-                endOfContent.classList.remove('hidden');
-                // Remove sentinel
-                const sentinel = document.getElementById('infiniteScrollSentinel');
-                if (sentinel) sentinel.remove();
-            } else {
-                // Update pagination container
-                document.getElementById('paginationContainer').innerHTML = newPagination.innerHTML;
-            }
-        }
-        
-        // Initialize AOS for new elements
-        if (typeof AOS !== 'undefined') {
-            AOS.refreshHard();
-        }
-        
-        // Re-initialize cart buttons for new products
-        initCartButtons();
-        
-        // Update sentinel position
-        updateSentinelPosition();
-        
-    } catch (error) {
-        console.error('Error loading more products:', error);
-        hasMorePages = false;
-        loadingIndicator.innerHTML = '<p class="text-red-500">Gagal memuat lebih banyak produk</p>';
-    } finally {
-        isLoading = false;
-        loadingIndicator.classList.add('hidden');
-    }
-}
-
-// Initialize cart buttons
-function initCartButtons() {
-    document.querySelectorAll('[onclick^="addToCart"]').forEach(button => {
-        const onclick = button.getAttribute('onclick');
-        const match = onclick.match(/addToCart\((\d+),\s*'(\w+)'\)/);
-        if (match) {
-            button.onclick = () => addToCart(match[1], match[2]);
-        }
-    });
-}
-
-// Update sentinel position
-function updateSentinelPosition() {
-    const sentinel = document.getElementById('infiniteScrollSentinel');
-    if (sentinel) {
-        observer.unobserve(sentinel);
-        sentinel.remove();
-    }
-    
-    // Create new sentinel
-    const newSentinel = document.createElement('div');
-    newSentinel.id = 'infiniteScrollSentinel';
-    newSentinel.className = 'h-10 w-full';
-    
-    if (currentView === 'grid') {
-        const container = document.getElementById('productsContainer');
-        if (container) container.appendChild(newSentinel);
-    } else {
-        const container = document.getElementById('listProductsContainer');
-        if (container) container.appendChild(newSentinel);
-    }
-    
-    observer.observe(newSentinel);
-}
-
-// Initialize page on load
-document.addEventListener('DOMContentLoaded', function() {
-    // Set initial view from localStorage
-    const savedView = localStorage.getItem('productView') || 'grid';
-    switchView(savedView);
-    
-    // Initialize AOS
-    if (typeof AOS !== 'undefined') {
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 50,
-            easing: 'ease-out-cubic'
+            });
         });
-    }
-    
-    // Initialize cart buttons
-    initCartButtons();
-    
-    // Close modal on ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeModal();
-        }
-    });
-    
-    // Initialize infinite scroll after a short delay
-    setTimeout(() => initInfiniteScroll(), 500);
-});
-
-// Handle browser back/forward navigation
-window.addEventListener('popstate', function() {
-    // Reload page for proper state
-    window.location.reload();
-});
-</script>
+    </script>
 @endpush

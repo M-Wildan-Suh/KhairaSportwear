@@ -44,7 +44,7 @@
         padding: 15px 0;
         position: sticky;
         top: 0;
-        z-index: 1000;
+        z-index: 35;
         backdrop-filter: blur(10px);
     }
     
@@ -167,7 +167,7 @@
         box-shadow: 0 10px 40px rgba(26, 54, 93, 0.2);
         border-radius: 12px;
         min-width: 220px;
-        padding: 10px 0;
+        padding-bottom: 10px;
         margin-top: 10px;
         opacity: 0;
         visibility: hidden;
@@ -224,12 +224,6 @@
         border-radius: 8px;
         margin: 4px 8px;
         transition: all 0.3s ease;
-    }
-    
-    .mobile-nav-link:hover {
-        background: rgba(214, 158, 46, 0.2);
-        color: white;
-        transform: translateX(5px);
     }
     
     .mobile-nav-link i {
@@ -481,12 +475,12 @@
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-sport">
-        <div class="container mx-auto px-4">
+        <div class="container mx-auto px-4 md:px-8">
             <div class="flex justify-between items-center">
                 <!-- Brand -->
                 <a href="{{ route('home') }}" class="navbar-brand-sport">
                     <i class="fas fa-dumbbell"></i>
-                    Sport<span>Wear</span>
+                    <i>Khaira <span class=" font-normal">SportWear</span></i>
                 </a>
                 
                 <!-- Desktop Navigation -->
@@ -494,10 +488,10 @@
                     <a href="{{ route('home') }}" class="nav-link-sport {{ request()->routeIs('home') ? 'active' : '' }}">
                         <i class="fas fa-home mr-2"></i> Home
                     </a>
-                    <a href="{{ route('produk.index') }}" class="nav-link-sport {{ request()->routeIs('user.produk.*') ? 'active' : '' }}">
-                        <i class="fas fa-store mr-2"></i> Produk
+                    <a href="{{ route('produk.index') }}" class="nav-link-sport {{ request()->routeIs('produk.*') ? 'active' : '' }}">
+                        <i class="fas fa-store mr-2"></i> Jual
                     </a>
-                    <a href="{{ route('sewa.index') }}" class="nav-link-sport {{ request()->routeIs('user.sewa.*') ? 'active' : '' }}">
+                    <a href="{{ route('sewa.index') }}" class="nav-link-sport {{ request()->routeIs('sewa.*') ? 'active' : '' }}">
                         <i class="fas fa-calendar-alt mr-2"></i> Sewa
                     </a>
                     <a href="{{ route('user.transaksi.index') }}" class="nav-link-sport {{ request()->routeIs('user.transaksi.*') ? 'active' : '' }}">
@@ -527,11 +521,11 @@
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
                         <div class="dropdown-menu-sport">
-                            <div class="px-4 py-3 border-b border-gray-200">
+                            <div class="px-4 py-4 border-b border-gray-200">
                                 <div class="font-semibold text-gray-800">{{ auth()->user()->name }}</div>
                                 <small class="text-gray-500 text-sm">{{ auth()->user()->email }}</small>
                             </div>
-                            <a href="{{ route('user.dashboard') }}" class="dropdown-item-sport">
+                            <a href="{{ Auth::user()->role === 'admin' ? route('admin.dashboard') : route('user.dashboard') }}" class="dropdown-item-sport">
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
                             <a href="{{ route('user.profil.edit') }}" class="dropdown-item-sport">
@@ -561,7 +555,7 @@
                 </div>
                 
                 <!-- Mobile Menu Toggle -->
-                <button class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors" id="mobileMenuToggle">
+                <button class="lg:hidden p-2 w-10 h-10 rounded-lg bg-gray-100 transition-colors" id="mobileMenuToggle">
                     <i class="fas fa-bars fa-lg"></i>
                 </button>
             </div>
@@ -569,19 +563,19 @@
             <!-- Mobile Menu -->
             <div class="mobile-menu lg:hidden mt-3" id="mobileMenu">
                 <div class="space-y-1">
-                    <a href="{{ route('home') }}" class="mobile-nav-link {{ request()->routeIs('home') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    <a href="{{ route('home') }}" class="mobile-nav-link {{ request()->routeIs('home') ? 'bg-blue-50 !text-black' : 'hover:bg-[#d69e2e]/20 text-white' }}">
                         <i class="fas fa-home"></i> Home
                     </a>
-                    <a href="{{ route('produk.index') }}" class="mobile-nav-link {{ request()->routeIs('user.produk.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    <a href="{{ route('produk.index') }}" class="mobile-nav-link {{ request()->routeIs('produk.*') ? 'bg-blue-50 !text-black' : 'hover:bg-[#d69e2e]/20 text-white' }}">
                         <i class="fas fa-store"></i> Produk
                     </a>
-                    <a href="{{ route('sewa.index') }}" class="mobile-nav-link {{ request()->routeIs('user.sewa.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    <a href="{{ route('sewa.index') }}" class="mobile-nav-link {{ request()->routeIs('sewa.*') ? 'bg-blue-50 !text-black' : 'hover:bg-[#d69e2e]/20 text-white' }}">
                         <i class="fas fa-calendar-alt"></i> Sewa
                     </a>
-                    <a href="{{ route('user.transaksi.index') }}" class="mobile-nav-link {{ request()->routeIs('user.transaksi.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    <a href="{{ route('user.transaksi.index') }}" class="mobile-nav-link {{ request()->routeIs('user.transaksi.*') ? 'bg-blue-50 !text-black' : 'hover:bg-[#d69e2e]/20 text-white' }}">
                         <i class="fas fa-history"></i> Histori
                     </a>
-                    <a href="{{ route('user.keranjang.index') }}" class="mobile-nav-link {{ request()->routeIs('user.keranjang.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    <a href="{{ route('user.keranjang.index') }}" class="mobile-nav-link {{ request()->routeIs('user.keranjang.*') ? 'bg-blue-50 !text-black' : 'hover:bg-[#d69e2e]/20 text-white' }}">
                         <i class="fas fa-shopping-cart"></i> Keranjang
                         @if(auth()->check() && auth()->user()->getCartCount() > 0)
                         <span class="ml-auto bg-gradient-to-r from-orange-500 to-yellow-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
@@ -592,13 +586,13 @@
                     
                     @auth
                     <hr class="my-2 border-gray-200">
-                    <a href="{{ route('user.dashboard') }}" class="mobile-nav-link">
+                    <a href="{{ route('user.dashboard') }}" class="mobile-nav-link hover:bg-[#d69e2e]/20 text-white">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
-                    <a href="{{ route('user.profil.edit') }}" class="mobile-nav-link">
+                    <a href="{{ route('user.profil.edit') }}" class="mobile-nav-link hover:bg-[#d69e2e]/20 text-white">
                         <i class="fas fa-user"></i> Profile
                     </a>
-                    <a href="{{ route('user.notifikasi.index') }}" class="mobile-nav-link">
+                    <a href="{{ route('user.notifikasi.index') }}" class="mobile-nav-link hover:bg-[#d69e2e]/20 text-white">
                         <i class="fas fa-bell"></i> Notifikasi
                         @if(auth()->check() && auth()->user()->getUnreadNotificationsCount() > 0)
                         <span class="ml-auto bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
@@ -606,9 +600,9 @@
                         </span>
                         @endif
                     </a>
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout') }}" class=" flex">
                         @csrf
-                        <button type="submit" class="w-full mobile-nav-link text-red-600 hover:text-red-700">
+                        <button type="submit" class="w-full mobile-nav-link text-white hover:bg-red-500/20">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </button>
                     </form>
@@ -635,7 +629,7 @@
     
     <!-- Footer -->
     <footer class="footer-sport">
-        <div class="container mx-auto px-4">
+        <div class="container mx-auto px-4 md:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div>
                     <h4 class="footer-title">SportWear</h4>
@@ -671,7 +665,7 @@
                     <ul class="space-y-3 mt-3">
                         <li class="flex items-start">
                             <i class="fas fa-map-marker-alt mt-1 mr-2 text-gray-400"></i>
-                            <span class="text-gray-300">Jl. Olahraga No. 123, Jakarta</span>
+                            <span class="text-gray-300">Kp. Margahayu Rt. 001 Rw. 009 Desa Cicalengka Kulon, Kecamatan Cicalengka, Kabupaten Bandung. 40395.</span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-phone mr-2 text-gray-400"></i>

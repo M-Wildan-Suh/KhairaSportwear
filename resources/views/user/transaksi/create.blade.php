@@ -5,7 +5,7 @@
 @section('content')
 <div class="py-8">
     <!-- Breadcrumb -->
-    <div class="container mb-6">
+    <div class="container mx-auto px-4 mb-6">
         <nav class="flex items-center text-sm text-gray-600">
             <a href="{{ route('home') }}" class="hover:text-primary transition-colors">
                 <i class="fas fa-home mr-2"></i> Home
@@ -17,7 +17,7 @@
         </nav>
     </div>
 
-    <div class="container">
+    <div class="container mx-auto px-4">
         <h1 class="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
         
         <form id="checkoutForm" method="POST" action="{{ route('user.transaksi.store') }}">
@@ -328,7 +328,7 @@
                             <!-- Action Buttons -->
                             <div class="space-y-3">
                                 <button type="submit" id="submitOrder" 
-                                        class="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+                                        class="w-full py-3 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-950 transition-colors flex items-center justify-center gap-2">
                                     <i class="fas fa-lock"></i>
                                     <span>Buat Pesanan</span>
                                 </button>

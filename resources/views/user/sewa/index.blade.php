@@ -182,126 +182,126 @@
             <!-- Products -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="productsGrid">
                 @forelse($produks as $produk)
-                <div class="group" data-aos="fade-up" data-aos-delay="{{ $loop->index * 50 }}">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col">
-                        <!-- Image Container -->
-                        <div class="relative overflow-hidden" style="height: 200px;">
-                            <img src="{{ $produk->gambar_url }}" 
-                                 alt="{{ $produk->nama }}"
-                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                            
-                            <!-- Badges -->
-                            <div class="absolute top-4 left-4">
-                                <span class="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full">
-                                    <i class="fas fa-calendar-alt mr-1"></i> Sewa
-                                </span>
+                    <div class="group" data-category="{{$produk->kategori->id}}" data-aos="fade-up" data-aos-delay="{{ $loop->index * 50 }}">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                            <!-- Image Container -->
+                            <div class="relative overflow-hidden" style="height: 200px;">
+                                <img src="{{ $produk->gambar_url }}" 
+                                    alt="{{ $produk->nama }}"
+                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                
+                                <!-- Badges -->
+                                <div class="absolute top-4 left-4">
+                                    <span class="px-3 py-1 bg-[#1A365D] text-white text-xs font-semibold rounded-full">
+                                        <i class="fas fa-calendar-alt mr-1"></i> Sewa
+                                    </span>
+                                </div>
+                                
+                                <!-- Stock Badge -->
+                                <div class="absolute top-4 right-4">
+                                    <span class="px-3 py-1 {{ $produk->stok_tersedia > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }} text-xs font-semibold rounded-full">
+                                        <i class="fas fa-box mr-1"></i>
+                                        {{ $produk->stok_tersedia > 0 ? $produk->stok_tersedia . ' tersedia' : 'Habis' }}
+                                    </span>
+                                </div>
+                                
+                                <!-- Overlay Gradient -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
                             </div>
                             
-                            <!-- Stock Badge -->
-                            <div class="absolute top-4 right-4">
-                                <span class="px-3 py-1 {{ $produk->stok_tersedia > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }} text-xs font-semibold rounded-full">
-                                    <i class="fas fa-box mr-1"></i>
-                                    {{ $produk->stok_tersedia > 0 ? $produk->stok_tersedia . ' tersedia' : 'Habis' }}
-                                </span>
-                            </div>
-                            
-                            <!-- Overlay Gradient -->
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
-                        </div>
-                        
-                        <!-- Content -->
-                        <div class="p-5 flex-1 flex flex-col">
-                            <!-- Category -->
-                            <div class="mb-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    <i class="fas fa-tag mr-1.5 text-xs"></i>
-                                    {{ $produk->kategori->nama }}
-                                </span>
-                            </div>
-                            
-                            <!-- Product Name -->
-                            <h3 class="font-bold text-gray-900 mb-2 text-lg">{{ $produk->nama }}</h3>
-                            
-                            <!-- Description -->
-                            <p class="text-gray-600 text-sm mb-4 flex-1">{{ Str::limit($produk->deskripsi, 80) }}</p>
-                            
-                            <!-- Rental Prices -->
-                            <div class="mb-6 bg-gray-50 rounded-xl p-4">
-                                <div class="grid grid-cols-3 gap-2 text-center">
-                                    <div>
-                                        <div class="font-bold text-emerald-600 text-lg">
-                                            Rp {{ number_format($produk->harga_sewa_harian, 0, ',', '.') }}
+                            <!-- Content -->
+                            <div class="p-5 flex-1 flex flex-col">
+                                <!-- Category -->
+                                <div class="mb-3">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        <i class="fas fa-tag mr-1.5 text-xs"></i>
+                                        {{ $produk->kategori->nama }}
+                                    </span>
+                                </div>
+                                
+                                <!-- Product Name -->
+                                <h3 class="font-bold text-gray-900 mb-2 text-lg">{{ $produk->nama }}</h3>
+                                
+                                <!-- Description -->
+                                <p class="text-gray-600 text-sm mb-4 flex-1">{{ Str::limit($produk->deskripsi, 80) }}</p>
+                                
+                                <!-- Rental Prices -->
+                                <div class="mb-6 bg-gray-50 rounded-xl py-4">
+                                    <div class="grid grid-cols-1 gap-2 text-center">
+                                        <div class=" flex justify-between gap-1 items-center">
+                                            <div class="font-bold text-emerald-600 text-lg">
+                                                Rp {{ number_format($produk->harga_sewa_harian, 0, ',', '.') }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1">/Hari</div>
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-1">Harian</div>
-                                    </div>
-                                    <div class="border-x border-gray-200">
-                                        <div class="font-bold text-emerald-600 text-lg">
-                                            Rp {{ number_format($produk->harga_sewa_mingguan, 0, ',', '.') }}
+                                        <div class=" flex justify-between gap-1 items-center">
+                                            <div class="font-bold text-emerald-600 text-lg">
+                                                Rp {{ number_format($produk->harga_sewa_mingguan, 0, ',', '.') }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1">/Minggu</div>
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-1">Mingguan</div>
-                                    </div>
-                                    <div>
-                                        <div class="font-bold text-emerald-600 text-lg">
-                                            Rp {{ number_format($produk->harga_sewa_bulanan, 0, ',', '.') }}
+                                        <div class=" flex justify-between gap-1 items-center">
+                                            <div class="font-bold text-emerald-600 text-lg">
+                                                Rp {{ number_format($produk->harga_sewa_bulanan, 0, ',', '.') }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1">/Bulan</div>
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-1">Bulanan</div>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Action Buttons -->
-                            <div class="flex gap-3">
-                                <a href="{{ route('produk.show', $produk->slug) }}" 
-                                   class="flex-1 px-4 py-2.5 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center gap-2">
-                                    <i class="fas fa-info-circle"></i>
-                                    <span>Detail</span>
-                                </a>
                                 
-                                @if($produk->stok_tersedia > 0)
-                                <button onclick="showSewaModal({{ $produk->id }})" 
-                                        class="flex-1 px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
-                                    <i class="fas fa-cart-plus"></i>
-                                    <span>Sewa</span>
-                                </button>
-                                @else
-                                <button disabled
-                                        class="flex-1 px-4 py-2.5 bg-gray-300 text-gray-500 font-semibold rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
-                                    <i class="fas fa-times"></i>
-                                    <span>Habis</span>
-                                </button>
-                                @endif
+                                <!-- Action Buttons -->
+                                <div class="flex gap-3">
+                                    <a href="{{ route('produk.show', $produk->slug) }}"
+                                        class="flex-1 px-4 py-2.5 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:bg-gray-200 transition-all duration-200 flex items-center justify-center gap-2">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Detail</span>
+                                    </a>
+
+                                    @if ($produk->stok_tersedia > 0)
+                                        <button onclick="showSewaModal({{ $produk->id }})"
+                                            class="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-800 text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
+                                            <i class="fas fa-cart-plus"></i>
+                                            <span>Sewa</span>
+                                        </button>
+                                    @else
+                                        <button disabled
+                                            class="flex-1 px-4 py-2.5 bg-gray-300 text-gray-500 font-semibold rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
+                                            <i class="fas fa-times"></i>
+                                            <span>Habis</span>
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 @empty
-                <!-- Empty State -->
-                <div class="col-span-full py-16 text-center" data-aos="fade-up">
-                    <div class="w-32 h-32 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-search text-gray-400 text-5xl"></i>
+                    <!-- Empty State -->
+                    <div class="col-span-full py-16 text-center" data-aos="fade-up">
+                        <div class="w-32 h-32 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-search text-gray-400 text-5xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">Tidak Ada Alat Tersedia</h3>
+                        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                            Saat ini tidak ada alat olahraga yang tersedia untuk disewa. Silakan cek kembali nanti atau gunakan kata kunci pencarian yang berbeda.
+                        </p>
+                        <button onclick="clearFilters()" 
+                                class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200">
+                            <i class="fas fa-redo mr-2"></i>
+                            Reset Pencarian
+                        </button>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Tidak Ada Alat Tersedia</h3>
-                    <p class="text-gray-600 mb-8 max-w-md mx-auto">
-                        Saat ini tidak ada alat olahraga yang tersedia untuk disewa. Silakan cek kembali nanti atau gunakan kata kunci pencarian yang berbeda.
-                    </p>
-                    <button onclick="clearFilters()" 
-                            class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200">
-                        <i class="fas fa-redo mr-2"></i>
-                        Reset Pencarian
-                    </button>
-                </div>
                 @endforelse
             </div>
             
             <!-- Load More -->
             @if($produks->hasMorePages())
-            <div class="text-center mt-12" data-aos="fade-up">
-                <button id="loadMoreBtn" 
-                        class="px-8 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    <span>Muat Lebih Banyak</span>
-                </button>
-            </div>
+                <div class="text-center mt-12" data-aos="fade-up">
+                    <button id="loadMoreBtn" 
+                            class="px-8 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-gray-200 transition-all duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        <span>Muat Lebih Banyak</span>
+                    </button>
+                </div>
             @endif
         </div>
     </section>
@@ -511,13 +511,15 @@ function initSearch() {
 function searchProducts() {
     const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
     const categoryId = document.getElementById('categoryFilter')?.value || '';
-    
+
     document.querySelectorAll('.group').forEach(card => {
         const productName = card.querySelector('h3')?.textContent.toLowerCase() || '';
-        const productCategory = card.querySelector('span')?.textContent || '';
-        const shouldShow = (!searchTerm || productName.includes(searchTerm)) &&
-                          (!categoryId || productCategory.includes(categoryId));
-        
+        const productCategory = card.dataset.category || '';
+
+        const shouldShow =
+            (!searchTerm || productName.includes(searchTerm)) &&
+            (!categoryId || productCategory === categoryId);
+
         card.style.display = shouldShow ? 'block' : 'none';
     });
 }

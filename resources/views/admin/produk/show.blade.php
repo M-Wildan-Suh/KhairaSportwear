@@ -20,7 +20,7 @@
     <div class="admin-card">
         <div class="flex justify-between items-center mb-6">
             <div>
-                <h3 class="text-2xl font-bold text-gray-800">{{ $produk->nama }}</h3>
+                <h3 class="text-2xl font-bold text-gray-100">{{ $produk->nama }}</h3>
                 <p class="text-gray-600 mt-1">ID: {{ $produk->id }} • Dibuat: {{ $produk->created_at->format('d M Y') }}</p>
             </div>
             <div class="flex space-x-3">
@@ -40,7 +40,7 @@
             <div class="space-y-6">
                 <!-- Product Info Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <h4 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                         <i class="fas fa-info-circle text-primary mr-2"></i> Informasi Produk
                     </h4>
                     <div class="space-y-4">
@@ -77,14 +77,14 @@
 
                 <!-- Stock Info Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <h4 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                         <i class="fas fa-boxes text-primary mr-2"></i> Informasi Stok
                     </h4>
                     <div class="space-y-4">
                         <div class="grid grid-cols-3 gap-4">
-                            <div class="bg-gray-50 p-4 rounded-lg text-center">
-                                <p class="text-sm text-gray-500">Stok Total</p>
-                                <p class="text-2xl font-bold text-gray-800">{{ $produk->stok_total }}</p>
+                            <div class="bg-yellow-50 p-4 rounded-lg text-center">
+                                <p class="text-sm text-yellow-600">Stok Total</p>
+                                <p class="text-2xl font-bold text-yellow-700">{{ $produk->stok_total }}</p>
                             </div>
                             <div class="bg-green-50 p-4 rounded-lg text-center">
                                 <p class="text-sm text-green-600">Stok Tersedia</p>
@@ -112,7 +112,7 @@
 
                 <!-- Variants Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <h4 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                         <i class="fas fa-palette text-primary mr-2"></i> Variasi Produk
                     </h4>
                     <div class="space-y-4">
@@ -122,7 +122,7 @@
                             @if($produk->warna && count($produk->warna) > 0)
                                 <div class="flex flex-wrap gap-2">
                                     @foreach($produk->warna as $warna)
-                                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100">
                                             <i class="fas fa-circle mr-2" style="color: {{ \App\Models\Produk::getColorCode($warna) }}"></i>
                                             {{ $warna }}
                                         </span>
@@ -157,17 +157,17 @@
             <div class="space-y-6">
                 <!-- Price Info Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <h4 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                         <i class="fas fa-tags text-primary mr-2"></i> Informasi Harga
                     </h4>
                     <div class="space-y-4">
                         @if($produk->harga_beli)
                         <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                             <div>
-                                <p class="text-sm text-gray-500">Harga Beli</p>
-                                <p class="text-xl font-bold text-gray-800">{{ $produk->harga_beli_formatted }}</p>
+                                <p class="text-sm">Harga Beli</p>
+                                <p class="text-xl font-bold">{{ $produk->harga_beli_formatted }}</p>
                             </div>
-                            <span class="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded">Jual</span>
+                            <span class="px-2 py-1 text-xs bg-gray-200 rounded">Jual</span>
                         </div>
                         @endif
 
@@ -177,7 +177,7 @@
                             <div class="space-y-2">
                                 <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
                                     <div>
-                                        <p class="text-sm text-gray-600">Harian</p>
+                                        <p class="text-sm text-green-600">Harian</p>
                                         <p class="font-medium text-green-700">{{ $produk->harga_sewa_harian_formatted }}</p>
                                     </div>
                                     <span class="px-2 py-1 text-xs bg-green-200 text-green-700 rounded">/hari</span>
@@ -186,7 +186,7 @@
                                 @if($produk->harga_sewa_mingguan)
                                 <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                                     <div>
-                                        <p class="text-sm text-gray-600">Mingguan</p>
+                                        <p class="text-sm text-blue-600">Mingguan</p>
                                         <p class="font-medium text-blue-700">Rp {{ number_format($produk->harga_sewa_mingguan, 0, ',', '.') }}</p>
                                     </div>
                                     <span class="px-2 py-1 text-xs bg-blue-200 text-blue-700 rounded">/minggu</span>
@@ -196,7 +196,7 @@
                                 @if($produk->harga_sewa_bulanan)
                                 <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
                                     <div>
-                                        <p class="text-sm text-gray-600">Bulanan</p>
+                                        <p class="text-sm text-purple-600">Bulanan</p>
                                         <p class="font-medium text-purple-700">Rp {{ number_format($produk->harga_sewa_bulanan, 0, ',', '.') }}</p>
                                     </div>
                                     <span class="px-2 py-1 text-xs bg-purple-200 text-purple-700 rounded">/bulan</span>
@@ -210,7 +210,7 @@
 
                 <!-- Image Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <h4 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                         <i class="fas fa-image text-primary mr-2"></i> Gambar Produk
                     </h4>
                     <div class="text-center">
@@ -223,7 +223,7 @@
                 <!-- Spesifikasi Card -->
                 @if($produk->spesifikasi && count($produk->spesifikasi) > 0)
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <h4 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                         <i class="fas fa-list text-primary mr-2"></i> Spesifikasi
                     </h4>
                     <div class="space-y-2">
@@ -239,7 +239,7 @@
 
                 <!-- Stats Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <h4 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                         <i class="fas fa-chart-bar text-primary mr-2"></i> Statistik
                     </h4>
                     <div class="space-y-3">

@@ -60,7 +60,7 @@
                         'selesai'=> ['color'=>'bg-green-50 text-green-700 border-green-200','label'=>'Selesai'],
                         'dibatalkan'=> ['color'=>'bg-red-50 text-red-700 border-red-200','label'=>'Dibatalkan']
                     ];
-                    $config = $statusConfig[$transaction->status] ?? ['color'=>'bg-gray-50 text-gray-700 border-gray-200','label'=>$transaction->status];
+                    $config = $statusConfig[$transaction->status] ?? ['color'=>'bg-gray-50 text-gray-100 dark:text-gray-700 border-gray-200','label'=>$transaction->status];
                 @endphp
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border {{ $config['color'] }}">
                     <i class="fas fa-circle text-[6px] mr-1"></i>
@@ -95,13 +95,28 @@
                 </div>
                 
                 <div>
+                    <p class="text-xs text-blue-600 mb-1">Status Pembayaran</p>
+                    <p class="text-sm font-semibold text-blue-900">
+                        @if ($transaction->bukti_pembayaran)
+                            @if ($transaction->status == 'pending' || $transaction->status == 'diproses')
+                                <span class=" text-yellow-600">Menunggu Konfirmasi</span>
+                            @else
+                                <span class=" text-green-600">Selesai Dibayar</span>
+                            @endif
+                        @else
+                            @if($transaction->tanggal_pembayaran)
+                                <span class=" text-green-600">Selesai Dibayar</span>
+                            @else
+                                <span class="text-red-600">Belum dibayar</span>
+                            @endif
+                        @endif
+                    </p>
+                </div>
+                
+                <div>
                     <p class="text-xs text-blue-600 mb-1">Tanggal Pembayaran</p>
                     <p class="text-sm font-semibold text-blue-900">
-                        @if($transaction->tanggal_pembayaran)
-                            {{ $transaction->tanggal_pembayaran->format('d M Y H:i') }}
-                        @else
-                            <span class="text-yellow-600">Belum dibayar</span>
-                        @endif
+                        {{ $transaction->tanggal_pembayaran ? $transaction->tanggal_pembayaran->format('d M Y H:i') : '' }}
                     </p>
                 </div>
                 
@@ -131,9 +146,20 @@
                     @method('PUT')
                     
                     <div class="space-y-4">
+                        <!-- Bukti Pembayaran -->
+                        @if ($transaction->bukti_pembayaran)
+                            <div class=" flex flex-col">
+                                <label class="block text-sm font-medium text-gray-100 dark:text-gray-700 mb-1">Bukti Pembayaran</label>
+                                <a href="{{asset('storage/bukti-pembayaran/'. $transaction->bukti_pembayaran)}}" target="_blank" class=" flex justify-between items-center w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-left">
+                                    {{$transaction->bukti_pembayaran}}
+                                    <i class="fas fa-external-link-alt transform group-hover:rotate-12 transition-transform text-black"></i>
+                                </a>
+                            </div>
+                        @endif
+
                         <!-- Status -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Transaksi *</label>
+                            <label class="block text-sm font-medium text-gray-100 dark:text-gray-700 mb-1">Status Transaksi *</label>
                             <select name="status" required
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                                 @foreach($statuses as $value => $label)
@@ -149,7 +175,7 @@
 
                         <!-- Shipping Date -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pengiriman</label>
+                            <label class="block text-sm font-medium text-gray-100 dark:text-gray-700 mb-1">Tanggal Pengiriman</label>
                             <input type="datetime-local" name="tanggal_pengiriman" 
                                    value="{{ old('tanggal_pengiriman', optional($transaction->tanggal_pengiriman)->format('Y-m-d\TH:i') ?? '') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
@@ -160,14 +186,14 @@
 
                         <!-- Shipping Address -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Pengiriman</label>
+                            <label class="block text-sm font-medium text-gray-100 dark:text-gray-700 mb-1">Alamat Pengiriman</label>
                             <textarea name="alamat_pengiriman" rows="2" placeholder="Alamat pengiriman produk"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">{{ old('alamat_pengiriman', $transaction->alamat_pengiriman ?? '') }}</textarea>
                         </div>
 
                         <!-- Notes -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Catatan Admin</label>
+                            <label class="block text-sm font-medium text-gray-100 dark:text-gray-700 mb-1">Catatan Admin</label>
                             <textarea name="catatan" rows="3" placeholder="Catatan internal untuk transaksi ini"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">{{ old('catatan', $transaction->catatan ?? '') }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">
@@ -200,7 +226,7 @@
                                 <i class="fas fa-save mr-2"></i> Simpan Perubahan
                             </button>
                             <a href="{{ route('admin.transaksi.show', $transaction->id) }}" 
-                               class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
+                               class="px-4 py-2 border border-gray-300 text-gray-100 dark:text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
                                 Batal
                             </a>
                         </div>
@@ -237,7 +263,7 @@
                                 <div class="flex-1">
                                     <p class="font-medium text-gray-900">{{ $item->produk->nama }}</p>
                                     <p class="text-gray-500">
-                                        {{ $item->quantity }} × Rp {{ number_format($item->harga, 0, ',', '.') }}
+                                        {{ $item->quantity }} × Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}
                                     </p>
                                 </div>
                                 <div class="text-gray-900 font-medium">
@@ -276,7 +302,7 @@
                         <div class="flex justify-between text-sm">
                             <span class="text-black">Status Saat Ini:</span>
                             @php
-                                $config = $statusConfig[$transaction->status] ?? ['color'=>'bg-gray-50 text-gray-700 border-gray-200','label'=>$transaction->status];
+                                $config = $statusConfig[$transaction->status] ?? ['color'=>'bg-gray-50 text-gray-100 dark:text-gray-700 border-gray-200','label'=>$transaction->status];
                             @endphp
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border {{ $config['color'] }}">
                                 <i class="fas fa-circle text-[6px] mr-1"></i>

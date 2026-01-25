@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Produk;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -16,7 +17,7 @@ class ProdukController extends Controller
         $query = Produk::with('kategori')
             ->when($request->search, function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%")
-                      ->orWhere('deskripsi', 'like', "%{$search}%");
+                    ->orWhere('deskripsi', 'like', "%{$search}%");
             })
             ->when($request->kategori, function ($query, $kategori) {
                 $query->where('kategori_id', $kategori);
@@ -46,17 +47,17 @@ class ProdukController extends Controller
     public function store(Request $request)
     {
         if ($request->has('warna') && is_string($request->warna)) {
-    $decodedWarna = json_decode($request->warna, true);
-    $request->merge([
-        'warna' => is_array($decodedWarna) ? $decodedWarna : []
-    ]);
-}
-if ($request->has('size') && is_string($request->size)) {
-    $decodedSize = json_decode($request->size, true);
-    $request->merge([
-        'size' => is_array($decodedSize) ? $decodedSize : []
-    ]);
-}
+            $decodedWarna = json_decode($request->warna, true);
+            $request->merge([
+                'warna' => is_array($decodedWarna) ? $decodedWarna : []
+            ]);
+        }
+        if ($request->has('size') && is_string($request->size)) {
+            $decodedSize = json_decode($request->size, true);
+            $request->merge([
+                'size' => is_array($decodedSize) ? $decodedSize : []
+            ]);
+        }
         // Validasi dasar
         $validated = $request->validate([
             'kategori_id' => 'required|exists:kategoris,id',
@@ -68,7 +69,7 @@ if ($request->has('size') && is_string($request->size)) {
             'harga_sewa_mingguan' => 'nullable|numeric|min:0',
             'harga_sewa_bulanan' => 'nullable|numeric|min:0',
             'stok_total' => 'required|integer|min:0',
-            'stok_tersedia' => 'required|integer|min:0|lte:stok_total',
+            'stok_tersedia' => 'nullable|integer|min:0|lte:stok_total',
             'stok_disewa' => 'nullable|integer|min:0|lte:stok_total',
             'warna' => 'nullable|array',
             'warna.*' => 'string|max:50',
@@ -82,27 +83,19 @@ if ($request->has('size') && is_string($request->size)) {
         if ($validated['tipe'] === 'jual' || $validated['tipe'] === 'both') {
             $request->validate(['harga_beli' => 'required|numeric|min:0']);
         }
-        
+
         if ($validated['tipe'] === 'sewa' || $validated['tipe'] === 'both') {
             $request->validate(['harga_sewa_harian' => 'required|numeric|min:0']);
         }
 
         // Validasi stok berdasarkan tipe
         if ($validated['tipe'] === 'sewa' || $validated['tipe'] === 'both') {
-            $request->validate(['stok_disewa' => 'required|integer|min:0|lte:stok_total']);
+            $request->validate(['stok_disewa' => 'nullable|integer|min:0|lte:stok_total']);
         } else {
             $validated['stok_disewa'] = 0; // Set ke 0 untuk produk jual saja
         }
 
-        // Validasi total stok harus sama dengan stok tersedia + stok disewa (untuk produk both)
-        if ($validated['tipe'] === 'both') {
-            $totalStok = $validated['stok_tersedia'] + $validated['stok_disewa'];
-            if ($totalStok > $validated['stok_total']) {
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['stok_total' => 'Stok total tidak boleh kurang dari stok tersedia + stok disewa.']);
-            }
-        }
+        $validated['stok_tersedia'] = $validated['stok_total'];
 
         // Handle spesifikasi
         if ($request->has('spesifikasi')) {
@@ -132,8 +125,25 @@ if ($request->has('size') && is_string($request->size)) {
 
         // Handle gambar upload
         if ($request->hasFile('gambar')) {
-            $fileName = time() . '_' . Str::slug($validated['nama']) . '.' . $request->file('gambar')->getClientOriginalExtension();
-            $validated['gambar'] = $request->file('gambar')->storeAs('produk', $fileName, 'public');
+            $file = $request->file('gambar');
+
+            // Nama file
+            $filename = time() . '_' . Str::random(10);
+            $extension = $file->getClientOriginalExtension();
+
+            // Path tujuan
+            $path = public_path('storage/produk/');
+
+            // Pastikan folder ada
+            if (!File::exists($path)) {
+                File::makeDirectory($path, 0755, true);
+            }
+
+            // Pindahkan file
+            $file->move($path, $filename . '.' . $extension);
+
+            // Simpan ke database
+            $validated['gambar'] = $filename . '.' . $extension;
         }
 
         // Generate slug
@@ -161,20 +171,20 @@ if ($request->has('size') && is_string($request->size)) {
 
     public function update(Request $request, Produk $produk)
     {
-            // ===== DECODE JSON WARNA & SIZE (WAJIB) =====
-    if ($request->has('warna') && is_string($request->warna)) {
-        $decodedWarna = json_decode($request->warna, true);
-        $request->merge([
-            'warna' => is_array($decodedWarna) ? $decodedWarna : []
-        ]);
-    }
+        // ===== DECODE JSON WARNA & SIZE (WAJIB) =====
+        if ($request->has('warna') && is_string($request->warna)) {
+            $decodedWarna = json_decode($request->warna, true);
+            $request->merge([
+                'warna' => is_array($decodedWarna) ? $decodedWarna : []
+            ]);
+        }
 
-    if ($request->has('size') && is_string($request->size)) {
-        $decodedSize = json_decode($request->size, true);
-        $request->merge([
-            'size' => is_array($decodedSize) ? $decodedSize : []
-        ]);
-    }
+        if ($request->has('size') && is_string($request->size)) {
+            $decodedSize = json_decode($request->size, true);
+            $request->merge([
+                'size' => is_array($decodedSize) ? $decodedSize : []
+            ]);
+        }
         // Validasi dasar
         $validated = $request->validate([
             'kategori_id' => 'required|exists:kategoris,id',
@@ -200,26 +210,26 @@ if ($request->has('size') && is_string($request->size)) {
         if ($validated['tipe'] === 'jual' || $validated['tipe'] === 'both') {
             $request->validate(['harga_beli' => 'required|numeric|min:0']);
         }
-        
+
         if ($validated['tipe'] === 'sewa' || $validated['tipe'] === 'both') {
             $request->validate(['harga_sewa_harian' => 'required|numeric|min:0']);
         }
 
         // Validasi stok berdasarkan tipe
-        if ($validated['tipe'] === 'sewa' || $validated['tipe'] === 'both') {
-            $request->validate(['stok_disewa' => 'required|integer|min:0|lte:stok_total']);
-        } else {
-            $validated['stok_disewa'] = 0; // Set ke 0 untuk produk jual saja
-        }
+        // if ($validated['tipe'] === 'sewa' || $validated['tipe'] === 'both') {
+        //     $request->validate(['stok_disewa' => 'required|integer|min:0|lte:stok_total']);
+        // } else {
+        //     $validated['stok_disewa'] = 0; // Set ke 0 untuk produk jual saja
+        // }
 
         // Validasi total stok harus sama dengan stok tersedia + stok disewa (untuk produk both)
         if ($validated['tipe'] === 'both') {
-            $totalStok = $validated['stok_tersedia'] + $validated['stok_disewa'];
-            if ($totalStok > $validated['stok_total']) {
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['stok_total' => 'Stok total tidak boleh kurang dari stok tersedia + stok disewa.']);
-            }
+            // $totalStok = $validated['stok_tersedia'] + $validated['stok_disewa'];
+            // if ($totalStok > $validated['stok_total']) {
+            //     return redirect()->back()
+            //         ->withInput()
+            //         ->withErrors(['stok_total' => 'Stok total tidak boleh kurang dari stok tersedia + stok disewa.']);
+            // }
         }
 
         // Handle spesifikasi
@@ -250,13 +260,34 @@ if ($request->has('size') && is_string($request->size)) {
 
         // Handle gambar upload
         if ($request->hasFile('gambar')) {
-            // Delete old image if exists
+            $file = $request->file('gambar');
+
             if ($produk->gambar) {
-                Storage::disk('public')->delete($produk->gambar);
+                $path = public_path('storage/produk/' . $produk->gambar);
+    
+                if (file_exists($path)) {
+                    unlink($path);
+                }
             }
-            
-            $fileName = time() . '_' . Str::slug($validated['nama']) . '.' . $request->file('gambar')->getClientOriginalExtension();
-            $validated['gambar'] = $request->file('gambar')->storeAs('produk', $fileName, 'public');
+
+
+            // Nama file
+            $filename = time() . '_' . Str::random(10);
+            $extension = $file->getClientOriginalExtension();
+
+            // Path tujuan
+            $path = public_path('storage/produk/');
+
+            // Pastikan folder ada
+            if (!File::exists($path)) {
+                File::makeDirectory($path, 0755, true);
+            }
+
+            // Pindahkan file
+            $file->move($path, $filename . '.' . $extension);
+
+            // Simpan ke database
+            $validated['gambar'] = $filename . '.' . $extension;
         }
 
         // Update slug if nama changed
@@ -314,12 +345,12 @@ if ($request->has('size') && is_string($request->size)) {
                 }
                 $message = 'Produk berhasil dihapus.';
                 break;
-                
+
             case 'activate':
                 Produk::whereIn('id', $request->ids)->update(['is_active' => true]);
                 $message = 'Produk berhasil diaktifkan.';
                 break;
-                
+
             case 'deactivate':
                 Produk::whereIn('id', $request->ids)->update(['is_active' => false]);
                 $message = 'Produk berhasil dinonaktifkan.';
