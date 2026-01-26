@@ -182,8 +182,8 @@
                 <!-- Continue Shopping -->
                 <div class="mt-8 text-center">
                     <a href="{{ route('produk.index') }}" 
-                       class="inline-flex items-center px-6 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-300">
-                        <i class="fas fa-arrow-left mr-3"></i>
+                              class="inline-flex items-center px-6 py-3 border-2 border-primary text-primary font-semibold rounded-xl transition-all duration-300 hover:bg-primary hover:text-dark hover:shadow-lg group">
+        <i class="fas fa-arrow-left mr-3 transition-transform duration-300 group-hover:-translate-x-1"></i>
                         <span>Lanjutkan Belanja</span>
                     </a>
                 </div>
@@ -195,7 +195,7 @@
                     <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                         <!-- Header -->
                         <div class="bg-gradient-to-r from-primary to-primary-dark p-6">
-                            <h2 class="text-xl font-bold text-white flex items-center gap-3">
+                            <h2 class="text-xl font-bold text-dark flex items-center gap-3">
                                 <i class="fas fa-receipt"></i>
                                 Ringkasan Pesanan
                             </h2>
@@ -289,7 +289,7 @@
                     <span >Jelajahi Produk</span>
                 </a>
                 <a href="{{ route('sewa.index') }}" 
-                   class="inline-flex items-center justify-center px-8 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 gap-3">
+                   class="inline-flex items-center justify-center px-8 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-dark transition-all duration-300 gap-3">
                     <i class="fas fa-calendar-check"></i>
                     <span>Sewa Peralatan</span>
                 </a>

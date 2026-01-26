@@ -142,7 +142,7 @@
                         <p class="text-gray-600">Kelola informasi profil dan akun Anda</p>
                     </div>
                     <a href="{{ route('user.dashboard') }}" 
-                       class="flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-200">
+                       class="flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-dark hover:shadow-lg transition-all duration-200">
                         <i class="fas fa-arrow-left"></i>
                         <span>Kembali ke Dashboard</span>
                     </a>
@@ -397,12 +397,12 @@
                             </p>
                             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                                 <a href="{{ route('produk.index') }}" 
-                                   class="px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200">
+                                   class="px-6 py-3 bg-blue-900 text-white font-semibold rounded-xl hover:bg-blue-800 transition-all duration-200">
                                     <i class="fas fa-store mr-2"></i>
                                     Mulai Belanja
                                 </a>
                                 <a href="{{ route('sewa.index') }}" 
-                                   class="px-6 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all duration-200">
+                                   class="px-6 py-3 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-gray-200 hover:text-dark transition-all duration-200">
                                     <i class="fas fa-calendar-alt mr-2"></i>
                                     Sewa Alat
                                 </a>

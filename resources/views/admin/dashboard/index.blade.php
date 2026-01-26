@@ -371,7 +371,7 @@
                 <div class="space-y-3">
                     @foreach ($lowStockProducts->take(5) as $product)
                         <div
-                            class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-red-50 transition-colors">
+                            class="flex items-center justify-between p-3 border border-gray-200 rounded-lg transition-colors">
                             <div class="flex items-center">
                                 @if ($product->gambar)
                                     <img src="{{ asset('storage/' . $product->gambar) }}" alt="{{ $product->nama }}"
@@ -484,7 +484,7 @@
             @if (count($recentActivities) > 0)
                 @foreach ($recentActivities as $activity)
                     <div
-                        class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg transition-colors">
                         <div class="flex-shrink-0">
                             <div class="w-8 h-8 rounded-full {{ $activity['color'] }} flex items-center justify-center">
                                 <i class="{{ $activity['icon'] }} text-white text-sm"></i>
