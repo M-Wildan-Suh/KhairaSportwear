@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Produk;
 use App\Models\Kategori;
+use App\Models\ProdukGambar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -75,7 +76,8 @@ class ProdukController extends Controller
             'warna.*' => 'string|max:50',
             'size' => 'nullable|array',
             'size.*' => 'string|max:20',
-            'gambar' => 'nullable|image|max:2048',
+            'gambar' => 'nullable|array', // UBAH: dari image jadi array
+            'gambar.*' => 'image|max:2048',
             'is_active' => 'boolean',
         ]);
 
@@ -95,7 +97,7 @@ class ProdukController extends Controller
             $validated['stok_disewa'] = 0; // Set ke 0 untuk produk jual saja
         }
 
-        $validated['stok_tersedia'] = $validated['stok_total'];
+        $validated['stok_tersedia'] = $validated['stok_total'] - ($validated['stok_disewa'] ?? 0);
 
         // Handle spesifikasi
         if ($request->has('spesifikasi')) {
@@ -123,36 +125,37 @@ class ProdukController extends Controller
             $validated['size'] = null;
         }
 
-        // Handle gambar upload
-        if ($request->hasFile('gambar')) {
-            $file = $request->file('gambar');
+        // Generate slug
+        $validated['slug'] = Str::slug($validated['nama']);
+        $validated['is_active'] = $request->has('is_active') ? true : false;
 
-            // Nama file
+        unset($validated['gambar']);
+        $produk = Produk::create($validated);
+
+        //Upload Gambar
+        if ($request->hasFile('gambar')) {
+        $files = $request->file('gambar');
+        
+        foreach ($files as $index => $file) {
             $filename = time() . '_' . Str::random(10);
             $extension = $file->getClientOriginalExtension();
-
-            // Path tujuan
             $path = public_path('storage/produk/');
 
-            // Pastikan folder ada
             if (!File::exists($path)) {
                 File::makeDirectory($path, 0755, true);
             }
 
-            // Pindahkan file
             $file->move($path, $filename . '.' . $extension);
 
-            // Simpan ke database
-            $validated['gambar'] = $filename . '.' . $extension;
+            // Simpan ke tabel produk_gambar
+            ProdukGambar::create([
+                'produk_id' => $produk->id,
+                'gambar' => $filename . '.' . $extension,
+                'urutan' => $index,
+                'is_primary' => $index === 0 // Gambar pertama = primary
+            ]);
         }
-
-        // Generate slug
-        $validated['slug'] = Str::slug($validated['nama']);
-
-        // Set default values jika tidak ada
-        $validated['is_active'] = $request->has('is_active') ? true : false;
-
-        Produk::create($validated);
+    }
 
         return redirect()->route('admin.produk.index')
             ->with('success', 'Produk berhasil ditambahkan.');
@@ -202,7 +205,10 @@ class ProdukController extends Controller
             'warna.*' => 'string|max:50',
             'size' => 'nullable|array',
             'size.*' => 'string|max:20',
-            'gambar' => 'nullable|image|max:2048',
+            'gambar' => 'nullable|array', // UBAH
+            'gambar.*' => 'image|max:2048', // TAMBAH
+            'hapus_gambar' => 'nullable|array', // TAMBAH: untuk hapus gambar
+            'hapus_gambar.*' => 'exists:produk_gambar,id',
             'is_active' => 'boolean',
         ]);
 
@@ -258,38 +264,6 @@ class ProdukController extends Controller
             $validated['size'] = null;
         }
 
-        // Handle gambar upload
-        if ($request->hasFile('gambar')) {
-            $file = $request->file('gambar');
-
-            if ($produk->gambar) {
-                $path = public_path('storage/produk/' . $produk->gambar);
-    
-                if (file_exists($path)) {
-                    unlink($path);
-                }
-            }
-
-
-            // Nama file
-            $filename = time() . '_' . Str::random(10);
-            $extension = $file->getClientOriginalExtension();
-
-            // Path tujuan
-            $path = public_path('storage/produk/');
-
-            // Pastikan folder ada
-            if (!File::exists($path)) {
-                File::makeDirectory($path, 0755, true);
-            }
-
-            // Pindahkan file
-            $file->move($path, $filename . '.' . $extension);
-
-            // Simpan ke database
-            $validated['gambar'] = $filename . '.' . $extension;
-        }
-
         // Update slug if nama changed
         if ($produk->nama !== $validated['nama']) {
             $validated['slug'] = Str::slug($validated['nama']);
@@ -300,16 +274,82 @@ class ProdukController extends Controller
 
         $produk->update($validated);
 
+            // Handle penghapusan gambar yang dipilih
+   // Handle penghapusan gambar yang dipilih
+if ($request->filled('hapus_gambar')) {
+    \Log::info('Gambar yang akan dihapus:', $request->hapus_gambar);
+    
+    $gambarToDelete = ProdukGambar::whereIn('id', $request->hapus_gambar)
+        ->where('produk_id', $produk->id)
+        ->get();
+
+    foreach ($gambarToDelete as $img) {
+        \Log::info('Menghapus gambar: ' . $img->gambar);
+        
+        $path = public_path('storage/produk/' . $img->gambar);
+        if (file_exists($path)) {
+            unlink($path);
+            \Log::info('File dihapus: ' . $path);
+        }
+        $img->delete();
+    }
+    
+    \Log::info('Total gambar dihapus: ' . count($gambarToDelete));
+}
+    // Handle upload gambar baru
+    if ($request->hasFile('gambar')) {
+        $files = $request->file('gambar');
+        
+        // Hitung urutan terakhir
+        $lastUrutan = ProdukGambar::where('produk_id', $produk->id)->max('urutan') ?? -1;
+        
+        foreach ($files as $index => $file) {
+            $filename = time() . '_' . Str::random(10);
+            $extension = $file->getClientOriginalExtension();
+            $path = public_path('storage/produk/');
+
+            if (!File::exists($path)) {
+                File::makeDirectory($path, 0755, true);
+            }
+
+            $file->move($path, $filename . '.' . $extension);
+
+            // Cek apakah sudah ada gambar primary
+            $hasPrimary = ProdukGambar::where('produk_id', $produk->id)
+                ->where('is_primary', true)
+                ->exists();
+
+            ProdukGambar::create([
+                'produk_id' => $produk->id,
+                'gambar' => $filename . '.' . $extension,
+                'urutan' => $lastUrutan + $index + 1,
+                'is_primary' => !$hasPrimary && $index === 0 // Set primary jika belum ada
+            ]);
+        }
+    }
+
         return redirect()->route('admin.produk.index')
             ->with('success', 'Produk berhasil diperbarui.');
     }
 
     public function destroy(Produk $produk)
     {
-        // Delete image if exists
+            // Hapus gambar legacy (kolom gambar)
         if ($produk->gambar) {
-            Storage::disk('public')->delete($produk->gambar);
+            $path = public_path('storage/produk/' . $produk->gambar);
+        if (file_exists($path)) {
+            unlink($path);
         }
+    }
+
+    // Hapus semua gambar dari tabel produk_gambar
+        foreach ($produk->gambarTambahan as $img) {
+            $path = public_path('storage/produk/' . $img->gambar);
+        if (file_exists($path)) {
+            unlink($path);
+        }
+    }
+    // Record di produk_gambar akan terhapus otomatis karena cascade delete
 
         $produk->delete();
 

@@ -23,22 +23,21 @@ class Produk extends Model
         'stok_total',
         'stok_tersedia',
         'stok_disewa',
-        'warna',       // Tambah field warna
-        'size',        // Tambah field size
+        'warna',        // Tambah field warna
+        'size',         // Tambah field size
         'spesifikasi',
-        'gambar',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'spesifikasi' => 'array',
-        'warna' => 'array',        // Tambah cast untuk warna
-        'size' => 'array',         // Tambah cast untuk size
-        'harga_beli' => 'decimal:2',
-        'harga_sewa_harian' => 'decimal:2',
+        'is_active'           => 'boolean',
+        'spesifikasi'         => 'array',
+        'warna'               => 'array',        // Tambah cast untuk warna
+        'size'                => 'array',        // Tambah cast untuk size
+        'harga_beli'          => 'decimal:2',
+        'harga_sewa_harian'   => 'decimal:2',
         'harga_sewa_mingguan' => 'decimal:2',
-        'harga_sewa_bulanan' => 'decimal:2'
+        'harga_sewa_bulanan'  => 'decimal:2',
     ];
 
     // Relationships
@@ -60,6 +59,56 @@ class Produk extends Model
     public function sewas()
     {
         return $this->hasMany(Sewa::class);
+    }
+
+    // Tambahkan di bagian relationships (sekitar baris 50-an)
+    public function gambarTambahan()
+    {
+        return $this->hasMany(ProdukGambar::class, 'produk_id')
+                    ->orderBy('urutan');
+    }
+
+    public function gambarPrimary()
+    {
+        return $this->hasOne(ProdukGambar::class, 'produk_id')
+                    ->where('is_primary', true);
+    }
+
+    // Update method getGambarUrlAttribute yang sudah ada
+    public function getGambarUrlAttribute()
+    {
+        // Prioritas 1: Gambar dari kolom gambar (legacy)
+        if ($this->gambar) {
+            if (filter_var($this->gambar, FILTER_VALIDATE_URL)) {
+                return $this->gambar;
+            }
+
+            $path = 'produk/' . ltrim($this->gambar, '/');
+
+            if (file_exists(public_path('storage/' . $path))) {
+                return asset('storage/' . $path);
+            }
+        }
+
+        // Prioritas 2: Gambar primary dari tabel produk_gambar
+        $primaryImage = $this->gambarPrimary;
+        if ($primaryImage) {
+            return $primaryImage->gambar_url;
+        }
+
+        // Prioritas 3: Gambar pertama dari tabel produk_gambar
+        $firstImage = $this->gambarTambahan()->first();
+        if ($firstImage) {
+            return $firstImage->gambar_url;
+        }
+
+        // Fallback: default image
+        return 'https://placehold.co/400x400/e5e7eb/6b7280?text=Produk&font=roboto';
+    }
+
+    public function getDefaultImage()
+    {
+        return 'https://placehold.co/400x400/e5e7eb/6b7280?text=Produk&font=roboto';
     }
 
     // Scopes
@@ -222,34 +271,7 @@ class Produk extends Model
         return $this;
     }
 
-    public function getGambarUrlAttribute()
-    {
-        // Jika tidak ada gambar sama sekali
-        if (!$this->gambar) {
-            return $this->getDefaultImage();
-        }
-
-        // Jika sudah berupa URL lengkap
-        if (filter_var($this->gambar, FILTER_VALIDATE_URL)) {
-            return $this->gambar;
-        }
-
-        // Path relatif di storage
-        $path = 'produk/' . ltrim($this->gambar, '/');
-
-        // Cek apakah file benar-benar ada
-        if (file_exists(public_path('storage/' . $path))) {
-            return asset('storage/' . $path);
-        }
-
-        // Jika file tidak ditemukan → placeholder
-        return $this->getDefaultImage();
-    }
-
-    protected function getDefaultImage()
-    {
-        return 'https://placehold.co/400x400/e5e7eb/6b7280?text=Produk&font=roboto';
-    }
+    //Url Gambar
 
 
     // Accessor untuk harga format

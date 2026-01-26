@@ -45,35 +45,62 @@
                     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                         <!-- Main Image -->
                         <div class="relative overflow-hidden">
-                            <img src="{{ $produk->gambar_url }}" alt="{{ $produk->nama }}" class="w-full h-96 object-cover"
-                                id="mainProductImage">
+                            @php
+                                // Ambil gambar pertama (primary atau yang pertama)
+                                $mainImage = $produk->gambarTambahan && $produk->gambarTambahan->count() > 0 
+                                    ? ($produk->gambarTambahan->where('is_primary', true)->first() ?? $produk->gambarTambahan->first())
+                                    : null;
+                                $mainImageUrl = $mainImage ? $mainImage->gambar_url : $produk->gambar_url;
+                            @endphp
+                            
+                            <img src="{{ $mainImageUrl }}" 
+                                 alt="{{ $produk->nama }}" 
+                                 class="w-full h-96 object-cover"
+                                 id="mainProductImage">
+                            
                             <div class="absolute top-4 left-4">
                                 @if ($produk->tipe === 'jual')
-                                    <span
-                                        class="px-3 py-1 bg-primary text-white text-sm font-semibold rounded-full">Dijual</span>
+                                    <span class="px-3 py-1 bg-primary text-white text-sm font-semibold rounded-full">Dijual</span>
                                 @elseif($produk->tipe === 'sewa')
-                                    <span
-                                        class="px-3 py-1 bg-accent text-white text-sm font-semibold rounded-full">Disewa</span>
+                                    <span class="px-3 py-1 bg-accent text-white text-sm font-semibold rounded-full">Disewa</span>
                                 @else
-                                    <span
-                                        class="px-3 py-1 bg-gradient-to-r from-primary to-accent text-white text-sm font-semibold rounded-full">Dijual/Disewa</span>
+                                    <span class="px-3 py-1 bg-gradient-to-r from-primary to-accent text-white text-sm font-semibold rounded-full">Dijual/Disewa</span>
                                 @endif
                             </div>
                         </div>
 
                         <!-- Image Thumbnails -->
                         <div class="p-4">
-                            <div class="grid grid-cols-4 gap-2">
-                                <div class="thumbnail-item active" onclick="changeMainImage('{{ $produk->gambar_url }}')">
-                                    <img src="{{ $produk->gambar_url }}" alt="{{ $produk->nama }}"
-                                        class="w-full h-20 object-cover rounded-lg cursor-pointer">
+                            @if($produk->gambarTambahan && $produk->gambarTambahan->count() > 0)
+                                <!-- Multiple images dari tabel produk_gambar -->
+                                <div class="grid grid-cols-4 gap-2">
+                                    @foreach($produk->gambarTambahan as $img)
+                                        <div class="thumbnail-item {{ $loop->first ? 'active' : '' }}" 
+                                             onclick="changeMainImage('{{ $img->gambar_url }}', this)">
+                                            <img src="{{ $img->gambar_url }}" 
+                                                 alt="{{ $produk->nama }}"
+                                                 class="w-full h-20 object-cover rounded-lg cursor-pointer border-2 hover:border-primary transition">
+                                            @if($img->is_primary)
+                                                <div class="absolute top-1 right-1">
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
                                 </div>
-                                <!-- Additional thumbnails would go here -->
-                            </div>
+                            @else
+                                <!-- Fallback untuk single image (legacy) -->
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div class="thumbnail-item active" onclick="changeMainImage('{{ $produk->gambar_url }}', this)">
+                                        <img src="{{ $produk->gambar_url }}" 
+                                             alt="{{ $produk->nama }}"
+                                             class="w-full h-20 object-cover rounded-lg cursor-pointer border-2 hover:border-primary transition">
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
-
                 <!-- Product Info -->
                 <div data-aos="fade-left">
                     <div class="space-y-6">
@@ -1407,13 +1434,34 @@
         }
 
         // Change main image
-        function changeMainImage(src) {
-            document.getElementById('mainProductImage').src = src;
-            document.querySelectorAll('.thumbnail-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
+        // Change main image - UPDATE FUNCTION
+function changeMainImage(src, element) {
+    // Update main image
+    const mainImage = document.getElementById('mainProductImage');
+    if (mainImage) {
+        mainImage.src = src;
+    }
+    
+    // Remove active class from all thumbnails
+    document.querySelectorAll('.thumbnail-item').forEach(item => {
+        item.classList.remove('active');
+        const img = item.querySelector('img');
+        if (img) {
+            img.classList.remove('border-primary');
+            img.classList.add('border-transparent');
         }
+    });
+    
+    // Add active class to clicked thumbnail
+    if (element) {
+        element.classList.add('active');
+        const img = element.querySelector('img');
+        if (img) {
+            img.classList.add('border-primary');
+            img.classList.remove('border-transparent');
+        }
+    }
+}
 
         // ================= EVENT LISTENERS =================
 

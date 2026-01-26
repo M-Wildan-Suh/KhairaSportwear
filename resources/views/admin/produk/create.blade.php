@@ -31,6 +31,7 @@
                         </h3>
                         
                         <div class="space-y-4">
+                            <!-- Nama Produk -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Nama Produk *</label>
                                 <input type="text" name="nama" required
@@ -45,6 +46,7 @@
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Kategori -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Kategori *</label>
                                     <div class="relative">
@@ -68,6 +70,7 @@
                                     @enderror
                                 </div>
                                 
+                                <!-- Tipe Produk -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Tipe Produk *</label>
                                     <div class="relative">
@@ -100,6 +103,7 @@
                         </h3>
                         
                         <div class="space-y-4">
+                            <!-- Stok Total -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Stok Total *</label>
                                 <div class="relative">
@@ -119,27 +123,6 @@
                             </div>
                             
                             <div id="stock-fields" class="space-y-4">
-                                <!-- Stok Tersedia -->
-                                {{-- <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Stok Tersedia</label>
-                                    <div class="relative">
-                                        <input type="number" name="stok_tersedia" min="0" id="stok_tersedia"
-                                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
-                                               value="{{ old('stok_tersedia', 0) }}">
-                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                            <span class="text-gray-500">unit</span>
-                                        </div>
-                                    </div>
-                                    <p class="mt-2 text-xs text-gray-500 flex items-center">
-                                        <i class="fas fa-info-circle mr-1"></i> Stok yang tersedia untuk dijual
-                                    </p>
-                                    @error('stok_tersedia')
-                                        <p class="mt-2 text-sm text-red-600 flex items-center">
-                                            <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
-                                        </p>
-                                    @enderror
-                                </div> --}}
-                                
                                 <!-- Stok Sewa (conditional) -->
                                 <div id="stok-disewa-group" class="hidden">
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Stok untuk Disewa</label>
@@ -215,6 +198,7 @@
                             
                             <!-- Harga Sewa -->
                             <div id="harga-sewa-group" class="hidden space-y-4">
+                                <!-- Harga Sewa Harian -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Harga Sewa Harian *</label>
                                     <div class="relative">
@@ -234,6 +218,7 @@
                                 </div>
                                 
                                 <div class="grid grid-cols-2 gap-4">
+                                    <!-- Harga Mingguan -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-300 mb-2">Harga Mingguan</label>
                                         <div class="relative">
@@ -247,6 +232,7 @@
                                         </div>
                                     </div>
                                     
+                                    <!-- Harga Bulanan -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-300 mb-2">Harga Bulanan</label>
                                         <div class="relative">
@@ -262,6 +248,7 @@
                                 </div>
                             </div>
                             
+                            <!-- No Price Message -->
                             <div id="no-price-message" class="hidden p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                                 <div class="flex items-center">
                                     <i class="fas fa-info-circle text-yellow-500 mr-2"></i>
@@ -342,24 +329,39 @@
                             <!-- Image Upload -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-3">Gambar Produk</label>
+
                                 <div class="relative">
-                                    <input type="file" name="gambar" id="gambar" accept="image/*"
+                                    <input type="file"
+                                           name="gambar[]"
+                                           id="gambar"
+                                           accept="image/png, image/jpg, image/jpeg"
                                            class="hidden"
-                                           onchange="previewImage(event)">
+                                           multiple
+                                           onchange="previewMultipleImages(event)">
+
                                     <label for="gambar" class="cursor-pointer">
-                                        <div id="image-upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary/50 transition duration-200">
-                                            <div id="image-preview" class="hidden mb-4">
-                                                <img id="preview" class="mx-auto max-h-48 rounded-lg shadow-sm">
-                                            </div>
-                                            <div id="upload-placeholder" class="text-center">
-                                                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
-                                                <p class="text-sm text-gray-600 mb-1">Klik untuk upload gambar</p>
-                                                <p class="text-xs text-gray-500">Max: 2MB, Format: JPG, PNG, JPEG</p>
+                                        <div class="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:border-primary/50 hover:bg-gray-800/30 transition duration-200">
+                                            <!-- Preview -->
+                                            <div id="image-previews" class="space-y-4 mb-6 hidden"></div>
+
+                                            <!-- Placeholder -->
+                                            <div id="upload-placeholder">
+                                                <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
+                                                <p class="text-base text-gray-300 mb-2 font-medium">
+                                                    Klik untuk upload gambar
+                                                </p>
+                                                <p class="text-sm text-gray-500">
+                                                    Max: 2MB, Format: JPG, PNG, JPEG
+                                                </p>
+                                                <p class="text-sm text-gray-500 mt-1">
+                                                    Bisa upload beberapa gambar sekaligus
+                                                </p>
                                             </div>
                                         </div>
                                     </label>
                                 </div>
-                                @error('gambar')
+
+                                @error('gambar.*')
                                     <p class="mt-2 text-sm text-red-600 flex items-center">
                                         <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
                                     </p>
@@ -411,10 +413,12 @@
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         transition: all 0.2s ease;
     }
+    
     .variant-tag:hover {
         transform: translateY(-1px);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+    
     .variant-tag button {
         margin-left: 0.75rem;
         color: #9ca3af;
@@ -424,6 +428,7 @@
         font-size: 0.75rem;
         transition: color 0.2s ease;
     }
+    
     .variant-tag button:hover {
         color: #ef4444;
     }
@@ -454,27 +459,76 @@
 
 @push('scripts')
 <script>
-    // Image preview function
-    function previewImage(event) {
-        const input = event.target;
-        const preview = document.getElementById('preview');
+    // Image Preview Functions
+    let selectedFiles = [];
+
+    function previewMultipleImages(event) {
+        const files = Array.from(event.target.files);
+        const previewContainer = document.getElementById('image-previews');
         const placeholder = document.getElementById('upload-placeholder');
-        const imagePreview = document.getElementById('image-preview');
-        
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                preview.src = e.target.result;
-                placeholder.style.display = 'none';
-                imagePreview.style.display = 'block';
-            }
-            
-            reader.readAsDataURL(input.files[0]);
+
+        selectedFiles = files;
+
+        if (files.length > 0) {
+            previewContainer.innerHTML = '';
+            previewContainer.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'relative group bg-gray-800/50 rounded-xl overflow-hidden border-2 border-green-500';
+
+                    wrapper.innerHTML = `
+                        <div class="relative w-full" style="padding-bottom:56.25%;">
+                            <img src="${e.target.result}"
+                                 class="absolute inset-0 w-full h-full object-cover">
+
+                            <div class="absolute top-4 left-4">
+                                <span class="bg-green-500 text-white text-sm px-3 py-1.5 rounded-lg shadow-lg font-medium flex items-center gap-2">
+                                    <i class="fas fa-plus"></i>
+                                    Gambar Baru
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 flex items-center justify-between">
+                            <span class="text-sm text-gray-300 truncate">${file.name}</span>
+                            <button type="button"
+                                    onclick="removePreviewImage(${index})"
+                                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg flex items-center gap-2">
+                                <i class="fas fa-times"></i>
+                                Batal
+                            </button>
+                        </div>
+                    `;
+
+                    previewContainer.appendChild(wrapper);
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    function removePreviewImage(index) {
+        selectedFiles.splice(index, 1);
+
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => dataTransfer.items.add(file));
+        document.getElementById('gambar').files = dataTransfer.files;
+
+        if (selectedFiles.length === 0) {
+            document.getElementById('image-previews').classList.add('hidden');
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+        } else {
+            previewMultipleImages({ target: { files: selectedFiles } });
         }
     }
     
-    // Update form fields based on product type
+    // Form Field Management
     function updateFormFields() {
         const tipe = document.getElementById('tipe').value;
         const hargaBeliGroup = document.getElementById('harga-beli-group');
@@ -503,19 +557,18 @@
         updateAvailableStock();
     }
     
-    // Update available stock calculation
+    // Stock Management
     function updateAvailableStock() {
         const totalStock = parseInt(document.querySelector('input[name="stok_total"]').value) || 0;
         const disewaStock = parseInt(document.getElementById('stok_disewa').value) || 0;
         const tersediaInput = document.getElementById('stok_tersedia');
         const tipe = document.getElementById('tipe').value;
         
-        if (tipe === 'both') {
+        if (tipe === 'both' && tersediaInput) {
             tersediaInput.value = Math.max(0, totalStock - disewaStock);
-        } else if (tipe === 'jual') {
+        } else if (tipe === 'jual' && tersediaInput) {
             tersediaInput.value = totalStock;
         }
-        // For 'sewa', let the user decide
     }
     
     // Validate disewa stock

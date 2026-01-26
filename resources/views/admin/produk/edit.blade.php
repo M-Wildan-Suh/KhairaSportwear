@@ -33,6 +33,7 @@
                         </h3>
                         
                         <div class="space-y-4">
+                            <!-- Nama Produk -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-100 mb-2">Nama Produk *</label>
                                 <input type="text" name="nama" required
@@ -47,14 +48,17 @@
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Kategori -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-100 mb-2">Kategori *</label>
                                     <div class="relative">
                                         <select name="kategori_id" required
-                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 appearance-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200 bg-white">
+                                                style="color: #111; background-color: #fff;"
+                                                class="w-full rounded-lg px-4 py-3 border border-gray-300 appearance-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200">
                                             <option value="">Pilih Kategori</option>
                                             @foreach($kategoris as $kategori)
-                                                <option value="{{ $kategori->id }}" {{ old('kategori_id', $produk->kategori_id) == $kategori->id ? 'selected' : '' }}>
+                                                <option value="{{ $kategori->id }}"
+                                                        {{ old('kategori_id', $produk->kategori_id) == $kategori->id ? 'selected' : '' }}>
                                                     {{ $kategori->nama }}
                                                 </option>
                                             @endforeach
@@ -70,11 +74,13 @@
                                     @enderror
                                 </div>
                                 
+                                <!-- Tipe Produk -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-100 mb-2">Tipe Produk *</label>
                                     <div class="relative">
                                         <select name="tipe" required id="tipe"
-                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 appearance-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200 bg-white"
+                                                style="color: #111; background-color: #fff;"
+                                                class="w-full rounded-lg px-4 py-3 border border-gray-300 appearance-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-200"
                                                 onchange="updateFormFields()">
                                             <option value="">Pilih Tipe</option>
                                             <option value="jual" {{ old('tipe', $produk->tipe) == 'jual' ? 'selected' : '' }}>Jual</option>
@@ -102,6 +108,7 @@
                         </h3>
                         
                         <div class="space-y-4">
+                            <!-- Stok Total -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-100 mb-2">Stok Total *</label>
                                 <div class="relative">
@@ -217,6 +224,7 @@
                             
                             <!-- Harga Sewa -->
                             <div id="harga-sewa-group" class="{{ in_array($produk->tipe, ['sewa', 'both']) ? 'space-y-4' : 'hidden' }}">
+                                <!-- Harga Sewa Harian -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-100 mb-2">Harga Sewa Harian *</label>
                                     <div class="relative">
@@ -236,6 +244,7 @@
                                 </div>
                                 
                                 <div class="grid grid-cols-2 gap-4">
+                                    <!-- Harga Mingguan -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-100 mb-2">Harga Mingguan</label>
                                         <div class="relative">
@@ -249,6 +258,7 @@
                                         </div>
                                     </div>
                                     
+                                    <!-- Harga Bulanan -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-100 mb-2">Harga Bulanan</label>
                                         <div class="relative">
@@ -354,33 +364,112 @@
                         </h3>
                         
                         <div class="space-y-6">
-                            <!-- Image Upload -->
+                            <!-- Image Upload Section -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-100 mb-3">Gambar Produk</label>
-                                <div class="mb-4">
-                                    <img src="{{ $produk->gambar_url }}" 
-                                         alt="{{ $produk->nama }}"
-                                         class="max-w-full h-auto rounded-lg shadow-sm max-h-64 mx-auto">
-                                </div>
-                                <div class="relative">
-                                    <input type="file" name="gambar" id="gambar" accept="image/png, image/jpg, image/jpeg"
-                                           class="hidden"
-                                           onchange="previewImage(event)">
-                                    <label for="gambar" class="cursor-pointer">
-                                        <div id="image-upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-primary/50 transition duration-200">
-                                            <div id="image-preview" class="hidden mb-4">
-                                                <img id="preview" class="mx-auto max-h-48 rounded-lg shadow-sm">
+                                
+                                <!-- Existing Images Display -->
+                                @if($produk->gambarTambahan->count() > 0)
+                                    <div class="space-y-4 mb-4">
+                                        @foreach($produk->gambarTambahan as $img)
+                                            <div class="relative group bg-gray-800/50 rounded-xl overflow-hidden border-2 border-gray-700 hover:border-gray-600 transition">
+                                                <!-- Image Container 16:9 -->
+                                                <div class="relative w-full" style="padding-bottom: 56.25%;"> <!-- 16:9 ratio -->
+                                                    <img src="{{ $img->gambar_url }}" 
+                                                         alt="{{ $produk->nama }}"
+                                                         class="absolute inset-0 w-full h-full object-cover">
+                                                    
+                                                    <!-- Primary Badge -->
+                                                    @if($img->is_primary)
+                                                        <div class="absolute top-4 left-4">
+                                                            <span class="bg-blue-500 text-white text-sm px-3 py-1.5 rounded-lg shadow-lg font-medium flex items-center gap-2">
+                                                                <i class="fas fa-star"></i>
+                                                                Gambar Utama
+                                                            </span>
+                                                        </div>
+                                                    @endif
+                                                    
+                                                    <!-- Overlay saat dicentang -->
+                                                    <div class="delete-overlay-{{ $img->id }} absolute inset-0 bg-red-500 bg-opacity-0 transition-all duration-300 pointer-events-none flex items-center justify-center">
+                                                        <div class="text-center opacity-0 transition-opacity duration-300">
+                                                            <i class="fas fa-trash text-white text-5xl mb-3"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Info Bar -->
+                                                <div class="p-4 flex items-center justify-between">
+                                                    <div class="flex items-center gap-2">
+                                                        <i class="fas fa-image text-gray-400"></i>
+                                                    </div>
+                                                    
+                                                    <!-- Checkbox only -->
+                                                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                                                        <input type="checkbox" 
+                                                               name="hapus_gambar[]" 
+                                                               value="{{ $img->id }}" 
+                                                               class="form-checkbox h-5 w-5 text-red-600 rounded border-gray-600 bg-gray-700 focus:ring-red-500 focus:ring-offset-gray-800"
+                                                               onchange="toggleDeleteOverlay(this, {{ $img->id }})"
+                                                               id="delete-checkbox-{{ $img->id }}">
+                                                        <span class="text-sm text-gray-300">Tandai untuk dihapus</span>
+                                                    </label>
+                                                </div>
                                             </div>
+                                        @endforeach
+                                    </div>
+                                    
+                                    <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
+                                        <p class="text-sm text-blue-300 flex items-center gap-2">
+                                            <i class="fas fa-info-circle"></i>
+                                            <span>Tandai gambar yang ingin dihapus dengan checkbox, lalu klik tombol <strong>Simpan Perubahan</strong> di bawah untuk menghapus gambar.</span>
+                                        </p>
+                                    </div>
+                                @elseif($produk->gambar)
+                                    <!-- Legacy single image fallback -->
+                                    <div class="mb-4">
+                                        <div class="relative w-full bg-gray-800/50 rounded-xl overflow-hidden border-2 border-gray-700" style="padding-bottom: 56.25%;">
+                                            <img src="{{ $produk->gambar_url }}" 
+                                                 alt="{{ $produk->nama }}"
+                                                 class="absolute inset-0 w-full h-full object-cover">
+                                        </div>
+                                        <div class="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                                            <p class="text-xs text-yellow-300 flex items-center gap-2">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                Gambar lama (format single image). Upload gambar baru untuk menggunakan multiple image.
+                                            </p>
+                                        </div>
+                                    </div>
+                                @else
+                                    <!-- No image -->
+                                    <div class="mb-4">
+                                        <div class="relative w-full bg-gray-800/50 rounded-xl overflow-hidden border-2 border-dashed border-gray-600" style="padding-bottom: 56.25%;">
+                                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                                <i class="fas fa-image text-6xl text-gray-600 mb-3"></i>
+                                                <p class="text-sm text-gray-400">Belum ada gambar</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Upload New Images -->
+                                <div class="relative">
+                                    <input type="file" name="gambar[]" id="gambar" accept="image/png, image/jpg, image/jpeg"
+                                           class="hidden"
+                                           multiple
+                                           onchange="previewMultipleImages(event)">
+                                    <label for="gambar" class="cursor-pointer">
+                                        <div class="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:border-primary/50 hover:bg-gray-800/30 transition duration-200">
+                                            <div id="image-previews" class="space-y-4 mb-6 hidden"></div>
                                             <div id="upload-placeholder">
-                                                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
-                                                <p class="text-sm text-gray-600 mb-1">Klik untuk ganti gambar</p>
-                                                <p class="text-xs text-gray-500">Max: 2MB, Format: JPG, PNG, JPEG</p>
-                                                <p class="text-xs text-gray-500 mt-1">Biarkan kosong jika tidak ingin mengganti</p>
+                                                <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
+                                                <p class="text-base text-gray-300 mb-2 font-medium">Klik untuk tambah gambar baru</p>
+                                                <p class="text-sm text-gray-500">Max: 2MB per file, Format: JPG, PNG, JPEG</p>
+                                                <p class="text-sm text-gray-500 mt-1">Bisa upload beberapa gambar sekaligus</p>
                                             </div>
                                         </div>
                                     </label>
                                 </div>
-                                @error('gambar')
+                                @error('gambar.*')
                                     <p class="mt-2 text-sm text-red-600 flex items-center">
                                         <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
                                     </p>

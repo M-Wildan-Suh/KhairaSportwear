@@ -18,6 +18,7 @@
 
 @section('content')
     <div class="admin-card">
+        <!-- Header -->
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h3 class="text-2xl font-bold text-gray-100">{{ $produk->nama }}</h3>
@@ -97,15 +98,15 @@
                         </div>
                         
                         @if($produk->tipe === 'both')
-                        <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <div class="flex items-center text-yellow-700">
-                                <i class="fas fa-info-circle mr-2"></i>
-                                <div class="text-sm">
-                                    <p class="font-medium">Distribusi Stok:</p>
-                                    <p>{{ $produk->stok_tersedia }} untuk dijual + {{ $produk->stok_disewa }} untuk disewa = {{ $produk->stok_total }} total</p>
+                            <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div class="flex items-center text-yellow-700">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    <div class="text-sm">
+                                        <p class="font-medium">Distribusi Stok:</p>
+                                        <p>{{ $produk->stok_tersedia }} untuk dijual + {{ $produk->stok_disewa }} untuk disewa = {{ $produk->stok_total }} total</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                     </div>
                 </div>
@@ -162,48 +163,48 @@
                     </h4>
                     <div class="space-y-4">
                         @if($produk->harga_beli)
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <div>
-                                <p class="text-sm">Harga Beli</p>
-                                <p class="text-xl font-bold">{{ $produk->harga_beli_formatted }}</p>
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm">Harga Beli</p>
+                                    <p class="text-xl font-bold">{{ $produk->harga_beli_formatted }}</p>
+                                </div>
+                                <span class="px-2 py-1 text-xs bg-gray-200 rounded">Jual</span>
                             </div>
-                            <span class="px-2 py-1 text-xs bg-gray-200 rounded">Jual</span>
-                        </div>
                         @endif
 
                         @if($produk->harga_sewa_harian)
-                        <div>
-                            <p class="text-sm text-gray-500 mb-2">Harga Sewa</p>
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                                    <div>
-                                        <p class="text-sm text-green-600">Harian</p>
-                                        <p class="font-medium text-green-700">{{ $produk->harga_sewa_harian_formatted }}</p>
+                            <div>
+                                <p class="text-sm text-gray-500 mb-2">Harga Sewa</p>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                                        <div>
+                                            <p class="text-sm text-green-600">Harian</p>
+                                            <p class="font-medium text-green-700">{{ $produk->harga_sewa_harian_formatted }}</p>
+                                        </div>
+                                        <span class="px-2 py-1 text-xs bg-green-200 text-green-700 rounded">/hari</span>
                                     </div>
-                                    <span class="px-2 py-1 text-xs bg-green-200 text-green-700 rounded">/hari</span>
+                                    
+                                    @if($produk->harga_sewa_mingguan)
+                                        <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                            <div>
+                                                <p class="text-sm text-blue-600">Mingguan</p>
+                                                <p class="font-medium text-blue-700">Rp {{ number_format($produk->harga_sewa_mingguan, 0, ',', '.') }}</p>
+                                            </div>
+                                            <span class="px-2 py-1 text-xs bg-blue-200 text-blue-700 rounded">/minggu</span>
+                                        </div>
+                                    @endif
+                                    
+                                    @if($produk->harga_sewa_bulanan)
+                                        <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                                            <div>
+                                                <p class="text-sm text-purple-600">Bulanan</p>
+                                                <p class="font-medium text-purple-700">Rp {{ number_format($produk->harga_sewa_bulanan, 0, ',', '.') }}</p>
+                                            </div>
+                                            <span class="px-2 py-1 text-xs bg-purple-200 text-purple-700 rounded">/bulan</span>
+                                        </div>
+                                    @endif
                                 </div>
-                                
-                                @if($produk->harga_sewa_mingguan)
-                                <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                                    <div>
-                                        <p class="text-sm text-blue-600">Mingguan</p>
-                                        <p class="font-medium text-blue-700">Rp {{ number_format($produk->harga_sewa_mingguan, 0, ',', '.') }}</p>
-                                    </div>
-                                    <span class="px-2 py-1 text-xs bg-blue-200 text-blue-700 rounded">/minggu</span>
-                                </div>
-                                @endif
-                                
-                                @if($produk->harga_sewa_bulanan)
-                                <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                                    <div>
-                                        <p class="text-sm text-purple-600">Bulanan</p>
-                                        <p class="font-medium text-purple-700">Rp {{ number_format($produk->harga_sewa_bulanan, 0, ',', '.') }}</p>
-                                    </div>
-                                    <span class="px-2 py-1 text-xs bg-purple-200 text-purple-700 rounded">/bulan</span>
-                                </div>
-                                @endif
                             </div>
-                        </div>
                         @endif
                     </div>
                 </div>
@@ -213,28 +214,86 @@
                     <h4 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
                         <i class="fas fa-image text-primary mr-2"></i> Gambar Produk
                     </h4>
-                    <div class="text-center">
-                        <img src="{{ $produk->gambar_url }}" 
-                             alt="{{ $produk->nama }}"
-                             class="mx-auto max-w-full h-auto rounded-lg shadow-sm max-h-96">
+                    
+                    <!-- Product Images -->
+                    <div data-aos="fade-right" class="mb-6">
+                        @if($produk->gambarTambahan && $produk->gambarTambahan->count() > 0)
+                            <!-- Multiple Images - Format 16:9 List Vertikal -->
+                            <div class="space-y-4">
+                                @foreach($produk->gambarTambahan->sortBy('urutan') as $img)
+                                    <div class="relative bg-white rounded-xl overflow-hidden border-2 {{ $img->is_primary ? 'border-primary' : 'border-gray-200' }} hover:border-primary/50 transition cursor-pointer group"
+                                         onclick="viewImageFullscreen('{{ $img->gambar_url }}', '{{ $produk->nama }}')">
+                                        <!-- Image Container 16:9 -->
+                                        <div class="relative w-full" style="padding-bottom: 56.25%;"> <!-- 16:9 ratio -->
+                                            <img src="{{ $img->gambar_url }}" 
+                                                 alt="{{ $produk->nama }}"
+                                                 class="absolute inset-0 w-full h-full object-cover">
+                                            
+                                            <!-- Primary Badge Only -->
+                                            @if($img->is_primary)
+                                                <div class="absolute top-4 left-4">
+                                                    <span class="bg-blue-500 text-white text-sm px-3 py-1.5 rounded-lg shadow-lg font-medium flex items-center gap-2">
+                                                        <i class="fas fa-star"></i>
+                                                        Gambar Utama
+                                                    </span>
+                                                </div>
+                                            @endif
+                                            
+                                            <!-- Image Number -->
+                                            <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-lg font-medium">
+                                                <i class="fas fa-image mr-1"></i>
+                                                {{ $loop->iteration }}/{{ $produk->gambarTambahan->count() }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @elseif($produk->gambar)
+                            <!-- Legacy single image fallback -->
+                            <div class="relative bg-white rounded-xl overflow-hidden border-2 border-gray-200 group">
+                                <div class="relative w-full" style="padding-bottom: 56.25%;">
+                                    <img src="{{ $produk->gambar_url }}" 
+                                         alt="{{ $produk->nama }}"
+                                         class="absolute inset-0 w-full h-full object-cover cursor-pointer"
+                                         onclick="viewImageFullscreen('{{ $produk->gambar_url }}', '{{ $produk->nama }}')">
+                                </div>
+                                
+                                <div class="p-3 bg-yellow-500/10 border-t border-yellow-500/30">
+                                    <p class="text-xs text-yellow-700 flex items-center gap-2">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Format gambar lama (single image)
+                                    </p>
+                                </div>
+                            </div>
+                        @else
+                            <!-- No image -->
+                            <div class="relative bg-white rounded-xl overflow-hidden border-2 border-dashed border-gray-300">
+                                <div class="relative w-full" style="padding-bottom: 56.25%;">
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-gray-50">
+                                        <i class="fas fa-image text-6xl text-gray-300 mb-3"></i>
+                                        <p class="text-sm text-gray-400">Belum ada gambar produk</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
                 <!-- Spesifikasi Card -->
                 @if($produk->spesifikasi && count($produk->spesifikasi) > 0)
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h4 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
-                        <i class="fas fa-list text-primary mr-2"></i> Spesifikasi
-                    </h4>
-                    <div class="space-y-2">
-                        @foreach($produk->spesifikasi as $key => $value)
-                        <div class="flex justify-between py-2 border-b border-gray-100 last:border-0">
-                            <span class="font-medium text-gray-700">{{ $key }}:</span>
-                            <span class="text-gray-600">{{ $value }}</span>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h4 class="text-lg font-semibold text-gray-100 mb-4 flex items-center">
+                            <i class="fas fa-list text-primary mr-2"></i> Spesifikasi
+                        </h4>
+                        <div class="space-y-2">
+                            @foreach($produk->spesifikasi as $key => $value)
+                                <div class="flex justify-between py-2 border-b border-gray-100 last:border-0">
+                                    <span class="font-medium text-gray-700">{{ $key }}:</span>
+                                    <span class="text-gray-600">{{ $value }}</span>
+                                </div>
+                            @endforeach
                         </div>
-                        @endforeach
                     </div>
-                </div>
                 @endif
 
                 <!-- Stats Card -->
