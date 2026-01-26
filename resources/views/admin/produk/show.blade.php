@@ -21,16 +21,16 @@
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
             <div>
-                <h3 class="text-2xl font-bold text-gray-100">{{ $produk->nama }}</h3>
-                <p class="text-gray-600 mt-1">ID: {{ $produk->id }} • Dibuat: {{ $produk->created_at->format('d M Y') }}</p>
+                <h3 class="text-2xl font-bold text-dark-100">{{ $produk->nama }}</h3>
+                <p class="text-dark-600 mt-1">ID: {{ $produk->id }} • Dibuat: {{ $produk->created_at->format('d M Y') }}</p>
             </div>
             <div class="flex space-x-3">
                 <a href="{{ route('admin.produk.edit', $produk) }}" 
-                   class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition duration-200 flex items-center">
+                   class="px-4 py-2 border border-gray-300 text-dark rounded-lg hover:bg-gray-50 transition duration-200 flex items-center">
                     <i class="fas fa-edit mr-2"></i> Edit
                 </a>
                 <a href="{{ route('admin.produk.index') }}" 
-                   class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200 flex items-center">
+                   class="px-4 py-2 border border-gray-300 rounded-lg text-dark-700 hover:bg-gray-50 transition duration-200 flex items-center">
                     <i class="fas fa-arrow-left mr-2"></i> Kembali
                 </a>
             </div>
@@ -48,7 +48,7 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <p class="text-sm text-gray-500">Kategori</p>
-                                <p class="font-medium">{{ $produk->kategori->nama }}</p>
+                                <p class="font-medium text-gray-900">{{ $produk->kategori->nama }}</p>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500">Tipe Produk</p>
@@ -71,7 +71,7 @@
                         
                         <div>
                             <p class="text-sm text-gray-500">Deskripsi</p>
-                            <p class="mt-1 text-gray-700">{{ $produk->deskripsi ?: 'Tidak ada deskripsi' }}</p>
+                            <p class="font-medium text-gray-900">{{ $produk->deskripsi ?: 'Tidak ada deskripsi' }}</p>
                         </div>
                     </div>
                 </div>
@@ -304,15 +304,15 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Total Disewa</span>
-                            <span class="font-medium">{{ $produk->sewas->count() }} kali</span>
+                            <span class="font-medium text-gray-600">{{ $produk->sewas->count() }} kali</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Total Terjual</span>
-                            <span class="font-medium">{{ $produk->detailTransaksis->sum('quantity') }} unit</span>
+                            <span class="font-medium text-gray-600">{{ $produk->detailTransaksis->sum('quantity') }} unit</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Terakhir Diperbarui</span>
-                            <span class="font-medium">{{ $produk->updated_at->format('d M Y H:i') }}</span>
+                            <span class="font-medium text-gray-600">{{ $produk->updated_at->format('d M Y H:i') }}</span>
                         </div>
                     </div>
                 </div>
