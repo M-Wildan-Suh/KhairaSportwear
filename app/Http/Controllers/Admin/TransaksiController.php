@@ -309,6 +309,8 @@ public function update(Request $request, $id)
                     if ($detail->produk) {
                         $detail->produk->decrement('stok', $detail->quantity);
                         
+                        $detail->bundle?->decrement('stok', $detail->quantity);
+
                         
                         // Log stok keluar
                         \App\Models\StokLog::create([

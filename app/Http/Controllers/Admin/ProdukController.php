@@ -118,6 +118,7 @@ class ProdukController extends Controller
                 $varian->produk_id = $produk->id;
                 $varian->warna = $item['warna'];
                 $varian->size = $item['size'];
+                $varian->stok = $item['stok'];
 
                 $varian->save();
             }
@@ -275,6 +276,8 @@ class ProdukController extends Controller
                 $varian->produk_id = $produk->id;
                 $varian->warna = $item['warna'];
                 $varian->size  = $item['size'];
+                $varian->stok = $item['stok'];
+
                 $varian->save();
             }
         }
