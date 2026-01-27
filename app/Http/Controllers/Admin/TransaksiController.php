@@ -277,8 +277,9 @@ public function update(Request $request, $id)
         'alamat_pengiriman' => 'nullable|string',
     ]);
 
+    
     DB::beginTransaction();
-
+    
     try {
         $oldStatus = $transaction->status;
         $newStatus = $request->status;
@@ -308,7 +309,7 @@ public function update(Request $request, $id)
                 foreach ($transaction->detailTransaksis as $detail) {
                     if ($detail->produk) {
                         $detail->produk->decrement('stok', $detail->quantity);
-                        
+
                         $detail->bundle?->decrement('stok', $detail->quantity);
 
                         
@@ -427,8 +428,7 @@ public function update(Request $request, $id)
             $this->createStatusNotification($transaction, $oldStatus);
         }
 
-        return redirect()->route('admin.transaksi.show', $transaction->id)
-            ->with('success', 'Transaksi berhasil diperbarui.');
+        return redirect()->route('admin.transaksi.index')->with('success', 'Transaksi berhasil diperbarui.');
 
     } catch (\Exception $e) {
         DB::rollBack();
