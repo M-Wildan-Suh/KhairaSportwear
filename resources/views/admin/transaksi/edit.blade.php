@@ -226,7 +226,7 @@
                                 <i class="fas fa-save mr-2"></i> Simpan Perubahan
                             </button>
                             <a href="{{ route('admin.transaksi.show', $transaction->id) }}" 
-                               class="px-4 py-2 border border-gray-300 text-gray-100 dark:text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
+                               class="px-4 py-2 border border-gray-300 text-white hover:dark:text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
                                 Batal
                             </a>
                         </div>

@@ -23,21 +23,21 @@ class Produk extends Model
         'stok_total',
         'stok_tersedia',
         'stok_disewa',
-        'warna',        // Tambah field warna
-        'size',         // Tambah field size
+        'warna',       // Tambah field warna
+        'size',        // Tambah field size
         'spesifikasi',
-        'is_active',
+        'is_active'
     ];
 
     protected $casts = [
-        'is_active'           => 'boolean',
-        'spesifikasi'         => 'array',
-        'warna'               => 'array',        // Tambah cast untuk warna
-        'size'                => 'array',        // Tambah cast untuk size
-        'harga_beli'          => 'decimal:2',
-        'harga_sewa_harian'   => 'decimal:2',
+        'is_active' => 'boolean',
+        'spesifikasi' => 'array',
+        'warna' => 'array',        // Tambah cast untuk warna
+        'size' => 'array',         // Tambah cast untuk size
+        'harga_beli' => 'decimal:2',
+        'harga_sewa_harian' => 'decimal:2',
         'harga_sewa_mingguan' => 'decimal:2',
-        'harga_sewa_bulanan'  => 'decimal:2',
+        'harga_sewa_bulanan' => 'decimal:2'
     ];
 
     // Relationships
@@ -271,7 +271,11 @@ class Produk extends Model
         return $this;
     }
 
-    //Url Gambar
+    // Method varian produk
+    public function varians()
+    {
+        return $this->hasMany(ProdukVarian::class);
+    }
 
 
     // Accessor untuk harga format

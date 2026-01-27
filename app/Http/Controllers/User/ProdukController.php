@@ -16,7 +16,7 @@ class ProdukController extends Controller
             ->active()
             ->stokTersedia()
             ->paginate(12);
-
+        
         // Get featured rental products
         $featuredProducts = Produk::with('kategori')
             ->tipeJual()
@@ -24,16 +24,16 @@ class ProdukController extends Controller
             ->inRandomOrder()
             ->limit(4)
             ->get();
-
+        
         $kategoris = \App\Models\Kategori::active()->get();
-
+        
         return view('user.produk.index', compact(
             'produks',
             'featuredProducts',
             'kategoris'
         ));
     }
-
+    
     public function show($slug)
     {
         $produk = Produk::with('kategori')
@@ -49,7 +49,7 @@ class ProdukController extends Controller
             ])
             ->where('slug', $slug)
             ->firstOrFail();
-
+        
         // Get related products
         $relatedProducts = Produk::with('kategori')
             ->where('kategori_id', $produk->kategori_id)
@@ -64,10 +64,10 @@ class ProdukController extends Controller
             ->where('is_active', true)
             ->limit(4)
             ->get();
-
+        
         return view('user.produk.show', compact('produk', 'relatedProducts'));
     }
-
+    
     public function byKategori($slug)
     {
         $kategori = Kategori::where('slug', $slug)->firstOrFail();
@@ -77,7 +77,7 @@ class ProdukController extends Controller
             ->active()
             ->stokTersedia()
             ->paginate(12);
-
+        
         // Ambil semua kategori dengan count
         $kategoris = Kategori::active()
             ->withCount([
@@ -86,9 +86,9 @@ class ProdukController extends Controller
                 },
             ])
             ->get();
-
+        
         $view = request()->get('view', 'grid');
-
+        
         return view('user.produk.kategori', compact(
             'produks',
             'kategori',
@@ -96,11 +96,11 @@ class ProdukController extends Controller
             'view'
         ));
     }
-
+    
     public function search(Request $request)
     {
         $search = $request->get('q');
-
+        
         $produks = Produk::with('kategori')
             ->where(function ($query) use ($search) {
                 $query->where('nama', 'like', "%{$search}%")
@@ -112,7 +112,7 @@ class ProdukController extends Controller
             ->active()
             ->stokTersedia()
             ->paginate(12);
-
+        
         // Ambil kategori dengan count untuk sidebar
         $kategoris = Kategori::active()
             ->withCount([
@@ -121,23 +121,23 @@ class ProdukController extends Controller
                 },
             ])
             ->get();
-
+        
         // Hitung untuk sidebar
         $jualCount = Produk::active()->stokTersedia()->tipeJual()->count();
         $sewaCount = Produk::active()->stokTersedia()->tipeSewa()->count();
-
+        
         $featuredProducts = Produk::with('kategori')
             ->active()
             ->stokTersedia()
             ->inRandomOrder()
             ->limit(4)
             ->get();
-
+        
         $view = $request->get('view', 'grid');
-
+        
         return view('user.produk.search', compact(
-            'produks',
-            'search',
+            'produks', 
+            'search', 
             'view',
             'kategoris',
             'jualCount',

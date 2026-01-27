@@ -373,7 +373,7 @@ class TestResponse implements ArrayAccess
         $actual = $this->headers->get($headerName);
 
         if (! is_null($value)) {
-            PHPUnit::withResponse($this)->assertEqualsIgnoringCase(
+            PHPUnit::withResponse($this)->assertEquals(
                 $value, $this->headers->get($headerName),
                 "Header [{$headerName}] was found, but value [{$actual}] does not match [{$value}]."
             );

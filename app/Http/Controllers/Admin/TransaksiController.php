@@ -292,6 +292,7 @@ public function update(Request $request, $id)
                 $transaction->tanggal_pembayaran = now();
                 // $validated['tanggal_pembayaran'] = now();
             }
+
             $validated['verifikasi_oleh'] = auth()->id();
             $validated['tanggal_verifikasi'] = now();
 
@@ -307,6 +308,7 @@ public function update(Request $request, $id)
                 foreach ($transaction->detailTransaksis as $detail) {
                     if ($detail->produk) {
                         $detail->produk->decrement('stok', $detail->quantity);
+                        
                         
                         // Log stok keluar
                         \App\Models\StokLog::create([

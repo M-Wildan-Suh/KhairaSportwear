@@ -35,13 +35,6 @@ class Response implements ArrayAccess, Stringable
     protected $decoded;
 
     /**
-     * The flags that were used when decoding the JSON response.
-     *
-     * @var int-mask<JSON_BIGINT_AS_STRING, JSON_INVALID_UTF8_IGNORE, JSON_INVALID_UTF8_SUBSTITUTE, JSON_OBJECT_AS_ARRAY, JSON_THROW_ON_ERROR>
-     */
-    protected int $decodingFlags;
-
-    /**
      * The request cookies.
      *
      * @var \GuzzleHttp\Cookie\CookieJar
@@ -61,13 +54,6 @@ class Response implements ArrayAccess, Stringable
      * @var int<1, max>|false|null
      */
     protected $truncateExceptionsAt = null;
-
-    /**
-     * The flags passed to `json_decode` by default.
-     *
-     * @var int-mask<JSON_BIGINT_AS_STRING, JSON_INVALID_UTF8_IGNORE, JSON_INVALID_UTF8_SUBSTITUTE, JSON_OBJECT_AS_ARRAY, JSON_THROW_ON_ERROR>
-     */
-    public static int $defaultJsonDecodingFlags = 0;
 
     /**
      * Create a new response instance.
@@ -94,19 +80,12 @@ class Response implements ArrayAccess, Stringable
      *
      * @param  string|null  $key
      * @param  mixed  $default
-     * @param  int-mask<JSON_BIGINT_AS_STRING, JSON_INVALID_UTF8_IGNORE, JSON_INVALID_UTF8_SUBSTITUTE, JSON_OBJECT_AS_ARRAY, JSON_THROW_ON_ERROR>|null  $flags
      * @return mixed
      */
-    public function json($key = null, $default = null, $flags = null)
+    public function json($key = null, $default = null)
     {
-        $flags = $flags ?? self::$defaultJsonDecodingFlags;
-
-        if (! $this->decoded || (isset($this->decodingFlags) && $this->decodingFlags !== $flags)) {
-            $this->decoded = json_decode(
-                $this->body(), true, flags: $flags
-            );
-
-            $this->decodingFlags = $flags;
+        if (! $this->decoded) {
+            $this->decoded = json_decode($this->body(), true);
         }
 
         if (is_null($key)) {
@@ -119,36 +98,33 @@ class Response implements ArrayAccess, Stringable
     /**
      * Get the JSON decoded body of the response as an object.
      *
-     * @param  int-mask<JSON_BIGINT_AS_STRING, JSON_INVALID_UTF8_IGNORE, JSON_INVALID_UTF8_SUBSTITUTE, JSON_OBJECT_AS_ARRAY, JSON_THROW_ON_ERROR>|null  $flags
      * @return object|null
      */
-    public function object($flags = null)
+    public function object()
     {
-        return json_decode($this->body(), false, flags: $flags ?? self::$defaultJsonDecodingFlags);
+        return json_decode($this->body(), false);
     }
 
     /**
      * Get the JSON decoded body of the response as a collection.
      *
      * @param  string|null  $key
-     * @param  int-mask<JSON_BIGINT_AS_STRING, JSON_INVALID_UTF8_IGNORE, JSON_INVALID_UTF8_SUBSTITUTE, JSON_OBJECT_AS_ARRAY, JSON_THROW_ON_ERROR>|null  $flags
      * @return \Illuminate\Support\Collection
      */
-    public function collect($key = null, $flags = null)
+    public function collect($key = null)
     {
-        return new Collection($this->json($key, flags: $flags));
+        return new Collection($this->json($key));
     }
 
     /**
      * Get the JSON decoded body of the response as a fluent object.
      *
      * @param  string|null  $key
-     * @param  int-mask<JSON_BIGINT_AS_STRING, JSON_INVALID_UTF8_IGNORE, JSON_INVALID_UTF8_SUBSTITUTE, JSON_OBJECT_AS_ARRAY, JSON_THROW_ON_ERROR>|null  $flags
      * @return \Illuminate\Support\Fluent
      */
-    public function fluent($key = null, $flags = null)
+    public function fluent($key = null)
     {
-        return new Fluent((array) $this->json($key, flags: $flags));
+        return new Fluent((array) $this->json($key));
     }
 
     /**
@@ -598,13 +574,5 @@ class Response implements ArrayAccess, Stringable
         return static::hasMacro($method)
             ? $this->macroCall($method, $parameters)
             : $this->response->{$method}(...$parameters);
-    }
-
-    /**
-     * Flush the global state of the Response.
-     */
-    public static function flushState(): void
-    {
-        self::$defaultJsonDecodingFlags = 0;
     }
 }

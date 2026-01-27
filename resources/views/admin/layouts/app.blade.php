@@ -476,7 +476,7 @@
 @include('admin.components.navbar', [
     'logoUrl' => route('admin.dashboard'),
     'brandName' => 'SportWear Admin',
-    'showSearch' => true,
+    'showSearch' => false,
     'searchAction' => route('admin.search'),
     'showGithub' => false
 ])

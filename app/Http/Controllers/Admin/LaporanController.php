@@ -188,6 +188,10 @@ public function penyewaan(Request $request)
         ->where('tanggal_kembali_rencana', '<', now())
         ->count();
     
+    $overdueRentalitem = Sewa::where('status', Sewa::STATUS_AKTIF)
+        ->where('tanggal_kembali_rencana', '<', now())
+        ->get();
+    
     // Rentals akan berakhir (3 hari ke depan)
     $upcomingReturns = Sewa::where('status', Sewa::STATUS_AKTIF)
         ->whereBetween('tanggal_kembali_rencana', [now(), now()->addDays(3)])
@@ -228,6 +232,7 @@ public function penyewaan(Request $request)
         'mostRentedProducts',
         'statusAnalysis',
         'overdueRentals',
+        'overdueRentalitem',
         'upcomingReturns',
         // Variabel untuk view lama
         'totalRentalRevenue',

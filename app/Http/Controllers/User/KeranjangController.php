@@ -78,6 +78,7 @@ class KeranjangController extends Controller
             if ($existingItem) {
                 // Update quantity
                 $existingItem->quantity += $request->quantity;
+                $existingItem->bundle_id = $request->bundle ? $request->bundle : ($product->varians->first()->id ?? '');
                 
                 // Update sewa options if needed
                 if ($request->type === 'sewa' && $request->has('options')) {
@@ -93,6 +94,7 @@ class KeranjangController extends Controller
                     'produk_id' => $product->id,
                     'tipe' => $request->type,
                     'quantity' => $request->quantity,
+                    'bundle_id' => $product->varians->first() ? $product->varians->first() : $request->bundle ?? '',
                     'opsi_sewa' => $request->type === 'sewa' ? $request->options : null
                 ]);
                 

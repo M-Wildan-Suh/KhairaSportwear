@@ -36,6 +36,11 @@ class Keranjang extends Model
         return $this->belongsTo(Produk::class);
     }
 
+    public function bundle()
+    {
+        return $this->belongsTo(ProdukVarian::class, 'bundle_id', 'id');
+    }
+
     // Scopes
     public function scopeTipeJual($query)
     {

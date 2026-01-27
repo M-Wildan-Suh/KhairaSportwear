@@ -21,8 +21,6 @@ use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
-use Illuminate\Http\Client\Response;
-use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Middleware\TrustHosts;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -180,7 +178,6 @@ trait InteractsWithTestCaseLifecycle
         Factory::flushState();
         EncodedHtmlString::flushState();
         EncryptCookies::flushState();
-        HandleCors::flushState();
         HandleExceptions::flushState($this);
         JsonApiResource::flushState();
         JsonResource::flushState();
@@ -190,7 +187,6 @@ trait InteractsWithTestCaseLifecycle
         PreventRequestsDuringMaintenance::flushState();
         Queue::createPayloadUsing(null);
         RegisterProviders::flushState();
-        Response::flushState();
         Sleep::fake(false);
         TrimStrings::flushState();
         TrustProxies::flushState();

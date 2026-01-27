@@ -230,14 +230,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($overdueRentals as $sewa)
+                        @foreach($overdueRentalitem as $sewa)
                         <tr class="border-t border-red-200">
                             <td class="p-3 font-medium">{{ $sewa->kode_sewa }}</td>
                             <td class="p-3">{{ $sewa->user->name ?? 'Guest' }}</td>
                             <td class="p-3">{{ $sewa->produk->nama }}</td>
                             <td class="p-3 font-bold">{{ $sewa->tanggal_kembali_rencana->format('d/m/Y') }}</td>
                             <td class="p-3 text-red-600 font-bold">{{ $sewa->hitungKeterlambatan() }} hari</td>
-                            <td class="p-3 font-bold">Rp {{ number_format($sewa->hitungDenda(), 0, ',', '.') }}</td>
+                            <td class="p-3 font-bold">Rp {{ $sewa->denda }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -245,7 +245,7 @@
                         <tr>
                             <td colspan="5" class="p-3 text-right font-bold">Total Potensi Denda:</td>
                             <td class="p-3 font-bold text-red-700">
-                                Rp {{ number_format($overdueRentals->sum('hitungDenda'), 0, ',', '.') }}
+                                Rp {{ $overdueRentalitem->sum('denda') }}
                             </td>
                         </tr>
                     </tfoot>
@@ -262,7 +262,7 @@
         </h4>
         <ul class="list-disc pl-5 text-sm text-blue-800 space-y-1">
             @if($overdueRentals > 0)
-            <li>Segera hubungi {{ $overdueRentals->count() }} customer yang terlambat mengembalikan barang.</li>
+            <li>Segera hubungi {{ $overdueRentals }} customer yang terlambat mengembalikan barang.</li>
             @endif
             @if(($statusCounts['ongoing'] ?? 0) > 10)
             <li>Terdapat {{ $statusCounts['ongoing'] ?? 0 }} penyewaan aktif. Periksa stok ketersediaan produk.</li>

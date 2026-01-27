@@ -197,39 +197,17 @@
                         </div>
 
                         <!-- Warna Selection -->
-                        @if ($produk->warna && count($produk->warna) > 0)
+                        @if ($produk->varians)
                             <div class="border-t border-gray-200 pt-6">
-                                <h4 class="font-semibold text-gray-900 mb-3">Warna</h4>
+                                <h4 class="font-semibold text-gray-900 mb-3">Bundles</h4>
                                 <div class="flex flex-wrap gap-3">
-                                    @foreach ($produk->warna as $warna)
+                                    @foreach ($produk->varians as $item)
                                         <label class="color-option cursor-pointer">
-                                            <input type="radio" name="selected_warna" value="{{ $warna }}"
+                                            <input type="radio" name="bundle" value="{{ $item->id }}" id="bundle"
                                                 class="sr-only" {{ $loop->first ? 'checked' : '' }}>
                                             <div
                                                 class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-lg hover:border-primary transition-all duration-200">
-                                                <div class="w-5 h-5 rounded-full border border-gray-300"
-                                                    style="background-color: {{ \App\Models\Produk::getColorCode($warna) }}">
-                                                </div>
-                                                <span class="font-medium text-gray-700">{{ ucfirst($warna) }}</span>
-                                            </div>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Ukuran Selection -->
-                        @if ($produk->size && count($produk->size) > 0)
-                            <div class="border-t border-gray-200 pt-6">
-                                <h4 class="font-semibold text-gray-900 mb-3">Ukuran</h4>
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach ($produk->size as $size)
-                                        <label class="size-option">
-                                            <input type="radio" name="selected_size" value="{{ $size }}"
-                                                class="sr-only" {{ $loop->first ? 'checked' : '' }}>
-                                            <div
-                                                class="px-5 py-2.5 border-2 border-gray-200 rounded-lg text-center font-medium text-gray-700 hover:border-primary hover:text-primary hover:bg-primary/5 cursor-pointer transition-all duration-200">
-                                                {{ strtoupper($size) }}
+                                                <span class="font-medium text-gray-700 capitalize">{{ $item->warna }} - {{$item->size}} - Stok : {{ $item->stok }}</span>
                                             </div>
                                         </label>
                                     @endforeach
@@ -913,23 +891,6 @@
                             <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
                                 <h4 class="font-semibold text-gray-900 mb-4">Ringkasan Biaya</h4>
                                 <div class="space-y-3">
-                                    @if ($produk->warna && count($produk->warna) > 0)
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">Warna:</span>
-                                            <span class="font-semibold text-gray-900" id="selectedWarna">
-                                                {{ ucfirst($produk->warna[0]) }}
-                                            </span>
-                                        </div>
-                                    @endif
-
-                                    @if ($produk->size && count($produk->size) > 0)
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-600">Ukuran:</span>
-                                            <span class="font-semibold text-gray-900" id="selectedSize">
-                                                {{ strtoupper($produk->size[0]) }}
-                                            </span>
-                                        </div>
-                                    @endif
 
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">Harga per hari:</span>
@@ -1195,28 +1156,6 @@
             });
         }
 
-        // Update display warna dan ukuran yang dipilih di summary
-        function updateSelectedColorSizeDisplay() {
-            // Get selected warna
-            const selectedWarnaRadio = document.querySelector('input[name="warna"]:checked');
-            if (selectedWarnaRadio) {
-                const selectedWarnaEl = document.getElementById('selectedWarna');
-                if (selectedWarnaEl) {
-                    selectedWarnaEl.textContent = selectedWarnaRadio.value.charAt(0).toUpperCase() + selectedWarnaRadio
-                        .value.slice(1);
-                }
-            }
-
-            // Get selected size
-            const selectedSizeRadio = document.querySelector('input[name="size"]:checked');
-            if (selectedSizeRadio) {
-                const selectedSizeEl = document.getElementById('selectedSize');
-                if (selectedSizeEl) {
-                    selectedSizeEl.textContent = selectedSizeRadio.value.toUpperCase();
-                }
-            }
-        }
-
         // Fungsi update harga sewa
         function updateRentalPrice() {
             const selectedDuration = document.querySelector('input[name="durasi"]:checked');
@@ -1323,8 +1262,7 @@
         // Fungsi add to cart untuk produk jual dengan warna dan size
         async function addToCart(type, checkout = false) {
             const quantity = document.getElementById('quantity').value;
-            const selectedWarna = document.querySelector('input[name="selected_warna"]:checked')?.value || null;
-            const selectedSize = document.querySelector('input[name="selected_size"]:checked')?.value || null;
+            const bundle = document.getElementById('bundle').value || null;
 
             // Validasi quantity
             if (quantity < 1 || quantity > {{ $produk->stok_tersedia }}) {
@@ -1332,28 +1270,11 @@
                 return;
             }
 
-            // Validasi jika produk memiliki warna tapi tidak dipilih
-            @if ($produk->warna && count($produk->warna) > 0)
-                if (!selectedWarna) {
-                    Swal.fire('Error', 'Silakan pilih warna', 'error');
-                    return;
-                }
-            @endif
-
-            // Validasi jika produk memiliki size tapi tidak dipilih
-            @if ($produk->size && count($produk->size) > 0)
-                if (!selectedSize) {
-                    Swal.fire('Error', 'Silakan pilih ukuran', 'error');
-                    return;
-                }
-            @endif
-
             const data = {
                 product_id: {{ $produk->id }},
                 type: type,
                 quantity: parseInt(quantity),
-                warna: selectedWarna,
-                size: selectedSize
+                bundle: bundle,
             };
 
             try {

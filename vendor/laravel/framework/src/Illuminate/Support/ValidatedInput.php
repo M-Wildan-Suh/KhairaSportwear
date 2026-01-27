@@ -161,7 +161,6 @@ class ValidatedInput implements ValidatedData
     /**
      * Determine if an input item is set.
      *
-     * @param  string  $name
      * @return bool
      */
     public function __isset($name)

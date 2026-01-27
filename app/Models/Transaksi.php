@@ -60,6 +60,11 @@ class Transaksi extends Model
         return $this->hasOne(Sewa::class);
     }
 
+    public function bundle()
+    {
+        return $this->belongsTo(ProdukVarian::class, 'bundle_id', 'id');
+    }
+
     /* ================= KODE TRANSAKSI ================= */
     public static function generateKodeTransaksi()
     {

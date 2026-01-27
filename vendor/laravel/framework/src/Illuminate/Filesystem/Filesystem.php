@@ -90,7 +90,7 @@ class Filesystem
                 if (flock($handle, LOCK_SH)) {
                     clearstatcache(true, $path);
 
-                    $contents = stream_get_contents($handle);
+                    $contents = fread($handle, $this->size($path) ?: 1);
 
                     flock($handle, LOCK_UN);
                 }

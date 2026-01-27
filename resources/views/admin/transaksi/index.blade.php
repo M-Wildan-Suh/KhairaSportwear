@@ -333,17 +333,17 @@
                                 </td>
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     <div class="flex items-center gap-1">
-                                        <a href="{{ route('admin.transaksi.show', $transaction->id) }}" 
+                                        {{-- <a href="{{ route('admin.transaksi.show', $transaction->id) }}" 
                                            class="p-1 text-gray-400 hover:text-blue-600" title="Detail">
                                             <i class="fas fa-eye text-xs"></i>
-                                        </a>
+                                        </a> --}}
                                         
                                         <!-- TAMBAHKAN TOMBOL PRINT -->
-                                        <a href="{{ route('admin.transaksi.print', $transaction->id) }}" 
+                                        {{-- <a href="{{ route('admin.transaksi.print', $transaction->id) }}" 
                                            target="_blank"
                                            class="p-1 text-gray-400 hover:text-red-600" title="Print Struk">
                                             <i class="fas fa-print text-xs"></i>
-                                        </a>
+                                        </a> --}}
                                         
                                         @if($transaction->status != 'dibatalkan')
                                         <a href="{{ route('admin.transaksi.edit', $transaction->id) }}" 
@@ -352,11 +352,11 @@
                                         </a>
                                         @endif
                                         
-                                        <a href="{{ route('admin.transaksi.invoice', $transaction->id) }}" 
+                                        {{-- <a href="{{ route('admin.transaksi.invoice', $transaction->id) }}" 
                                            target="_blank"
                                            class="p-1 text-gray-400 hover:text-purple-600" title="Invoice">
                                             <i class="fas fa-file-invoice text-xs"></i>
-                                        </a>
+                                        </a> --}}
                                         
                                         @if($transaction->bukti_bayar)
                                         <a href="{{ Storage::url($transaction->bukti_bayar) }}" 

@@ -35,6 +35,11 @@ class DetailTransaksi extends Model
     {
         return $this->belongsTo(Produk::class);
     }
+    
+    public function bundle()
+    {
+        return $this->belongsTo(ProdukVarian::class, 'bundle_id', 'id');
+    }
 
     // Custom methods
     public function getOpsiSewaAttribute($value)

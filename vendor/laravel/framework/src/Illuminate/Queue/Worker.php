@@ -374,7 +374,7 @@ class Worker
             return $connection->pop($queue, $index);
         };
 
-        $this->raiseBeforeJobPopEvent($connection->getConnectionName(), $queue);
+        $this->raiseBeforeJobPopEvent($connection->getConnectionName());
 
         try {
             if (isset(static::$popCallbacks[$this->name ?? ''])) {
@@ -531,12 +531,10 @@ class Worker
             // so it is not lost entirely. This'll let the job be retried at a later time by
             // another listener (or this same one). We will re-throw this exception after.
             if (! $job->isDeleted() && ! $job->isReleased() && ! $job->hasFailed()) {
-                $backoff = $this->calculateBackoff($job, $options);
-
-                $job->release($backoff);
+                $job->release($this->calculateBackoff($job, $options));
 
                 $this->events->dispatch(new JobReleasedAfterException(
-                    $connectionName, $job, $backoff
+                    $connectionName, $job
                 ));
             }
         }
@@ -686,12 +684,11 @@ class Worker
      * Raise an event indicating a job is being popped from the queue.
      *
      * @param  string  $connectionName
-     * @param  string|null  $queue
      * @return void
      */
-    protected function raiseBeforeJobPopEvent($connectionName, $queue = null)
+    protected function raiseBeforeJobPopEvent($connectionName)
     {
-        $this->events->dispatch(new JobPopping($connectionName, $queue));
+        $this->events->dispatch(new JobPopping($connectionName));
     }
 
     /**

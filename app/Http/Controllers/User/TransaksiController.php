@@ -28,17 +28,20 @@ class TransaksiController extends Controller
         return view('user.transaksi.index', compact('transaksis'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $user = auth()->user();
-        $keranjangs = $user->keranjangs()
-            ->with('produk')
-            ->get();
 
-        if ($keranjangs->isEmpty()) {
-            return redirect()->route('user.keranjang.index')
-                ->with('error', 'Keranjang Anda kosong. Silakan tambahkan produk terlebih dahulu.');
+        $query = $user->keranjangs()->with('produk');
+
+        // 🔥 FILTER ITEM TERPILIH
+        if ($request->filled('items')) {
+            $ids = explode(',', $request->items);
+            $query->whereIn('id', $ids);
         }
+
+        $keranjangs = $query->get();
+
 
         // Debug info
         \Log::info('=== CHECKOUT DEBUG ===');
@@ -183,7 +186,18 @@ class TransaksiController extends Controller
         ]);
 
         $user = auth()->user();
-        $keranjangs = $user->keranjangs()->with('produk')->get();
+        $ids = [];
+
+        if ($request->filled('items')) {
+            $ids = explode(',', $request->items);
+        }
+
+        $keranjangs = $user->keranjangs()
+            ->with('produk')
+            ->when(!empty($ids), function ($q) use ($ids) {
+                $q->whereIn('id', $ids);
+            })
+            ->get();
 
         \Log::info('Cart items retrieved:', [
             'count' => $keranjangs->count(),
@@ -303,6 +317,8 @@ class TransaksiController extends Controller
 
         \Log::info('=== STOCK VALIDATION PASSED ===');
 
+        $checkedOutCartIds = $keranjangs->pluck('id')->toArray();
+
         DB::beginTransaction();
         \Log::info('Transaction started');
 
@@ -372,8 +388,14 @@ class TransaksiController extends Controller
             }
 
             // Kosongkan keranjang
-            $deleted = $user->keranjangs()->delete();
-            \Log::info('Cart cleared, deleted ' . $deleted . ' items');
+            $deleted = Keranjang::where('user_id', $user->id)
+                ->whereIn('id', $checkedOutCartIds)
+                ->delete();
+
+            \Log::info('Cart items deleted (checked out only):', [
+                'deleted_count' => $deleted,
+                'cart_ids' => $checkedOutCartIds
+            ]);
 
             DB::commit();
             \Log::info('Transaction committed successfully');
@@ -487,6 +509,7 @@ class TransaksiController extends Controller
                 'produk_id' => $item->produk_id,
                 'tipe_produk' => $item->tipe,
                 'quantity' => $item->quantity,
+                'bundle_id' => $item->bundle_id,
                 'harga_satuan' => $item->harga,
                 'subtotal' => $item->subtotal,
                 'opsi_sewa' => $item->opsi_sewa

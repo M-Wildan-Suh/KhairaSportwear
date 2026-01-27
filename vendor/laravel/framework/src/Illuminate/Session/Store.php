@@ -272,7 +272,7 @@ class Store implements Session
     /**
      * Checks if a key exists.
      *
-     * @param  \BackedEnum|\UnitEnum|string|array  $key
+     * @param  string|array  $key
      * @return bool
      */
     public function exists($key)
@@ -287,7 +287,7 @@ class Store implements Session
     /**
      * Determine if the given key is missing from the session data.
      *
-     * @param  \BackedEnum|\UnitEnum|string|array  $key
+     * @param  string|array  $key
      * @return bool
      */
     public function missing($key)
@@ -298,7 +298,7 @@ class Store implements Session
     /**
      * Determine if a key is present and not null.
      *
-     * @param  \BackedEnum|\UnitEnum|string|array  $key
+     * @param  string|array  $key
      * @return bool
      */
     public function has($key)
@@ -311,7 +311,7 @@ class Store implements Session
     /**
      * Determine if any of the given keys are present and not null.
      *
-     * @param  \BackedEnum|\UnitEnum|string|array  $key
+     * @param  string|array  $key
      * @return bool
      */
     public function hasAny($key)
