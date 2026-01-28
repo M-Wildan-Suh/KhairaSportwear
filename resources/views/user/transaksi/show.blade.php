@@ -56,12 +56,12 @@
                 </div>
                 
                 <div class="flex flex-wrap gap-3">
-                    @if($transaksi->status === 'pending')
-                    <button onclick="showUploadModal()" 
-                            class="flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors duration-200 shadow-sm">
-                        <i class="fas fa-upload"></i>
-                        <span>Upload Bukti</span>
-                    </button>
+                    @if($transaksi->status === 'pending' && $transaksi->metode_pembayaran != 'tunai')
+                        <button onclick="showUploadModal()" 
+                                class="flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors duration-200 shadow-sm">
+                            <i class="fas fa-upload"></i>
+                            <span>Upload Bukti</span>
+                        </button>
                     @endif
                     
                     @if(in_array($transaksi->status, ['pending', 'diproses']))

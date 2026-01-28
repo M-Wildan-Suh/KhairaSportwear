@@ -170,6 +170,8 @@ public function penyewaan(Request $request)
     }
 
     $sewas = $query->orderBy('created_at', 'desc')->paginate(20);
+
+    $topProducts = $this->getTopProducts($startDate, $endDate, 'penjualan', $request->kategori_id);
     
     // Hitung semua statistik
     $summary = $this->calculateRentalSummary($sewas);
@@ -214,7 +216,7 @@ public function penyewaan(Request $request)
     
     // Export PDF
     if ($request->has('download') && $request->download === 'pdf') {
-        return $this->generateRentalPdf($sewas, $startDate, $endDate, $summary);
+        return $this->generateRentalPdf($sewas, $startDate, $endDate, $summary, $topProducts);
     }
 
     // Export Excel
@@ -615,6 +617,24 @@ private function calculateMode($values)
         $pdf = Pdf::loadView('admin.laporan.pdf.penjualan', $data);
 
         $filename = 'laporan_penjualan_' . $startDate->format('Ymd') . '_' . $endDate->format('Ymd') . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    private function generaterentalPdf($sewas, $startDate, $endDate, $summary, $topProducts)
+    {
+        $data = [
+            'sewas' => $sewas,
+            'summary' => $summary,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'topProducts' => $topProducts,
+
+        ];
+
+        $pdf = Pdf::loadView('admin.laporan.pdf.penyewaan', $data);
+
+        $filename = 'laporan_penyewaan_' . $startDate->format('Ymd') . '_' . $endDate->format('Ymd') . '.pdf';
 
         return $pdf->download($filename);
     }

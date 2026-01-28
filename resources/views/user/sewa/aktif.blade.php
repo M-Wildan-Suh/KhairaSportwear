@@ -134,8 +134,8 @@
                     
                     <!-- Action Buttons -->
                     <div class="flex flex-wrap gap-2">
-                        <a href="{{ route('user.sewa.struk', ['struk' => $sewa->id]) }}" target="_blank" {{$sewa->status === 'aktif' ? '' : 'disable'}}
-                           class="flex-1 min-w-[120px] px-4 py-2 border {{$sewa->status === 'aktif' ? '' : 'opacity-50 cursor-not-allowed'}} border-gray-800 text-gray-800 font-medium rounded-lg hover:bg-gray-800/5 transition-colors text-center">
+                        <a href="{{ route('user.sewa.struk', ['struk' => $sewa->id]) }}" target="_blank" {{$sewa->status == 'aktif' ? '' : 'disable'}}
+                           class="flex-1 min-w-[120px] px-4 py-2 border {{$sewa->status == 'aktif' ? '' : 'opacity-50 cursor-not-allowed'}} border-gray-800 text-gray-800 font-medium rounded-lg hover:bg-gray-800/5 transition-colors text-center">
                             <i class="fas fa-eye mr-2"></i> Struk
                         </a>
                         
@@ -145,8 +145,8 @@
                             <i class="fas fa-plus mr-2"></i> Perpanjang
                         </button>
                         
-                        <button onclick="showReturnModal('{{ $sewa->id }}')" 
-                                class="flex-1 min-w-[120px] px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors">
+                        <button onclick="showReturnModal('{{ $sewa->id }}')"  {{$sewa->status != 'selesai' ? '' : 'disable'}}
+                                class=" {{$sewa->status != 'selesai' ? '' : 'opacity-50 cursor-not-allowed'}} flex-1 min-w-[120px] px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors">
                             <i class="fas fa-undo mr-2"></i> Kembalikan
                         </button>
                     </div>
@@ -237,9 +237,9 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Kondisi</label>
                                 <textarea name="catatan_kondisi" 
-                                          rows="3"
-                                          placeholder="Deskripsi kondisi alat..."
-                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-gray-800"></textarea>
+                                    rows="3"
+                                    placeholder="Deskripsi kondisi alat..."
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-gray-800"></textarea>
                             </div>
                         </div>
                         
@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Toast notification function
 function showToast(type, message) {
     const toast = document.createElement('div');
-    toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in-right ${type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`;
+    toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in-right ${type == 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`;
     toast.textContent = message;
     document.body.appendChild(toast);
     
@@ -665,7 +665,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Close modals on ESC
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
+        if (e.key == 'Escape') {
             closeReturnModal();
             closeExtendModal();
         }

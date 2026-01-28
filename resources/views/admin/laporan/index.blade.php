@@ -153,11 +153,11 @@
                             <i class="fas fa-eye mr-2"></i> Tampilkan Laporan
                         </button>
                         
-                        {{-- <button type="button"
+                        <button type="button"
                                 onclick="downloadSalesPdf()"
                                 class="flex-1 btn-admin-accent flex items-center justify-center">
                             <i class="fas fa-download mr-2"></i> Download PDF
-                        </button> --}}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -216,11 +216,11 @@
                             <i class="fas fa-eye mr-2"></i> Tampilkan Laporan
                         </button>
                         
-                        {{-- <button type="button"
+                        <button type="button"
                                 onclick="downloadRentalPdf()"
                                 class="flex-1 btn-admin-accent flex items-center justify-center">
                             <i class="fas fa-download mr-2"></i> Download PDF
-                        </button> --}}
+                        </button>
                     </div>
                 </form>
             </div>

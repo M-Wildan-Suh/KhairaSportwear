@@ -297,7 +297,7 @@
                                     <!-- Payment Methods -->
                                     <div class="mt-8">
                                         <h3 class="text-sm font-semibold text-gray-900 mb-3">METODE PEMBAYARAN</h3>
-                                        <div class="grid grid-cols-3 gap-2">
+                                        <div class="grid grid-cols-2 gap-2">
                                             <div class="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
                                                 <i class="fas fa-university text-blue-600 text-lg mb-2"></i>
                                                 <p class="text-xs font-medium text-gray-900">Transfer Bank</p>
@@ -305,10 +305,6 @@
                                             <div class="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
                                                 <i class="fas fa-money-bill-wave text-green-600 text-lg mb-2"></i>
                                                 <p class="text-xs font-medium text-gray-900">Tunai</p>
-                                            </div>
-                                            <div class="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
-                                                <i class="fas fa-qrcode text-purple-600 text-lg mb-2"></i>
-                                                <p class="text-xs font-medium text-gray-900">QRIS</p>
                                             </div>
                                         </div>
                                     </div>

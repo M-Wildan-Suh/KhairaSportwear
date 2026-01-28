@@ -88,10 +88,10 @@
                    class="btn-admin-accent">
                     <i class="fas fa-download mr-2"></i>Download PDF
                 </a>
-                <a href="{{ route('admin.laporan.export.excel', 'penjualan') . '?' . http_build_query(request()->all()) }}" 
+                {{-- <a href="{{ route('admin.laporan.export.excel', 'penjualan') . '?' . http_build_query(request()->all()) }}" 
                    class="btn-admin-primary">
                     <i class="fas fa-file-excel mr-2"></i>Export Excel
-                </a>
+                </a> --}}
             </div>
         </div>
     </div>
