@@ -289,6 +289,7 @@
         const selectedDuration = document.querySelector('input[name="durasi"]:checked');
         const jumlahHariInput = document.getElementById('jumlah_hari');
         const quantity = parseInt(document.getElementById('quantity')?.value) || 1;
+        
 
         if (!selectedDuration || !window.currentProductData || !jumlahHariInput) return;
 
@@ -331,21 +332,21 @@
         switch (duration) {
             case 'harian':
                 pricePerDay = harga_harian;
-                totalPrice = pricePerDay * days;
+                totalPrice = pricePerDay * days *quantity;
                 displayText = `${days} hari`;
                 break;
 
             case 'mingguan':
                 const weeks = days / 7;
                 pricePerDay = Math.round(harga_mingguan / 7);
-                totalPrice = harga_mingguan * weeks;
+                totalPrice = harga_mingguan * weeks *quantity;
                 displayText = `${weeks} minggu (${days} hari)`;
                 break;
 
             case 'bulanan':
                 const months = days / 30;
                 pricePerDay = Math.round(harga_bulanan / 30);
-                totalPrice = harga_bulanan * months;
+                totalPrice = harga_bulanan * months *quantity;
                 displayText = `${months} bulan (${days} hari)`;
                 break;
         }
