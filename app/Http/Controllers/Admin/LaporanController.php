@@ -38,8 +38,7 @@ class LaporanController extends Controller
             ->whereYear('created_at', now()->year)
             ->count();
 
-        $unpaidFinesTotal = Denda::where('status_pembayaran', 'belum_bayar')
-            ->sum('jumlah_denda');
+        $unpaidFinesTotal = Sewa::all()->sum('denda');
 
         $todaySales = Transaksi::where('tipe', 'penjualan')
             ->where('status', 'selesai')

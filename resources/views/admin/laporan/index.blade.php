@@ -28,7 +28,6 @@
                 <div class="ml-4">
                     <h3 class="text-lg font-semibold text-gray-700">Total Laporan</h3>
                     <p class="text-2xl font-bold text-primary mt-1">{{ number_format($totalLaporan) }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Laporan tersimpan</p>
                 </div>
             </div>
         </div>
@@ -44,7 +43,6 @@
                 <div class="ml-4">
                     <h3 class="text-lg font-semibold text-gray-700">Penjualan</h3>
                     <p class="text-2xl font-bold text-primary mt-1">Rp {{ number_format($salesThisMonth, 0, ',', '.') }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Bulan ini</p>
                 </div>
             </div>
         </div>
@@ -60,7 +58,6 @@
                 <div class="ml-4">
                     <h3 class="text-lg font-semibold text-gray-700">Penyewaan</h3>
                     <p class="text-2xl font-bold text-primary mt-1">{{ number_format($rentalsThisMonth) }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Bulan ini</p>
                 </div>
             </div>
         </div>
@@ -76,7 +73,6 @@
                 <div class="ml-4">
                     <h3 class="text-lg font-semibold text-gray-700">Denda</h3>
                     <p class="text-2xl font-bold text-primary mt-1">Rp {{ number_format($unpaidFinesTotal, 0, ',', '.') }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Belum dibayar</p>
                 </div>
             </div>
         </div>
