@@ -311,13 +311,13 @@
                                         <i class="fas fa-eye text-sm"></i>
                                     </a>
 
-                                    @if ($sewa->denda > 0)
+                                    {{-- @if ($sewa->denda > 0)
                                         <button onclick="showDendaInfo({{ $sewa->id }}, {{ $sewa->denda }})"
                                             class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 transition-colors"
                                             title="Lihat Denda">
                                             <i class="fas fa-money-bill-wave text-sm"></i>
                                         </button>
-                                    @endif
+                                    @endif --}}
                                 </div>
                             </td>
                         </tr>
