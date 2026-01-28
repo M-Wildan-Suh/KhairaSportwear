@@ -196,16 +196,16 @@
                                 <div class="space-y-1">
                                     <div class="flex items-center text-sm">
                                         <i class="fas fa-play text-green-500 mr-2 text-xs"></i>
-                                        <span class="text-gray-700">{{ $sewa->tanggal_mulai->format('d M Y') }}</span>
+                                        <span class="text-gray-300">{{ $sewa->tanggal_mulai->format('d M Y') }}</span>
                                     </div>
                                     <div class="flex items-center text-sm">
                                         <i class="fas fa-flag-checkered text-blue-500 mr-2 text-xs"></i>
-                                        <span class="text-gray-700">{{ $sewa->tanggal_kembali_rencana->format('d M Y') }}</span>
+                                        <span class="text-gray-300">{{ $sewa->tanggal_kembali_rencana->format('d M Y') }}</span>
                                     </div>
                                     @if($sewa->tanggal_kembali_aktual)
                                         <div class="flex items-center text-xs">
                                             <i class="fas fa-check-circle text-purple-500 mr-2"></i>
-                                            <span class="text-gray-600">Kembali: {{ $sewa->tanggal_kembali_aktual->format('d M Y') }}</span>
+                                            <span class="text-gray-300">Kembali: {{ $sewa->tanggal_kembali_aktual->format('d M Y') }}</span>
                                         </div>
                                     @endif
                                 </div>

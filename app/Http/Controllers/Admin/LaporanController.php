@@ -9,6 +9,7 @@ use App\Models\Sewa;
 use App\Models\Produk;
 use App\Models\Kategori;
 use App\Models\Denda;
+use App\Models\DetailTransaksi;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -200,8 +201,8 @@ public function penyewaan(Request $request)
         ->count();
 
     // Variabel untuk view lama (backward compatibility)
-    $totalRentalRevenue = $summary['total_pendapatan'] ?? 0;
-    $totalRentals = $summary['total_sewa'] ?? 0;
+    $totalRentalRevenue = DetailTransaksi::where('tipe_produk', 'sewa')->get()->sum('subtotal') ?? 0;
+    $totalRentals = DetailTransaksi::where('tipe_produk', 'sewa')->get()->count() ?? 0;
     $totalItemsRented = $totalRentals; // Sama dengan total rentals karena 1 sewa = 1 item
     $averageRentalDuration = $summary['durasi_rata_rata'] ?? 0;
     
