@@ -80,6 +80,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('sewa/aktif', [AdminSewaController::class, 'aktif'])->name('sewa.aktif');
     Route::get('sewa/terlambat', [AdminSewaController::class, 'terlambat'])->name('sewa.terlambat');
     Route::patch('sewa/{sewa}/status', [AdminSewaController::class, 'updateStatus'])->name('sewa.update-status');
+    Route::post('sewa/{id}/verif', [AdminSewaController::class, 'verif'])->name('sewa.verif');
     Route::post('sewa/{sewa}/pengembalian', [AdminSewaController::class, 'pengembalian'])->name('sewa.pengembalian');
 
     // HAPUS atau PERBAIKI ROUTE INI - ini menyebabkan konflik

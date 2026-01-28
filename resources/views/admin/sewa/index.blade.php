@@ -244,6 +244,10 @@
                                     <i class="{{ $statusIcons[$sewa->status] ?? 'fas fa-question-circle' }} mr-1.5"></i>
                                     {{ ucfirst($sewa->status) }}
                                 </span>
+
+                                @if ($sewa->pengembalian)
+                                    
+                                @endif
                                 
                                 @if($sewa->status == 'aktif')
                                     @php

@@ -7,6 +7,7 @@ use App\Models\Sewa;
 use App\Models\Produk;
 use App\Models\Transaksi;
 use App\Models\Denda;
+use App\Models\Pengembalian;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -89,6 +90,17 @@ class SewaController extends Controller
             ->paginate(15);
             
         return view('admin.sewa.aktif', compact('sewas'));
+    }
+
+    public function verif($id, Request $request)
+    {
+        $pengem = Pengembalian::find($id);
+
+        $pengem->status = 'selesai';
+
+        $pengem->save();
+
+        return redirect()->back();
     }
     
     public function terlambat()

@@ -168,7 +168,7 @@ class SewaController extends Controller
                 'denda_keterlambatan' => $dendaKeterlambatan,
                 'denda_kerusakan' => $dendaKerusakan,
                 'total_denda' => $totalDenda,
-                'status' => 'selesai',
+                'status' => 'menunggu',
                 'created_at' => now(),
                 'updated_at' => now()
             ];
@@ -178,7 +178,7 @@ class SewaController extends Controller
 
             // Update status sewa
             $sewa->update([
-                'status' => 'selesai',
+                'status' => 'menunggu',
                 'tanggal_kembali_aktual' => $tanggalKembali,
                 'denda' => $totalDenda
             ]);
