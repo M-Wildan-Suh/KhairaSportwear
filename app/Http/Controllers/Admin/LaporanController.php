@@ -26,7 +26,7 @@ class LaporanController extends Controller
     {
         $search = $request->get('search');
 
-        $totalLaporan = Laporan::count();
+        $totalLaporan = Transaksi::all()->count();
 
         $salesThisMonth = Transaksi::where('tipe', 'penjualan')
             ->where('status', 'selesai')
