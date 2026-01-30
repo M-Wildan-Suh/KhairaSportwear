@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Keranjang;
 use App\Models\Transaksi;
 use App\Models\Sewa;
+use App\Models\Produk;
+use App\Models\Varian;
 use App\Models\DetailTransaksi;
 use App\Services\SewaService;
 use Illuminate\Support\Facades\DB;
@@ -94,11 +96,31 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($cartItems as $item) {
+                $produk = Produk::lockForUpdate()->find($item->produk_id);
+
+                if ($produk->stok < $item->quantity) {
+                    throw new \Exception('Stok produk habis');
+                }
+
+                // KURANGI STOK PRODUK
+                $produk->decrement('stok', $item->quantity);
+
+                // JIKA ADA VARIAN
+                if ($item->bundle_id) {
+                    $varian = Varian::lockForUpdate()->find($item->bundle_id);
+
+                    if (!$varian || $varian->stok < $item->quantity) {
+                        throw new \Exception('Stok varian habis');
+                    }
+
+                    // KURANGI STOK VARIAN
+                    $varian->decrement('stok', $item->quantity);
+                }
                 DetailTransaksi::create([
                     'transaksi_id' => $transaksi->id,
                     'produk_id'    => $item->produk_id,
                     'quantity'     => $item->quantity,
-                    'quantity'     => $item->bundle_id,
+                    'varian_id'     => $item->bundle_id,
                     'harga'        => $item->harga,
                     'subtotal'     => $item->subtotal,
                 ]);

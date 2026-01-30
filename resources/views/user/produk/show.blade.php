@@ -205,15 +205,18 @@
                                         <label class="color-option cursor-pointer">
                                             <input type="radio" name="bundle" value="{{ $item->id }}" id="bundle"
                                                 class="sr-only" {{ $loop->first ? 'checked' : '' }}>
+                                                @if ($produk->stok_tersedia > 0)
                                             <div
                                                 class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-lg hover:border-primary transition-all duration-200">
-                                                <span class="font-medium text-gray-700 capitalize">{{ $item->warna }} - {{$item->size}} - Stok : {{ $item->stok }}</span>
+                                                <span class="font-medium text-gray-700 capitalize">{{ $item->warna }} - {{$item->size}} - Stok : {{ $produk->stok_tersedia }}</span>
                                             </div>
+                                            @endif
                                         </label>
                                     @endforeach
                                 </div>
                             </div>
                         @endif
+               
 
                         <!-- Short Description -->
                         <div class="border-t border-gray-200 pt-6">

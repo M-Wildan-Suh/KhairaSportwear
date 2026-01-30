@@ -12,6 +12,8 @@ class DetailTransaksi extends Model
     protected $fillable = [
         'transaksi_id',
         'produk_id',
+        'size',
+        'warna',
         'tipe_produk',
         'quantity',
         'harga_satuan',
@@ -35,7 +37,7 @@ class DetailTransaksi extends Model
     {
         return $this->belongsTo(Produk::class);
     }
-    
+
     public function bundle()
     {
         return $this->belongsTo(ProdukVarian::class, 'bundle_id', 'id');

@@ -879,20 +879,4 @@ class TransaksiController extends Controller
             ], 500);
         }
     }
-
-    public function verify($id)
-    {
-        $transaksi = Transaksi::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
-
-        if ($transaksi->status !== 'selesai') {
-            return back()->with('error', 'Transaksi belum selesai');
-        }
-
-        $transaksi->verified_at = now();
-        $transaksi->save();
-
-        return back()->with('success', 'Transaksi berhasil diverifikasi');
-    }
 }

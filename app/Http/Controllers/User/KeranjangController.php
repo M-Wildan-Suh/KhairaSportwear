@@ -15,14 +15,14 @@ class KeranjangController extends Controller
         $keranjangs = auth()->user()->keranjangs()
             ->with('produk.kategori')
             ->get();
-        
+
         $subtotal = $keranjangs->sum('subtotal');
         $tax = $subtotal * 0.11; // 11% PPN
         $total = $subtotal + $tax;
-        
+
         return view('user.keranjang.index', compact('keranjangs', 'subtotal', 'tax', 'total'));
     }
-    
+
     public function store(Request $request)
     {
         $request->validate([
@@ -31,10 +31,10 @@ class KeranjangController extends Controller
             'quantity' => 'required|integer|min:1',
             'options' => 'nullable|array'
         ]);
-        
+
         $user = auth()->user();
         $product = Produk::findOrFail($request->product_id);
-        
+
         // Check stock
         if ($product->stok_tersedia < $request->quantity) {
             return response()->json([
@@ -42,7 +42,7 @@ class KeranjangController extends Controller
                 'message' => 'Stok tidak mencukupi'
             ], 400);
         }
-        
+
         // Check if product is available for the requested type
         if ($request->type === 'jual' && !in_array($product->tipe, ['jual', 'both'])) {
             return response()->json([
@@ -50,14 +50,14 @@ class KeranjangController extends Controller
                 'message' => 'Produk tidak tersedia untuk pembelian'
             ], 400);
         }
-        
+
         if ($request->type === 'sewa' && !in_array($product->tipe, ['sewa', 'both'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Produk tidak tersedia untuk penyewaan'
             ], 400);
         }
-        
+
         // For sewa type, validate options
         if ($request->type === 'sewa') {
             $request->validate([
@@ -66,7 +66,16 @@ class KeranjangController extends Controller
                 'options.tanggal_mulai' => 'required|date|after:today'
             ]);
         }
-        
+
+        $defaultVarian = $product->varians()->first();
+
+        if (!$defaultVarian) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Varian produk tidak ditemukan'
+            ], 400);
+        }
+
         DB::beginTransaction();
         try {
             // Check if item already exists in cart
@@ -74,17 +83,17 @@ class KeranjangController extends Controller
                 ->where('produk_id', $product->id)
                 ->where('tipe', $request->type)
                 ->first();
-            
+
             if ($existingItem) {
                 // Update quantity
                 $existingItem->quantity += $request->quantity;
-                $existingItem->bundle_id = $request->bundle ? $request->bundle : ($product->varians->first()->id ?? '');
-                
+                $existingItem->bundle_id = $existingItem->bundle_id ?? $defaultVarian->id;
+
                 // Update sewa options if needed
                 if ($request->type === 'sewa' && $request->has('options')) {
                     $existingItem->opsi_sewa = $request->options;
                 }
-                
+
                 $existingItem->updateSubtotal();
                 $existingItem->save();
             } else {
@@ -94,24 +103,23 @@ class KeranjangController extends Controller
                     'produk_id' => $product->id,
                     'tipe' => $request->type,
                     'quantity' => $request->quantity,
-                    'bundle_id' => $product->varians->first() ? $product->varians->first() : $request->bundle ?? '',
+                    'bundle_id' => $defaultVarian->id,
                     'opsi_sewa' => $request->type === 'sewa' ? $request->options : null
                 ]);
-                
+
                 $keranjang->updateSubtotal();
                 $keranjang->save();
             }
-            
+
             DB::commit();
-            
+
             $cartCount = $user->keranjangs()->count();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Produk berhasil ditambahkan ke keranjang',
                 'cart_count' => $cartCount
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -120,16 +128,16 @@ class KeranjangController extends Controller
             ], 500);
         }
     }
-    
+
     public function update(Request $request, $id)
     {
         $request->validate([
             'quantity' => 'required|integer|min:1'
         ]);
-        
+
         $keranjang = auth()->user()->keranjangs()->findOrFail($id);
         $product = $keranjang->produk;
-        
+
         // Check stock
         if ($product->stok_tersedia < $request->quantity) {
             return response()->json([
@@ -137,17 +145,17 @@ class KeranjangController extends Controller
                 'message' => 'Stok tidak mencukupi'
             ], 400);
         }
-        
+
         $keranjang->quantity = $request->quantity;
         $keranjang->updateSubtotal();
         $keranjang->save();
-        
+
         // Recalculate totals
         $keranjangs = auth()->user()->keranjangs()->with('produk')->get();
         $subtotal = $keranjangs->sum('subtotal');
         $tax = $subtotal * 0.11;
         $total = $subtotal + $tax;
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Keranjang berhasil diperbarui',
@@ -157,18 +165,18 @@ class KeranjangController extends Controller
             'item_subtotal' => number_format($keranjang->subtotal, 0, ',', '.')
         ]);
     }
-    
+
     public function destroy($id)
     {
         $keranjang = auth()->user()->keranjangs()->findOrFail($id);
         $keranjang->delete();
-        
+
         // Recalculate totals
         $keranjangs = auth()->user()->keranjangs()->with('produk')->get();
         $subtotal = $keranjangs->sum('subtotal');
         $tax = $subtotal * 0.11;
         $total = $subtotal + $tax;
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Item berhasil dihapus dari keranjang',
@@ -178,11 +186,11 @@ class KeranjangController extends Controller
             'total' => number_format($total, 0, ',', '.')
         ]);
     }
-    
+
     public function clear()
     {
         auth()->user()->keranjangs()->delete();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Keranjang berhasil dikosongkan',

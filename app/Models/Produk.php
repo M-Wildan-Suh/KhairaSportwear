@@ -61,27 +61,17 @@ class Produk extends Model
         return $this->hasMany(Sewa::class);
     }
 
-    public function bundleItems()
-    {
-        return $this->hasMany(BundleItem::class, 'bundle_id');
-    }
-
-    public function isBundle()
-    {
-        return $this->tipe === 'bundle';
-    }
-
     // Tambahkan di bagian relationships (sekitar baris 50-an)
     public function gambarTambahan()
     {
         return $this->hasMany(ProdukGambar::class, 'produk_id')
-            ->orderBy('urutan');
+                    ->orderBy('urutan');
     }
 
     public function gambarPrimary()
     {
         return $this->hasOne(ProdukGambar::class, 'produk_id')
-            ->where('is_primary', true);
+                    ->where('is_primary', true);
     }
 
     // Update method getGambarUrlAttribute yang sudah ada
