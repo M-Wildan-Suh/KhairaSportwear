@@ -18,6 +18,7 @@ class Transaksi extends Model
         'diskon',
         'total_bayar',
         'status',
+        'verified_at',
         'metode_pembayaran',
         'bukti_pembayaran',
         'nama_bank',
@@ -108,7 +109,7 @@ class Transaksi extends Model
     }
 
     public function items()
-{
-    return $this->detailTransaksis(); // alias untuk detailTransaksis
-}
+    {
+        return $this->detailTransaksis(); // alias untuk detailTransaksis
+    }
 }

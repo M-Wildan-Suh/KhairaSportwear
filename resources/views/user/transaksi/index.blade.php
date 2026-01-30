@@ -250,31 +250,55 @@
                             </td>
                             
                             <!-- Status -->
-                            <td class="py-5 px-6">
-                                <div class="space-y-2">
-                                    @php
-                                        $statusConfig = [
-                                            'pending' => ['color' => 'yellow', 'icon' => 'clock'],
-                                            'diproses' => ['color' => 'blue', 'icon' => 'sync'],
-                                            'selesai' => ['color' => 'green', 'icon' => 'check-circle'],
-                                            'dibatalkan' => ['color' => 'red', 'icon' => 'times-circle']
-                                        ];
-                                        $config = $statusConfig[$transaksi->status] ?? $statusConfig['pending'];
-                                    @endphp
-                                    
-                                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-{{ $config['color'] }}-50 text-{{ $config['color'] }}-700 rounded-lg border border-{{ $config['color'] }}-100">
-                                        <i class="fas fa-{{ $config['icon'] }} text-xs"></i>
-                                        <span class="text-sm font-medium capitalize">{{ $transaksi->status }}</span>
-                                    </div>
-                                    
-                                    @if($transaksi->status === 'pending')
-                                        <div class="flex items-center gap-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
-                                            <i class="fas fa-exclamation-circle"></i>
-                                            <span>{{$transaksi->metode_pembayaran == 'tunai' ? 'Lunasi produk di toko' : 'Upload bukti pembayaran'}}</span>
-                                        </div>
-                                    @endif
-                                </div>
-                            </td>
+                           <td class="py-5 px-6">
+    <div class="space-y-2">
+        @php
+            $statusConfig = [
+                'pending' => ['color' => 'yellow', 'icon' => 'clock'],
+                'diproses' => ['color' => 'blue', 'icon' => 'sync'],
+                'selesai' => ['color' => 'green', 'icon' => 'check-circle'],
+                'dibatalkan' => ['color' => 'red', 'icon' => 'times-circle']
+            ];
+            $config = $statusConfig[$transaksi->status] ?? $statusConfig['pending'];
+        @endphp
+
+        {{-- Badge Status --}}
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 
+            bg-{{ $config['color'] }}-50 text-{{ $config['color'] }}-700 
+            rounded-lg border border-{{ $config['color'] }}-100">
+            <i class="fas fa-{{ $config['icon'] }} text-xs"></i>
+            <span class="text-sm font-medium capitalize">{{ $transaksi->status }}</span>
+        </div>
+
+        {{-- Info Pending --}}
+        @if($transaksi->status === 'pending')
+            <div class="flex items-center gap-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>
+                    {{ $transaksi->metode_pembayaran == 'tunai'
+                        ? 'Lunasi produk di toko'
+                        : 'Upload bukti pembayaran' }}
+                </span>
+            </div>
+        @endif
+
+        {{-- Tombol Verifikasi --}}
+        @if($transaksi->status === 'selesai')
+            <form action="{{ route('user.transaksi.verify', $transaksi->id) }}" method="POST">
+    @csrf
+    <button type="submit"
+        class="inline-flex items-center gap-2 text-xs font-semibold
+               text-green-700 bg-green-100 hover:bg-green-200
+               px-3 py-1.5 rounded-lg transition">
+        <i class="fas fa-shield-check"></i>
+        Verifikasi Transaksi
+    </button>
+</form>
+
+        @endif
+    </div>
+</td>
+
                             
                             <!-- Aksi -->
                             <td class="py-5 px-6">

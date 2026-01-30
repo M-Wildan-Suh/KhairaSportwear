@@ -138,6 +138,9 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
         Route::get('/{id}', [TransaksiController::class, 'show'])->name('show');
         Route::post('/{id}/upload-bukti', [TransaksiController::class, 'uploadBukti'])->name('upload-bukti');
         Route::post('/{id}/cancel', [TransaksiController::class, 'cancel'])->name('cancel');
+
+        Route::post('/{id}/verify', [TransaksiController::class, 'verify'])
+            ->name('verify');
     });
 
     // Sewa (User) - INI ADALAH ROUTE user.sewa.index YANG BENAR
@@ -156,7 +159,7 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
         Route::post('/{id}/extend', [SewaController::class, 'extend'])
             ->name('extend');
     });
-    
+
     Route::prefix('produk')->name('produk.')->group(function () {
         Route::get('/', [ProdukController::class, 'index'])->name('index');
     });
