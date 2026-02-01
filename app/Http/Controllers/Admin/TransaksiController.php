@@ -173,11 +173,15 @@ class TransaksiController extends Controller
                 TransaksiDetail::create([
                     'transaksi_id' => $transaksi->id,
                     'produk_id' => $item['produk_id'],
+                    'tipe_produk' => 'jual', // ATAU 'sewa'
+                    'size' => $item['size'] ?? null,
+                    'warna' => $item['warna'] ?? null,
                     'quantity' => $item['quantity'],
-                    'harga' => $item['harga'],
-                    'diskon' => $itemDiskon,
+                    'harga_satuan' => $item['harga'],
                     'subtotal' => $itemSubtotal - $itemDiskon,
+                    'opsi_sewa' => null
                 ]);
+
 
                 // Kurangi stok produk
                 $produk->decrement('stok', $item['quantity']);

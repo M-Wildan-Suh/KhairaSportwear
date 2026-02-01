@@ -91,10 +91,16 @@ class Sewa extends Model
         return $this->hasOne(Pengembalian::class);
     }
 
-        public function detailTransaksi()
+    public function detailTransaksi()
     {
         return $this->belongsTo(DetailTransaksi::class);
     }
+
+    public function variant()
+    {
+        return $this->belongsTo(Varian::class);
+    }
+
 
 
     /* ================= KODE SEWA ================= */
@@ -139,7 +145,7 @@ class Sewa extends Model
             if ($sewa->status === self::STATUS_MENUNGGU_PEMBAYARAN) {
                 $expiredHours = config('sewa.expired_hours', 24);
                 $createdAt = $sewa->transaksi->created_at ?? $sewa->created_at;
-                
+
                 if ($createdAt && $createdAt->diffInHours(now()) > $expiredHours) {
                     $sewa->status = self::STATUS_EXPIRED;
                 }
@@ -263,7 +269,7 @@ class Sewa extends Model
     }
 
     // ================= BUSINESS LOGIC =================
-        /**
+    /**
      * Hitung denda berdasarkan tanggal kembali dan kondisi alat
      *
      * @param string $tanggalKembali
@@ -364,7 +370,7 @@ class Sewa extends Model
     private function getHargaProduk()
     {
         $produk = $this->produk;
-        
+
         if (!$produk) {
             Log::warning('Produk tidak ditemukan untuk sewa: ' . $this->id);
             return 0;
@@ -477,7 +483,6 @@ class Sewa extends Model
             ]);
 
             return $pengembalian;
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error proses pengembalian: ' . $e->getMessage());
@@ -551,7 +556,7 @@ class Sewa extends Model
         }
 
         $tanggalKembali = Carbon::parse($tanggalKembali);
-        
+
         if ($tanggalKembali->lt($this->tanggal_mulai)) {
             throw new \Exception('Tanggal kembali tidak boleh sebelum tanggal mulai sewa.');
         }
@@ -593,17 +598,17 @@ class Sewa extends Model
     }
 
     public function getStatusBadgeColor()
-{
-    $colors = [
-        'diproses' => 'warning',
-        'dibayar' => 'info',
-        'aktif' => 'success',
-        'selesai' => 'primary',
-        'dibatalkan' => 'danger'
-    ];
-    
-    return $colors[$this->status] ?? 'secondary';
-}
+    {
+        $colors = [
+            'diproses' => 'warning',
+            'dibayar' => 'info',
+            'aktif' => 'success',
+            'selesai' => 'primary',
+            'dibatalkan' => 'danger'
+        ];
+
+        return $colors[$this->status] ?? 'secondary';
+    }
 
     /**
      * Get quantity from transaction details

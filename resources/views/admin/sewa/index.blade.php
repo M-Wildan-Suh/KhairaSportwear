@@ -200,15 +200,25 @@
                                             <i class="fas fa-box text-gray-400 text-sm"></i>
                                         </div>
                                     @endif
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">{{ $sewa->produk->nama }}</div>
-                                        <div class="text-xs text-gray-500">
-                                            {{ $sewa->durasi }} hari • {{ $sewa->jumlah_hari }} unit
-                                        </div>
+                                    @php
+                                        $detail = $sewa->transaksi?->detailTransaksis
+                                            ?->where('produk_id', $sewa->produk_id)
+                                            ->first();
+                                    @endphp
+
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ $sewa->produk->nama }}
                                     </div>
+
+                                    <div class="text-xs text-gray-500">
+                                        Size:
+                                        {{ $detail?->size ?? ($detail?->variant?->nama ?? '-') }}
+                                        • {{ $sewa->durasi }} hari
+                                        • {{ $sewa->jumlah_hari }} unit
+                                    </div>
+
                                 </div>
                             </td>
-
                             <!-- Periode -->
                             <td class="px-6 py-4">
                                 <div class="space-y-1">
@@ -271,8 +281,8 @@
                                     <span
                                         class=" mt-1 inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium {{ $statusColors[$sewa->status] ?? 'bg-gray-50 text-gray-700' }}">
                                         <i
-                                            class="{{ $sewa->pengembalian->status == 'selesai' ? 'fas fa-question-circle' : 'fas fa-times-circle'}} mr-1.5 capitalize"></i>
-                                            {{ $sewa->pengembalian->status == 'selesai' ? 'Sudah di Verif' : 'Belum di Verif' }}
+                                            class="{{ $sewa->pengembalian->status == 'selesai' ? 'fas fa-question-circle' : 'fas fa-times-circle' }} mr-1.5 capitalize"></i>
+                                        {{ $sewa->pengembalian->status == 'selesai' ? 'Sudah di Verif' : 'Belum di Verif' }}
                                     </span>
                                 @endif
 
