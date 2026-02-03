@@ -57,22 +57,22 @@
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="admin-card">
-            <h4 class="text-sm font-medium text-gray-500 mb-2">Total Penjualan</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Total Penjualan</h4>
             <p class="text-2xl font-bold text-green-600">Rp {{ number_format($salesThisMonth, 0, ',', '.') }}</p>
         </div>
         
         <div class="admin-card">
-            <h4 class="text-sm font-medium text-gray-500 mb-2">Total Transaksi</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Total Transaksi</h4>
             <p class="text-2xl font-bold text-blue-600">{{ number_format($transactions->count()) }}</p>
         </div>
         
         <div class="admin-card">
-            <h4 class="text-sm font-medium text-gray-500 mb-2">Total Item Terjual</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Total Item Terjual</h4>
             <p class="text-2xl font-bold text-purple-600">{{ number_format($summary['total_items']) }}</p>
         </div>
         
         <div class="admin-card">
-            <h4 class="text-sm font-medium text-gray-500 mb-2">Rata-rata Transaksi</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Rata-rata Transaksi</h4>
             <p class="text-2xl font-bold text-yellow-600">Rp {{ number_format($summary['average_transaction'], 0, ',', '.') }}</p>
         </div>
     </div>
