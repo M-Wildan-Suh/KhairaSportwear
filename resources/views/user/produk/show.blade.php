@@ -47,40 +47,42 @@
                         <div class="relative overflow-hidden">
                             @php
                                 // Ambil gambar pertama (primary atau yang pertama)
-                                $mainImage = $produk->gambarTambahan && $produk->gambarTambahan->count() > 0 
-                                    ? ($produk->gambarTambahan->where('is_primary', true)->first() ?? $produk->gambarTambahan->first())
-                                    : null;
+                                $mainImage =
+                                    $produk->gambarTambahan && $produk->gambarTambahan->count() > 0
+                                        ? $produk->gambarTambahan->where('is_primary', true)->first() ??
+                                            $produk->gambarTambahan->first()
+                                        : null;
                                 $mainImageUrl = $mainImage ? $mainImage->gambar_url : $produk->gambar_url;
                             @endphp
-                            
-                            <img src="{{ $mainImageUrl }}" 
-                                 alt="{{ $produk->nama }}" 
-                                 class="w-full h-96 object-cover"
-                                 id="mainProductImage">
-                            
+
+                            <img src="{{ $mainImageUrl }}" alt="{{ $produk->nama }}" class="w-full h-96 object-cover"
+                                id="mainProductImage">
+
                             <div class="absolute top-4 left-4">
                                 @if ($produk->tipe === 'jual')
-                                    <span class="px-3 py-1 bg-primary text-white text-sm font-semibold rounded-full">Dijual</span>
+                                    <span
+                                        class="px-3 py-1 bg-primary text-white text-sm font-semibold rounded-full">Dijual</span>
                                 @elseif($produk->tipe === 'sewa')
-                                    <span class="px-3 py-1 bg-accent text-white text-sm font-semibold rounded-full">Disewa</span>
+                                    <span
+                                        class="px-3 py-1 bg-accent text-white text-sm font-semibold rounded-full">Disewa</span>
                                 @else
-                                    <span class="px-3 py-1 bg-gradient-to-r from-primary to-accent text-white text-sm font-semibold rounded-full">Dijual/Disewa</span>
+                                    <span
+                                        class="px-3 py-1 bg-gradient-to-r from-primary to-accent text-white text-sm font-semibold rounded-full">Dijual/Disewa</span>
                                 @endif
                             </div>
                         </div>
 
                         <!-- Image Thumbnails -->
                         <div class="p-4">
-                            @if($produk->gambarTambahan && $produk->gambarTambahan->count() > 0)
+                            @if ($produk->gambarTambahan && $produk->gambarTambahan->count() > 0)
                                 <!-- Multiple images dari tabel produk_gambar -->
                                 <div class="grid grid-cols-4 gap-2">
-                                    @foreach($produk->gambarTambahan as $img)
-                                        <div class="thumbnail-item {{ $loop->first ? 'active' : '' }}" 
-                                             onclick="changeMainImage('{{ $img->gambar_url }}', this)">
-                                            <img src="{{ $img->gambar_url }}" 
-                                                 alt="{{ $produk->nama }}"
-                                                 class="w-full h-20 object-cover rounded-lg cursor-pointer border-2 hover:border-primary transition">
-                                            @if($img->is_primary)
+                                    @foreach ($produk->gambarTambahan as $img)
+                                        <div class="thumbnail-item {{ $loop->first ? 'active' : '' }}"
+                                            onclick="changeMainImage('{{ $img->gambar_url }}', this)">
+                                            <img src="{{ $img->gambar_url }}" alt="{{ $produk->nama }}"
+                                                class="w-full h-20 object-cover rounded-lg cursor-pointer border-2 hover:border-primary transition">
+                                            @if ($img->is_primary)
                                                 <div class="absolute top-1 right-1">
                                                     <i class="fas fa-star text-yellow-400 text-xs"></i>
                                                 </div>
@@ -91,10 +93,10 @@
                             @else
                                 <!-- Fallback untuk single image (legacy) -->
                                 <div class="grid grid-cols-4 gap-2">
-                                    <div class="thumbnail-item active" onclick="changeMainImage('{{ $produk->gambar_url }}', this)">
-                                        <img src="{{ $produk->gambar_url }}" 
-                                             alt="{{ $produk->nama }}"
-                                             class="w-full h-20 object-cover rounded-lg cursor-pointer border-2 hover:border-primary transition">
+                                    <div class="thumbnail-item active"
+                                        onclick="changeMainImage('{{ $produk->gambar_url }}', this)">
+                                        <img src="{{ $produk->gambar_url }}" alt="{{ $produk->nama }}"
+                                            class="w-full h-20 object-cover rounded-lg cursor-pointer border-2 hover:border-primary transition">
                                     </div>
                                 </div>
                             @endif
@@ -156,42 +158,61 @@
                                     <h4 class="font-semibold text-gray-900 mb-2">Harga Sewa:</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         @if ($produk->harga_sewa_harian)
-                                            <div
-                                                class="price-option border border-gray-200 rounded-lg p-4 text-center hover:border-primary hover:shadow-sm cursor-pointer">
-                                                <div class="text-lg font-bold text-primary mb-1">Rp
-                                                    {{ number_format($produk->harga_sewa_harian, 0, ',', '.') }}</div>
-                                                <p class="text-gray-600 text-sm">Per Hari</p>
-                                            </div>
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="tipe" value="harian" class="peer hidden"
+                                                    checked>
+
+                                                <div
+                                                    class="price-option border border-gray-200 rounded-lg p-4 text-center hover:border-primary hover:shadow-sm peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary">
+                                                    <div class="text-lg font-bold text-primary mb-1">
+                                                        Rp {{ number_format($produk->harga_sewa_harian, 0, ',', '.') }}
+                                                    </div>
+                                                    <p class="text-gray-600 text-sm">Per Hari</p>
+                                                </div>
+                                            </label>
                                         @endif
 
                                         @if ($produk->harga_sewa_mingguan)
-                                            <div
-                                                class="price-option border border-gray-200 rounded-lg p-4 text-center hover:border-primary hover:shadow-sm cursor-pointer">
-                                                <div class="text-lg font-bold text-primary mb-1">Rp
-                                                    {{ number_format($produk->harga_sewa_mingguan, 0, ',', '.') }}</div>
-                                                <p class="text-gray-600 text-sm">Per Minggu</p>
-                                                <span
-                                                    class="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                                                    Hemat
-                                                    {{ number_format((($produk->harga_sewa_harian * 7 - $produk->harga_sewa_mingguan) / ($produk->harga_sewa_harian * 7)) * 100, 0) }}%
-                                                </span>
-                                            </div>
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="tipe" value="mingguan" class="peer hidden">
+
+                                                <div
+                                                    class="price-option border border-gray-200 rounded-lg p-4 text-center hover:border-primary hover:shadow-sm peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary">
+                                                    <div class="text-lg font-bold text-primary mb-1">
+                                                        Rp {{ number_format($produk->harga_sewa_mingguan, 0, ',', '.') }}
+                                                    </div>
+                                                    <p class="text-gray-600 text-sm">Per Minggu</p>
+
+                                                    <span
+                                                        class="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                                                        Hemat
+                                                        {{ number_format((($produk->harga_sewa_harian * 7 - $produk->harga_sewa_mingguan) / ($produk->harga_sewa_harian * 7)) * 100, 0) }}%
+                                                    </span>
+                                                </div>
+                                            </label>
                                         @endif
 
                                         @if ($produk->harga_sewa_bulanan)
-                                            <div
-                                                class="price-option border border-gray-200 rounded-lg p-4 text-center hover:border-primary hover:shadow-sm cursor-pointer">
-                                                <div class="text-lg font-bold text-primary mb-1">Rp
-                                                    {{ number_format($produk->harga_sewa_bulanan, 0, ',', '.') }}</div>
-                                                <p class="text-gray-600 text-sm">Per Bulan</p>
-                                                <span
-                                                    class="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                                                    Hemat
-                                                    {{ number_format((($produk->harga_sewa_harian * 30 - $produk->harga_sewa_bulanan) / ($produk->harga_sewa_harian * 30)) * 100, 0) }}%
-                                                </span>
-                                            </div>
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="tipe" value="bulanan" class="peer hidden">
+
+                                                <div
+                                                    class="price-option border border-gray-200 rounded-lg p-4 text-center hover:border-primary hover:shadow-sm peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary">
+                                                    <div class="text-lg font-bold text-primary mb-1">
+                                                        Rp {{ number_format($produk->harga_sewa_bulanan, 0, ',', '.') }}
+                                                    </div>
+                                                    <p class="text-gray-600 text-sm">Per Bulan</p>
+
+                                                    <span
+                                                        class="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                                                        Hemat
+                                                        {{ number_format((($produk->harga_sewa_harian * 30 - $produk->harga_sewa_bulanan) / ($produk->harga_sewa_harian * 30)) * 100, 0) }}%
+                                                    </span>
+                                                </div>
+                                            </label>
                                         @endif
                                     </div>
+
                                 </div>
                             @endif
                         </div>
@@ -203,20 +224,33 @@
                                 <div class="flex flex-wrap gap-3">
                                     @foreach ($produk->varians as $item)
                                         <label class="color-option cursor-pointer">
-                                            <input type="radio" name="bundle" value="{{ $item->id }}" id="bundle"
-                                                class="sr-only" {{ $loop->first ? 'checked' : '' }}>
-                                                @if ($produk->stok_tersedia > 0)
-                                            <div
-                                                class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-lg hover:border-primary transition-all duration-200">
-                                                <span class="font-medium text-gray-700 capitalize">{{ $item->warna }} - {{$item->size}} - Stok : {{ $item->stok }}</span>
-                                            </div>
+                                            <input type="radio" name="bundle" value="{{ $item->id }}"
+                                                id="bundle" class="sr-only" {{ $loop->first ? 'checked' : '' }}>
+                                            @if ($produk->stok_tersedia > 0)
+                                                <div
+                                                    class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-lg hover:border-primary transition-all duration-200">
+                                                    <span class="font-medium text-gray-700 capitalize">{{ $item->warna }}
+                                                        - {{ $item->size }} - Stok : {{ $item->stok }}</span>
+                                                </div>
                                             @endif
                                         </label>
                                     @endforeach
                                 </div>
                             </div>
                         @endif
-               
+
+                        <!-- Tanggal Mulai -->
+                        @if ($produk->tipe === 'sewa' || $produk->tipe === 'both')
+                            <div class="border-t border-gray-200 pt-6">
+                                <h4 class="font-semibold text-gray-900 mb-3">Tanggal Mulai</h4>
+                                <div class="flex flex-wrap gap-3">
+                                    <input type="date" id="tanggal_mulai"
+                                        value="{{ now()->format('Y-m-d') }}"
+                                        class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary">
+                                </div>
+                            </div>
+                        @endif
+
 
                         <!-- Short Description -->
                         <div class="border-t border-gray-200 pt-6">
@@ -286,7 +320,7 @@
 
                                     @if (in_array($produk->tipe, ['sewa', 'both']))
                                         @if ($produk->stok_tersedia > 0)
-                                            <button onclick="showRentalModal()"
+                                            <button id="submitRentalBtn"
                                                 class="flex-1 px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-800 transition-colors duration-200 flex items-center justify-center gap-2">
                                                 <i class="fas fa-calendar-alt"></i>
                                                 <span>Sewa Sekarang</span>
@@ -718,226 +752,28 @@
         @endif
     </div>
 
-    <!-- Sewa Modal -->
-    <div id="rentalModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
-        <div class="relative top-4 mx-auto p-4 w-full max-w-lg">
-            <div class="bg-white rounded-2xl shadow-xl">
-                <!-- Modal Header -->
-                <div
-                    class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-primary to-primary-dark rounded-t-2xl">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-calendar-alt text-white"></i>
-                            </div>
-                            <h3 class="text-xl font-bold text-white">Form Penyewaan</h3>
-                        </div>
-                        <button onclick="closeRentalModal()" class="text-white hover:text-gray-200">
-                            <i class="fas fa-times text-lg"></i>
-                        </button>
-                    </div>
-                </div>
+    <form id="rentalForm" class="hidden">
+        <input type="hidden" name="product_id" value="{{ $produk->id }}">
 
-                <!-- Modal Body -->
-                <div class="p-6">
-                    <form id="rentalForm">
-                        @csrf
-                        <input type="hidden" id="product_id" name="product_id" value="{{ $produk->id }}">
+        <!-- ambil dari radio name="tipe" (harian/mingguan/bulanan) -->
+        <input type="hidden" name="durasi" id="durasiHidden" value="harian">
 
-                        <!-- Product Info -->
-                        <div class="mb-6 p-4 bg-gray-50 rounded-xl">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                                    <img id="modalProductImage" src="{{ $produk->gambar_url }}"
-                                        alt="{{ $produk->nama }}" class="w-full h-full object-cover">
-                                </div>
-                                <div>
-                                    <h4 id="modalProductName" class="font-bold text-gray-900 mb-1">{{ $produk->nama }}
-                                    </h4>
-                                    <p id="modalProductCategory" class="text-sm text-gray-600">
-                                        {{ $produk->kategori->nama }}</p>
-                                </div>
-                            </div>
+        <!-- jumlah hari, default (bisa kamu ubah logic-nya) -->
+        <input type="hidden" name="jumlah_hari" id="jumlahHariHidden" value="1">
 
-                            <!-- Warna & Size Selection in Modal -->
-                            @if ($produk->warna && count($produk->warna) > 0)
-                                <div class="mb-3">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Warna</label>
-                                    <div class="flex flex-wrap gap-2">
-                                        @foreach ($produk->warna as $warna)
-                                            <label class="modal-color-option">
-                                                <input type="radio" name="warna" value="{{ $warna }}"
-                                                    class="sr-only" {{ $loop->first ? 'checked' : '' }}>
-                                                <div
-                                                    class="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded-lg hover:border-primary cursor-pointer">
-                                                    <div class="w-4 h-4 rounded-full border border-gray-300"
-                                                        style="background-color: {{ \App\Models\Produk::getColorCode($warna) }}">
-                                                    </div>
-                                                    <span class="text-sm">{{ ucfirst($warna) }}</span>
-                                                </div>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
+        <!-- ambil dari radio name="bundle" -->
+        <input type="hidden" name="bundle_id" id="bundleIdHidden" value="{{$produk->varians->first()->id}}">
 
-                            @if ($produk->size && count($produk->size) > 0)
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Ukuran</label>
-                                    <div class="flex flex-wrap gap-2">
-                                        @foreach ($produk->size as $size)
-                                            <label class="modal-size-option">
-                                                <input type="radio" name="size" value="{{ $size }}"
-                                                    class="sr-only" {{ $loop->first ? 'checked' : '' }}>
-                                                <div
-                                                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-primary hover:text-primary hover:bg-primary/5 cursor-pointer">
-                                                    {{ strtoupper($size) }}
-                                                </div>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
+        <!-- ambil dari input date -->
+        <input type="hidden" name="tanggal_mulai" id="tanggalMulaiHidden" value="{{ now()->format('Y-m-d') }}">
 
-                            <div class="grid grid-cols-3 gap-2 text-center">
-                                <div>
-                                    <div class="font-semibold text-emerald-600" id="modalDailyPrice">
-                                        Rp {{ number_format($produk->harga_sewa_harian, 0, ',', '.') }}
-                                    </div>
-                                    <div class="text-xs text-gray-500">Harian</div>
-                                </div>
-                                <div class="border-x border-gray-200">
-                                    <div class="font-semibold text-emerald-600" id="modalWeeklyPrice">
-                                        Rp {{ number_format($produk->harga_sewa_mingguan, 0, ',', '.') }}
-                                    </div>
-                                    <div class="text-xs text-gray-500">Mingguan</div>
-                                </div>
-                                <div>
-                                    <div class="font-semibold text-emerald-600" id="modalMonthlyPrice">
-                                        Rp {{ number_format($produk->harga_sewa_bulanan, 0, ',', '.') }}
-                                    </div>
-                                    <div class="text-xs text-gray-500">Bulanan</div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- ambil dari input qty -->
+        <input type="hidden" name="quantity" id="quantityHidden" value="1">
 
-                        <!-- Rental Form -->
-                        <div class="space-y-6">
-                            <!-- Duration -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Durasi Sewa</label>
-                                <div class="grid grid-cols-3 gap-3">
-                                    @php
-                                        $durations = [
-                                            'harian' => [
-                                                'label' => 'Harian',
-                                                'available' => $produk->harga_sewa_harian > 0,
-                                            ],
-                                            'mingguan' => [
-                                                'label' => 'Mingguan',
-                                                'available' => $produk->harga_sewa_mingguan > 0,
-                                            ],
-                                            'bulanan' => [
-                                                'label' => 'Bulanan',
-                                                'available' => $produk->harga_sewa_bulanan > 0,
-                                            ],
-                                        ];
-                                    @endphp
-                                    @foreach ($durations as $value => $info)
-                                        @if ($info['available'])
-                                            <label class="duration-option relative">
-                                                <input type="radio" name="durasi" value="{{ $value }}"
-                                                    class="sr-only" required
-                                                    {{ $loop->first && $info['available'] ? 'checked' : '' }}>
-                                                <div
-                                                    class="w-full p-4 border-2 border-gray-200 rounded-xl text-center cursor-pointer hover:border-primary transition-colors duration-200">
-                                                    <div class="font-semibold text-gray-900">{{ $info['label'] }}</div>
-                                                </div>
-                                            </label>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </div>
+        <!-- kalau ada catatan -->
+        <input type="hidden" name="catatan" id="catatanHidden" value="">
+    </form>
 
-                            <!-- Duration Details -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Hari</label>
-                                    <div class="relative">
-                                        <input type="number" name="jumlah_hari" id="jumlah_hari" value="1"
-                                            min="1" max="365"
-                                            class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
-                                            required>
-                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                            <span class="text-gray-500 text-sm">hari</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
-                                    <input type="date" name="tanggal_mulai" id="tanggal_mulai"
-                                        class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
-                                        required>
-                                </div>
-                            </div>
-
-                            <!-- Notes -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
-                                <textarea name="catatan" rows="3"
-                                    class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
-                                    placeholder="Contoh: Butuh alat untuk turnamen tanggal..."></textarea>
-                            </div>
-
-                            <!-- Price Summary -->
-                            <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
-                                <h4 class="font-semibold text-gray-900 mb-4">Ringkasan Biaya</h4>
-                                <div class="space-y-3">
-
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Harga per hari:</span>
-                                        <span class="font-semibold text-gray-900" id="pricePerDay">
-                                            @if ($produk->harga_sewa_harian)
-                                                Rp {{ number_format($produk->harga_sewa_harian, 0, ',', '.') }}/hari
-                                            @else
-                                                Rp 0
-                                            @endif
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Jumlah hari:</span>
-                                        <span class="font-semibold text-gray-900" id="daysCount">1 hari</span>
-                                    </div>
-                                    <div class="border-t border-gray-200 pt-3">
-                                        <div class="flex justify-between">
-                                            <span class="text-lg font-bold text-gray-900">Total Biaya:</span>
-                                            <span class="text-2xl font-bold text-primary" id="totalPrice">
-                                                @if ($produk->harga_sewa_harian)
-                                                    Rp {{ number_format($produk->harga_sewa_harian, 0, ',', '.') }}
-                                                @else
-                                                    Rp 0
-                                                @endif
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <div class="pt-4">
-                                <button type="submit" id="submitRentalBtn"
-                                    class="w-full px-6 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-3">
-                                    <i class="fas fa-cart-plus"></i>
-                                    <span>Tambah ke Keranjang</span>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 @endsection
 
 @push('styles')
@@ -1074,11 +910,6 @@
                     option.checked = true;
                 }
             });
-
-            // Update visual selection
-            updateDurationVisualSelection();
-            updateColorSizeVisualSelection();
-            updateSelectedColorSizeDisplay();
 
             // Update harga awal
             updateRentalPrice();
@@ -1359,33 +1190,33 @@
 
         // Change main image
         // Change main image - UPDATE FUNCTION
-function changeMainImage(src, element) {
-    // Update main image
-    const mainImage = document.getElementById('mainProductImage');
-    if (mainImage) {
-        mainImage.src = src;
-    }
-    
-    // Remove active class from all thumbnails
-    document.querySelectorAll('.thumbnail-item').forEach(item => {
-        item.classList.remove('active');
-        const img = item.querySelector('img');
-        if (img) {
-            img.classList.remove('border-primary');
-            img.classList.add('border-transparent');
+        function changeMainImage(src, element) {
+            // Update main image
+            const mainImage = document.getElementById('mainProductImage');
+            if (mainImage) {
+                mainImage.src = src;
+            }
+
+            // Remove active class from all thumbnails
+            document.querySelectorAll('.thumbnail-item').forEach(item => {
+                item.classList.remove('active');
+                const img = item.querySelector('img');
+                if (img) {
+                    img.classList.remove('border-primary');
+                    img.classList.add('border-transparent');
+                }
+            });
+
+            // Add active class to clicked thumbnail
+            if (element) {
+                element.classList.add('active');
+                const img = element.querySelector('img');
+                if (img) {
+                    img.classList.add('border-primary');
+                    img.classList.remove('border-transparent');
+                }
+            }
         }
-    });
-    
-    // Add active class to clicked thumbnail
-    if (element) {
-        element.classList.add('active');
-        const img = element.querySelector('img');
-        if (img) {
-            img.classList.add('border-primary');
-            img.classList.remove('border-transparent');
-        }
-    }
-}
 
         // ================= EVENT LISTENERS =================
 
@@ -1437,138 +1268,6 @@ function changeMainImage(src, element) {
                     updateRentalPrice();
                 });
             }
-
-            // Event: Submit form sewa
-            const rentalForm = document.getElementById('rentalForm');
-            if (rentalForm) {
-                rentalForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-
-                    const formData = new FormData(this);
-                    const submitBtn = document.getElementById('submitRentalBtn');
-
-                    if (!submitBtn) return;
-
-                    // Validasi data
-                    const tanggalMulai = formData.get('tanggal_mulai');
-                    const today = new Date();
-                    const tomorrow = new Date(today);
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    tomorrow.setHours(0, 0, 0, 0);
-
-                    if (new Date(tanggalMulai) < tomorrow) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Tanggal Tidak Valid',
-                            text: 'Tanggal mulai harus besok atau setelahnya',
-                            confirmButtonColor: '#2B6CB0'
-                        });
-                        return;
-                    }
-
-                    // Validasi warna dan size untuk produk sewa
-                    @if ($produk->warna && count($produk->warna) > 0)
-                        if (!formData.get('warna')) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Warna Belum Dipilih',
-                                text: 'Silakan pilih warna terlebih dahulu',
-                                confirmButtonColor: '#2B6CB0'
-                            });
-                            return;
-                        }
-                    @endif
-
-                    @if ($produk->size && count($produk->size) > 0)
-                        if (!formData.get('size')) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Ukuran Belum Dipilih',
-                                text: 'Silakan pilih ukuran terlebih dahulu',
-                                confirmButtonColor: '#2B6CB0'
-                            });
-                            return;
-                        }
-                    @endif
-
-                    const originalContent = submitBtn.innerHTML;
-
-                    // Tampilkan loading
-                    submitBtn.innerHTML = `
-                <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Memproses...</span>
-            `;
-                    submitBtn.disabled = true;
-
-                    try {
-                        const response = await fetch('/user/keranjang', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                product_id: formData.get('product_id'),
-                                type: 'sewa',
-                                quantity: 1,
-                                warna: formData.get('warna'),
-                                size: formData.get('size'),
-                                options: {
-                                    durasi: formData.get('durasi'),
-                                    jumlah_hari: formData.get('jumlah_hari'),
-                                    tanggal_mulai: formData.get('tanggal_mulai'),
-                                    catatan: formData.get('catatan') || ''
-                                }
-                            })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            // Tutup modal
-                            closeRentalModal();
-
-                            // Update cart badge
-                            if (typeof window.updateCartCount === 'function') {
-                                window.updateCartCount(data.cart_count);
-                            } else {
-                                window.dispatchEvent(new CustomEvent('cartUpdated', {
-                                    detail: {
-                                        count: data.cart_count
-                                    }
-                                }));
-                            }
-
-                            // Tampilkan pesan sukses
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: data.message || 'Produk telah ditambahkan ke keranjang',
-                                timer: 2000,
-                                showConfirmButton: false,
-                                toast: true,
-                                position: 'top-end'
-                            });
-                        } else {
-                            throw new Error(data.message || 'Terjadi kesalahan');
-                        }
-                    } catch (error) {
-                        console.error('Submit error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal',
-                            text: error.message ||
-                                'Terjadi kesalahan saat menambahkan ke keranjang',
-                            confirmButtonColor: '#2B6CB0'
-                        });
-                    } finally {
-                        submitBtn.innerHTML = originalContent;
-                        submitBtn.disabled = false;
-                    }
-                });
-            }
-
             // Close modal on background click
             const modal = document.getElementById('rentalModal');
             if (modal) {
@@ -1589,10 +1288,134 @@ function changeMainImage(src, element) {
                 }
             });
 
-            // Update visual selection awal
-            updateDurationVisualSelection();
-            updateColorSizeVisualSelection();
-            updateSelectedColorSizeDisplay();
+            function getCheckedValue(name) {
+                const el = document.querySelector(`input[name="${name}"]:checked`);
+                return el ? el.value : null;
+            }
+
+            // helper: default jumlah hari dari durasi
+            function getJumlahHariFromDurasi(durasi) {
+                if (durasi === 'mingguan') return 7;
+                if (durasi === 'bulanan') return 30;
+                return 1; // harian
+            }
+
+            // sinkronkan nilai dari UI ke hidden form
+            function syncRentalHiddenForm() {
+                const durasi = getCheckedValue('durasi') || 'harian';
+                const bundleId = getCheckedValue('bundle'); // value = id varians
+                const tanggalMulaiEl = document.getElementById('tanggal_mulai');
+                const qtyEl = document.getElementById('quantity');
+
+                document.getElementById('durasiHidden').value = durasi;
+                document.getElementById('jumlahHariHidden').value = getJumlahHariFromDurasi(durasi);
+
+                // bundle bisa null kalau memang tidak ada varians
+                document.getElementById('bundleIdHidden').value = bundleId || '';
+
+                // tanggal mulai (kalau field-nya ada)
+                document.getElementById('tanggalMulaiHidden').value = tanggalMulaiEl ? tanggalMulaiEl.value : '';
+
+                // quantity (kalau field-nya ada)
+                document.getElementById('quantityHidden').value = qtyEl ? qtyEl.value : 1;
+
+                // kalau punya textarea catatan, misal id="catatan"
+                const catatanEl = document.getElementById('catatan');
+                document.getElementById('catatanHidden').value = catatanEl ? catatanEl.value : '';
+            }
+
+            // klik tombol -> sync -> submit form
+            document.getElementById('submitRentalBtn').addEventListener('click', function() {
+                syncRentalHiddenForm();
+                document.getElementById('rentalForm').requestSubmit(); // trigger event submit
+            });
+
+            document.getElementById('rentalForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const submitBtn = document.getElementById('submitRentalBtn');
+                const originalContent = submitBtn.innerHTML;
+
+                submitBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/user/keranjang', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            product_id: formData.get('product_id'),
+                            type: 'sewa',
+                            quantity: Number(formData.get('quantity') || 1),
+                            bundle_id: formData.get('bundle_id') ? Number(formData.get(
+                                'bundle_id')) : null, // ✅ tambahin
+                            options: {
+                                durasi: formData.get('durasi'),
+                                jumlah_hari: Number(formData.get('jumlah_hari') || 1),
+                                tanggal_mulai: formData.get('tanggal_mulai'),
+                                catatan: formData.get('catatan')
+                            }
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Close modal
+                        if (typeof closeRentalModal === 'function') closeRentalModal();
+
+                        // Update cart badge
+                        if (typeof window.updateCartCount === 'function') {
+                            window.updateCartCount(data.cart_count);
+                        } else {
+                            window.dispatchEvent(new CustomEvent('cartUpdated', {
+                                detail: {
+                                    count: data.cart_count
+                                }
+                            }));
+                        }
+
+                        // Show success message
+                        if (typeof Swal !== 'undefined') {
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: data.message || 'Produk telah ditambahkan ke keranjang',
+                                timer: 2000,
+                                showConfirmButton: false,
+                                toast: true,
+                                position: 'top-end'
+                            });
+                        } else {
+                            alert('Produk telah ditambahkan ke keranjang');
+                        }
+                    } else {
+                        throw new Error(data.message || 'Terjadi kesalahan');
+                    }
+                } catch (error) {
+                    console.error('Submit error:', error);
+
+                    if (typeof Swal !== 'undefined') {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: error.message ||
+                                'Terjadi kesalahan saat menambahkan ke keranjang',
+                            confirmButtonColor: '#2B6CB0'
+                        });
+                    } else {
+                        alert('Error: ' + error.message);
+                    }
+                } finally {
+                    submitBtn.innerHTML = originalContent;
+                    submitBtn.disabled = false;
+                }
+            });
         });
     </script>
 @endpush

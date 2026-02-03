@@ -135,7 +135,7 @@
     <!-- Rentals Table -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-100">
+            <table class=" divide-y divide-gray-100">
                 <thead>
                     <tr class="bg-gray-50">
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">KODE
