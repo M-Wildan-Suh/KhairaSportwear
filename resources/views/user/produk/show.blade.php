@@ -762,7 +762,7 @@
         <input type="hidden" name="jumlah_hari" id="jumlahHariHidden" value="1">
 
         <!-- ambil dari radio name="bundle" -->
-        <input type="hidden" name="bundle_id" id="bundleIdHidden" value="{{$produk->varians->first()->id}}">
+        <input type="hidden" name="bundle_id" id="bundleIdHidden" value="{{$produk->varians->first()?->id}}">
 
         <!-- ambil dari input date -->
         <input type="hidden" name="tanggal_mulai" id="tanggalMulaiHidden" value="{{ now()->addDay()->format('Y-m-d') }}">

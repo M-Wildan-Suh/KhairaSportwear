@@ -255,7 +255,7 @@
                                         </a>
 
                                         @if ($produk->stok_tersedia > 0)
-                                            <button onclick="addToCart({{ $produk->id }}, 'jual', {{$produk->varians->first()->id}})"
+                                            <button onclick="addToCart({{ $produk->id }}, 'jual', {{$produk->varians->first()?->id}})"
                                                 class="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-800 text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
                                                 <i class="fas fa-cart-plus"></i>
                                                 <span>Keranjang</span>
