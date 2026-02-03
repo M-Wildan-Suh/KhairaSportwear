@@ -102,6 +102,22 @@ class Transaksi extends Model
             : null;
     }
 
+    /**
+ * Check if transaction is paid/lunas
+ */
+public function getIsLunasAttribute()
+{
+    return in_array($this->status, ['dibayar', 'diproses', 'dikirim', 'selesai']);
+}
+
+/**
+ * Get payment status label for struk
+ */
+public function getStatusPembayaranLabelAttribute()
+{
+    return $this->is_lunas ? 'LUNAS' : 'BELUM LUNAS';
+}
+
     // ================= SCOPE =================
     public function scopeSelesai(Builder $query)
     {

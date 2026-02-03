@@ -36,9 +36,60 @@
         <!-- Active Rentals Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             @foreach($sewas as $sewa)
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300" 
+            @php
+                $today = \Carbon\Carbon::today();
+                $tanggalKembali = \Carbon\Carbon::parse($sewa->tanggal_kembali_rencana);
+                $sisaHari = $today->diffInDays($tanggalKembali, false); // false = bisa negatif
+                $hariTerlambat = $sisaHari < 0 ? abs($sisaHari) : 0;
+                $isOverdue = $sisaHari < 0;
+                $isDendaAlert = $hariTerlambat >= 3; // Alert jika sudah 3 hari atau lebih terlambat
+                
+                // Hitung estimasi denda
+                $tarifDendaPerHari = $sewa->total_harga * 0.20;
+                $estimasiDenda = $hariTerlambat * $tarifDendaPerHari;
+            @endphp
+            
+            <div class="bg-white rounded-xl border {{ $isDendaAlert ? 'border-red-500 shadow-red-100' : ($isOverdue ? 'border-orange-500' : 'border-gray-200') }} shadow-sm hover:shadow-md transition-all duration-300" 
                  data-aos="fade-up" 
                  data-aos-delay="{{ $loop->index * 100 }}">
+                
+                <!-- Peringatan Denda - Muncul jika sudah lewat 3 hari -->
+                @if($isDendaAlert)
+                <div class="bg-red-50 border-b border-red-200 px-6 py-4">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center animate-pulse">
+                                <i class="fas fa-exclamation-triangle text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-red-900 mb-1">
+                                <i class="fas fa-bell mr-1"></i> PERINGATAN DENDA!
+                            </h4>
+                            <p class="text-sm text-red-700 mb-2">
+                                Sudah terlambat <strong>{{ $hariTerlambat }} hari</strong>. Segera kembalikan untuk menghindari denda lebih besar!
+                            </p>
+                            <div class="bg-red-100 rounded-lg px-3 py-2 inline-flex items-center gap-2">
+                                <i class="fas fa-money-bill-wave text-red-600"></i>
+                                <span class="text-sm font-bold text-red-900">
+                                    Estimasi Denda: Rp {{ number_format($estimasiDenda, 0, ',', '.') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @elseif($isOverdue)
+                <!-- Peringatan Terlambat - Kurang dari 3 hari -->
+                <div class="bg-orange-50 border-b border-orange-200 px-6 py-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-clock text-orange-600"></i>
+                        <p class="text-sm font-medium text-orange-900">
+                            Terlambat {{ $hariTerlambat }} hari - Estimasi denda: Rp {{ number_format($estimasiDenda, 0, ',', '.') }}
+                        </p>
+                    </div>
+                </div>
+                @endif
+                
                 <div class="p-6">
                     <!-- Header -->
                     <div class="flex justify-between items-start mb-4">
@@ -79,8 +130,8 @@
                                 </div>
                                 
                                 <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-flag-checkered text-red-600 text-sm"></i>
+                                    <div class="w-8 h-8 {{ $isOverdue ? 'bg-red-100' : 'bg-red-100' }} rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-flag-checkered {{ $isOverdue ? 'text-red-600' : 'text-red-600' }} text-sm"></i>
                                     </div>
                                     <div>
                                         <p class="text-xs text-gray-600">Kembali</p>
@@ -105,32 +156,75 @@
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-sm text-gray-600">Progress Sewa</span>
-                            <span class="text-sm font-medium {{ $sewa->sisa_hari < 3 ? 'text-red-600' : 'text-green-600' }}">
-                                {{ $sewa->sisa_hari }} hari tersisa
-                            </span>
+                            @if($isOverdue)
+                                <span class="text-sm font-bold text-red-600 animate-pulse">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    TERLAMBAT {{ $hariTerlambat }} HARI
+                                </span>
+                            @else
+                                <span class="text-sm font-medium {{ $sisaHari < 3 ? 'text-orange-600' : 'text-green-600' }}">
+                                    {{ $sisaHari }} hari tersisa
+                                </span>
+                            @endif
                         </div>
                         <div class="relative">
                             @php
                                 $totalDays = $sewa->jumlah_hari;
-                                $remainingDays = $sewa->sisa_hari;
-                                $elapsedDays = $totalDays - $remainingDays;
+                                $elapsedDays = $today->diffInDays($sewa->tanggal_mulai);
                                 $percentage = min(100, ($elapsedDays / $totalDays) * 100);
+                                
+                                // Jika terlambat, bar jadi merah dan 100%
+                                if ($isOverdue) {
+                                    $percentage = 100;
+                                }
                             @endphp
                             <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-gray-800 to-green-500 rounded-full transition-all duration-500"
+                                <div class="h-full {{ $isOverdue ? 'bg-gradient-to-r from-red-600 to-red-800' : 'bg-gradient-to-r from-gray-800 to-green-500' }} rounded-full transition-all duration-500"
                                      style="width: {{ $percentage }}%"></div>
                             </div>
                             <div class="absolute inset-0 flex justify-between items-center px-1">
                                 @for($i = 0; $i <= $totalDays; $i++)
-                                <div class="w-px h-3 {{ $i <= $elapsedDays ? 'bg-gray-800' : 'bg-gray-300' }}"></div>
+                                <div class="w-px h-3 {{ $i <= $elapsedDays ? ($isOverdue ? 'bg-red-600' : 'bg-gray-800') : 'bg-gray-300' }}"></div>
                                 @endfor
                             </div>
                         </div>
                         <div class="flex justify-between text-xs text-gray-500 mt-1">
                             <span>Mulai</span>
-                            <span>Kembali</span>
+                            <span class="{{ $isOverdue ? 'text-red-600 font-bold' : '' }}">
+                                {{ $isOverdue ? 'Lewat ' . $hariTerlambat . ' hari' : 'Kembali' }}
+                            </span>
                         </div>
                     </div>
+                    
+                    <!-- Informasi Denda (jika terlambat) -->
+                    @if($isOverdue)
+                    <div class="mb-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-calculator text-orange-600 mt-0.5"></i>
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-orange-900 mb-2">Perhitungan Denda Keterlambatan:</p>
+                                <div class="space-y-1 text-sm text-orange-800">
+                                    <div class="flex justify-between">
+                                        <span>Tarif per hari (20%):</span>
+                                        <span class="font-medium">Rp {{ number_format($tarifDendaPerHari, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Keterlambatan:</span>
+                                        <span class="font-medium">{{ $hariTerlambat }} hari</span>
+                                    </div>
+                                    <div class="flex justify-between pt-2 border-t border-orange-300">
+                                        <span class="font-bold">Estimasi Total:</span>
+                                        <span class="font-bold text-orange-900">Rp {{ number_format($estimasiDenda, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-orange-700 mt-2">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Denda final akan dihitung saat pengembalian berdasarkan kondisi alat
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                     
                     <!-- Action Buttons -->
                     <div class="flex flex-wrap gap-2">
@@ -139,15 +233,17 @@
                             <i class="fas fa-eye mr-2"></i> Struk
                         </a>
                         
+                        @if(!$isOverdue)
                         <button onclick="showExtendModal('{{ $sewa->id }}')" 
-                                class="flex-1 min-w-[120px] px-4 py-2 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors {{ $sewa->sisa_hari < 1 ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                {{ $sewa->sisa_hari < 1 ? 'disabled' : '' }}>
+                                class="flex-1 min-w-[120px] px-4 py-2 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
                             <i class="fas fa-plus mr-2"></i> Perpanjang
                         </button>
+                        @endif
                         
                         <button onclick="showReturnModal('{{ $sewa->id }}')"  {{$sewa->status != 'selesai' ? '' : 'disable'}}
-                                class=" {{$sewa->status != 'selesai' ? '' : 'opacity-50 cursor-not-allowed'}} flex-1 min-w-[120px] px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors">
-                            <i class="fas fa-undo mr-2"></i> Kembalikan
+                                class="{{ $isOverdue ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }} {{$sewa->status != 'selesai' ? '' : 'opacity-50 cursor-not-allowed'}} flex-1 min-w-[120px] px-4 py-2 text-white font-medium rounded-lg transition-colors">
+                            <i class="fas fa-undo mr-2"></i> 
+                            {{ $isOverdue ? 'Kembalikan SEGERA!' : 'Kembalikan' }}
                         </button>
                     </div>
                 </div>
@@ -347,6 +443,16 @@
     to { transform: rotate(360deg); }
 }
 
+/* Pulse animation untuk peringatan */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 /* Modal animations */
 #returnModal, #extendModal {
     transition: opacity 0.3s ease;
@@ -355,6 +461,11 @@
 /* Card hover effects */
 .hover\:shadow-md:hover {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Shadow untuk card dengan peringatan denda */
+.shadow-red-100 {
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.15);
 }
 </style>
 @endpush
@@ -429,7 +540,6 @@ async function calculateFines(sewaId, tanggalKembali, kondisiAlat) {
     `;
     
     try {
-        // PERBAIKAN: Gunakan URL langsung atau route dengan nama yang benar
         const response = await fetch("{{ route('user.sewa.calculate-denda') }}", {
             method: 'POST',
             headers: {
@@ -565,6 +675,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     if (data.redirect) {
                         window.location.href = data.redirect;
+                    } else {
+                        window.location.reload();
                     }
                 }, 1500);
             } else {
@@ -624,6 +736,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     if (data.redirect) {
                         window.location.href = data.redirect;
+                    } else {
+                        window.location.reload();
                     }
                 }, 1500);
             } else {

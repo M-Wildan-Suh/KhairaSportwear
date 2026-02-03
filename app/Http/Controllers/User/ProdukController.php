@@ -9,30 +9,31 @@ use App\Models\Kategori;
 
 class ProdukController extends Controller
 {
-    public function index(Request $request)
-    {
-        $produks = Produk::with('kategori')
-            ->tipeJual()
-            ->active()
-            ->stokTersedia()
-            ->paginate(12);
-        
-        // Get featured rental products
-        $featuredProducts = Produk::with('kategori')
-            ->tipeJual()
-            ->active()
-            ->inRandomOrder()
-            ->limit(4)
-            ->get();
-        
-        $kategoris = \App\Models\Kategori::active()->get();
-        
-        return view('user.produk.index', compact(
-            'produks',
-            'featuredProducts',
-            'kategoris'
-        ));
+    // File: app/Http/Controllers/User/ProdukController.php
+
+public function index(Request $request)
+{
+    $query = Produk::with('kategori')
+        ->tipeJual()
+        ->active()
+        ->stokTersedia();
+    
+    // Filter kategori
+    if ($request->has('kategori') && $request->kategori != '') {
+        $query->where('kategori_id', $request->kategori);
     }
+    
+    // Filter search
+    if ($request->has('search') && $request->search != '') {
+        $query->where('nama', 'like', '%' . $request->search . '%');
+    }
+    
+    $produks = $query->paginate(12)->withQueryString();
+    
+    $kategoris = Kategori::active()->get();
+    
+    return view('user.produk.index', compact('produks', 'kategoris'));
+}
     
     public function show($slug)
     {
