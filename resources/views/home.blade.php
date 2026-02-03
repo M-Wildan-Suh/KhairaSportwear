@@ -345,7 +345,9 @@
         </div>
     </section>
 
-    @include('user.components.sewa-modal')
+    @if ($productsForRent->isNotEmpty())
+        @include('user.components.sewa-modal')
+    @endif
 
 @endsection
 

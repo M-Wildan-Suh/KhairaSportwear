@@ -255,7 +255,7 @@
                                         </a>
 
                                         @if ($produk->stok_tersedia > 0)
-                                            <button onclick="addToCart({{ $produk->id }}, 'jual')"
+                                            <button onclick="addToCart({{ $produk->id }}, 'jual', {{$produk->varians->first()->id}})"
                                                 class="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-800 text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors duration-200 flex items-center justify-center gap-2">
                                                 <i class="fas fa-cart-plus"></i>
                                                 <span>Keranjang</span>
@@ -391,7 +391,9 @@
     </div>
 
     <!-- Include Modal Component -->
-    @include('user.components.sewa-modal')
+    @if ($produks->isNotEmpty())
+        @include('user.components.sewa-modal')
+    @endif
 @endsection
 
 @push('styles')
@@ -466,7 +468,7 @@
             initSearch();
         });
 
-        function addToCart(productId, type) {
+        function addToCart(productId, type, bundle) {
             const productName = document.querySelector(`[data-product-id="${productId}"]`)?.dataset.productName || 'produk';
 
             Swal.fire({
@@ -479,6 +481,7 @@
                 confirmButtonText: 'Ya, Tambahkan',
                 cancelButtonText: 'Batal',
                 showLoaderOnConfirm: true,
+                
                 preConfirm: async () => {
                     try {
                         const response = await fetch('/user/keranjang', {
@@ -489,6 +492,7 @@
                             },
                             body: JSON.stringify({
                                 product_id: productId,
+                                bundle_id: bundle,
                                 type: type,
                                 quantity: 1
                             })

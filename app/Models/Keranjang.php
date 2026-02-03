@@ -15,6 +15,7 @@ class Keranjang extends Model
         'size',
         'warna',
         'tipe',
+        'bundle_id',
         'quantity',
         'opsi_sewa',
         'harga',

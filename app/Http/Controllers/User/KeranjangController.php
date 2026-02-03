@@ -33,7 +33,7 @@ class KeranjangController extends Controller
         ]);
 
         $user = auth()->user();
-        $product = Produk::findOrFail($request->product_id);
+        $product = Produk::with('varians')->findOrFail($request->product_id);
 
         // Check stock
         if ($product->stok_tersedia < $request->quantity) {
@@ -67,14 +67,14 @@ class KeranjangController extends Controller
             ]);
         }
 
-        $defaultVarian = $product->varians()->first();
+        $defaultBundleId = $product->varians()->value('id') ?? 1;
 
-        if (!$defaultVarian) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Varian produk tidak ditemukan'
-            ], 400);
-        }
+        // if (!$defaultVarian) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => $defaultVarian
+        //     ], 500);
+        // }
 
         DB::beginTransaction();
         try {
@@ -85,11 +85,16 @@ class KeranjangController extends Controller
                 ->first();
 
             if ($existingItem) {
-                // Update quantity
                 $existingItem->quantity += $request->quantity;
-                $existingItem->bundle_id = $request->bundle_id ? $request->bundle_id : ($product->varians->first()->id ?? null);
 
-                // Update sewa options if needed
+                // hanya set bundle_id kalau request ada,
+                // kalau request kosong & existing masih null -> isi default
+                if ($request->filled('bundle_id')) {
+                    $existingItem->bundle_id = $request->bundle_id;
+                } elseif (!$existingItem->bundle_id) {
+                    $existingItem->bundle_id = $defaultBundleId;
+                }
+
                 if ($request->type === 'sewa' && $request->has('options')) {
                     $existingItem->opsi_sewa = $request->options;
                 }
@@ -103,7 +108,7 @@ class KeranjangController extends Controller
                     'produk_id' => $product->id,
                     'tipe' => $request->type,
                     'quantity' => $request->quantity,
-                    'bundle_id' => $request->bundle_id ? $request->bundle_id : ($product->varians->first()->id ?? null),
+                    'bundle_id' => $request->bundle_id ? $request->bundle_id : $defaultBundleId,
                     'opsi_sewa' => $request->type === 'sewa' ? $request->options : null
                 ]);
 
