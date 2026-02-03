@@ -245,7 +245,7 @@
                                 <h4 class="font-semibold text-gray-900 mb-3">Tanggal Mulai</h4>
                                 <div class="flex flex-wrap gap-3">
                                     <input type="date" id="tanggal_mulai"
-                                        value="{{ now()->format('Y-m-d') }}"
+                                        value="{{ now()->addDay()->format('Y-m-d') }}"
                                         class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary">
                                 </div>
                             </div>
@@ -765,7 +765,7 @@
         <input type="hidden" name="bundle_id" id="bundleIdHidden" value="{{$produk->varians->first()->id}}">
 
         <!-- ambil dari input date -->
-        <input type="hidden" name="tanggal_mulai" id="tanggalMulaiHidden" value="{{ now()->format('Y-m-d') }}">
+        <input type="hidden" name="tanggal_mulai" id="tanggalMulaiHidden" value="{{ now()->addDay()->format('Y-m-d') }}">
 
         <!-- ambil dari input qty -->
         <input type="hidden" name="quantity" id="quantityHidden" value="1">

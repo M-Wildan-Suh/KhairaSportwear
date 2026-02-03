@@ -50,25 +50,12 @@ function getTomorrowDate() {
  * Validate and adjust days based on duration
  */
 function adjustDaysForDuration(days, duration) {
-    let adjustedDays = parseInt(days) || 1;
-    
-    switch(duration) {
-        case 'mingguan':
-            if (adjustedDays < 7) adjustedDays = 7;
-            adjustedDays = Math.ceil(adjustedDays / 7) * 7;
-            break;
-        case 'bulanan':
-            if (adjustedDays < 30) adjustedDays = 30;
-            adjustedDays = Math.ceil(adjustedDays / 30) * 30;
-            break;
-        default: // harian
-            if (adjustedDays < 1) adjustedDays = 1;
-            if (adjustedDays > 365) adjustedDays = 365; // Set max limit
-    }
-    
-    return adjustedDays;
+    // 🔒 Kunci durasi, tidak ada pembulatan / akumulasi
+    if (duration === 'harian') return 1;
+    if (duration === 'mingguan') return 7;
+    if (duration === 'bulanan') return 30;
+    return 1;
 }
-
 /**
  * Update visual selection for duration options
  */
