@@ -88,147 +88,122 @@ class SewaController extends Controller
             'catatan_kondisi' => 'nullable|string|max:500'
         ]);
 
-        try {
-            // DEBUG: Cek user sewa
-            $userSewas = auth()->user()->sewas()
-                ->with('produk')
-                ->get()
-                ->map(function ($sewa) {
-                    return [
-                        'id' => $sewa->id,
-                        'kode' => $sewa->kode_sewa,
-                        'status' => $sewa->status,
-                        'produk_id' => $sewa->produk_id
-                    ];
-                });
+        $userSewas = auth()->user()->sewas()
+            ->with('produk')
+            ->get()
+            ->map(function ($sewa) {
+                return [
+                    'id' => $sewa->id,
+                    'kode' => $sewa->kode_sewa,
+                    'status' => $sewa->status,
+                    'produk_id' => $sewa->produk_id
+                ];
+            });
 
-            $sewa = auth()->user()->sewas()
-                ->with('produk')
-                ->where('status', 'aktif')
-                ->find($id);
+        
+        $sewa = Sewa::with('produk')
+            ->where('status', 'aktif')
+            ->find($id);
 
-            $sewa = auth()->user()->sewas()
-                ->with('produk')
-                ->where('status', 'aktif')
-                ->findOrFail($id);
+        $tanggalKembali = Carbon::parse($request->tanggal_kembali);
+        $tanggalMulai = Carbon::parse($sewa->tanggal_mulai);
+        $tanggalKembaliRencana = Carbon::parse($sewa->tanggal_kembali_rencana);
 
-            $tanggalKembali = Carbon::parse($request->tanggal_kembali);
-            $tanggalMulai = Carbon::parse($sewa->tanggal_mulai);
-            $tanggalKembaliRencana = Carbon::parse($sewa->tanggal_kembali_rencana);
-
-            // Validasi tanggal kembali
-            if ($tanggalKembali->lt($tanggalMulai)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tanggal kembali tidak boleh sebelum tanggal mulai sewa.'
-                ], 400);
-            }
-
-            DB::beginTransaction();
-
-            // Perbaikan perhitungan keterlambatan
-            if ($tanggalKembali->gt($tanggalKembaliRencana)) {
-                $keterlambatan = $tanggalKembaliRencana->diffInDays($tanggalKembali);
-            } else {
-                $keterlambatan = 0;
-            }
-
-            // Hitung denda keterlambatan
-            $tarifDenda = ($sewa->total_harga * 0.20);
-
-            $dendaKeterlambatan = $keterlambatan * $tarifDenda;
-
-            // Hitung denda kerusakan
-            $dendaKerusakan = 0;
-
-            if ($request->kondisi_alat !== 'baik') {
-                $hargaProduk = $sewa->produk->harga_beli;
-
-                switch ($request->kondisi_alat) {
-                    case 'rusak_ringan':
-                        break;
-                    case 'rusak_berat':
-                        $dendaKerusakan = $hargaProduk * 0.5;
-                        break;
-                    case 'hilang':
-                        $dendaKerusakan = $hargaProduk;
-                        break;
-                }
-            }
-
-            $totalDenda = $dendaKeterlambatan + $dendaKerusakan;
-
-            // Buat record pengembalian
-            $pengembalianData = [
-                'sewa_id' => $sewa->id,
-                'tanggal_kembali' => $tanggalKembali,
-                'keterlambatan_hari' => $keterlambatan,
-                'kondisi_alat' => $request->kondisi_alat,
-                'catatan_kondisi' => $request->catatan_kondisi,
-                'denda_keterlambatan' => $dendaKeterlambatan,
-                'denda_kerusakan' => $dendaKerusakan,
-                'total_denda' => $totalDenda,
-                'status' => 'menunggu',
-                'created_at' => now(),
-                'updated_at' => now()
-            ];
-
-
-            $pengembalian = Pengembalian::create($pengembalianData);
-
-            // Update status sewa
-            $sewa->update([
-                'status' => 'menunggu',
-                'tanggal_kembali_aktual' => $tanggalKembali,
-                'denda' => $totalDenda
-            ]);
-
-            // Kembalikan stok
-            try {
-                if (method_exists($sewa->produk, 'updateStokSewa')) {
-                    $sewa->produk->updateStokSewa($sewa->jumlah_hari, 'masuk');
-                } else {
-                    $sewa->produk->increment('stok_tersedia', $sewa->jumlah_hari);
-                }
-            } catch (\Exception $e) {
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengembalian berhasil diajukan. Menunggu verifikasi admin.',
-                'data' => [
-                    'pengembalian_id' => $pengembalian->id,
-                    'keterlambatan' => $keterlambatan,
-                    'total_denda' => $totalDenda,
-                    'formatted_denda' => 'Rp ' . number_format($totalDenda, 0, ',', '.')
-                ],
-                'redirect' => route('user.sewa.index', $sewa->id)
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            DB::rollBack();
+        // Validasi tanggal kembali
+        if ($tanggalKembali->lt($tanggalMulai)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Data sewa tidak ditemukan atau sudah tidak aktif.',
-                'debug' => [
-                    'user_id' => auth()->id(),
-                    'sewa_id' => $id,
-                    'model' => $e->getModel()
-                ]
-            ], 404);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan sistem. Silakan coba lagi atau hubungi admin.',
-                'error_detail' => config('app.debug') ? [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine()
-                ] : null
-            ], 500);
+                'message' => 'Tanggal kembali tidak boleh sebelum tanggal mulai sewa.'
+            ], 400);
         }
+
+        DB::beginTransaction();
+
+        // Perbaikan perhitungan keterlambatan
+        if ($tanggalKembali->gt($tanggalKembaliRencana)) {
+            $keterlambatan = $tanggalKembaliRencana->diffInDays($tanggalKembali);
+        } else {
+            $keterlambatan = 0;
+        }
+        
+        $mulaiDendaHariKe = 3;
+
+        // Hitung hari yang benar-benar kena denda
+        $hariKenaDenda = $keterlambatan >= $mulaiDendaHariKe
+            ? ($keterlambatan - ($mulaiDendaHariKe - 1)) // telat 3 => 1, telat 4 => 2
+            : 0;
+
+        $tarifDenda = ($sewa->total_harga * 0.20);
+        $dendaKeterlambatan = $hariKenaDenda * $tarifDenda;
+
+        // Hitung denda kerusakan
+        $dendaKerusakan = 0;
+
+        if ($request->kondisi_alat !== 'baik') {
+            $hargaProduk = $sewa->produk->harga_beli;
+
+            switch ($request->kondisi_alat) {
+                case 'rusak_ringan':
+                    break;
+                case 'rusak_berat':
+                    $dendaKerusakan = $hargaProduk * 0.5;
+                    break;
+                case 'hilang':
+                    $dendaKerusakan = $hargaProduk;
+                    break;
+            }
+        }
+
+        $totalDenda = $dendaKeterlambatan + $dendaKerusakan;
+
+        // Buat record pengembalian
+        $pengembalianData = [
+            'sewa_id' => $sewa->id,
+            'tanggal_kembali' => $tanggalKembali,
+            'keterlambatan_hari' => $keterlambatan,
+            'kondisi_alat' => $request->kondisi_alat,
+            'catatan_kondisi' => $request->catatan_kondisi,
+            'denda_keterlambatan' => $dendaKeterlambatan,
+            'denda_kerusakan' => $dendaKerusakan,
+            'total_denda' => $totalDenda,
+            // 'status' => 'menunggu',
+            'created_at' => now(),
+            'updated_at' => now()
+        ];
+
+
+        $pengembalian = Pengembalian::create($pengembalianData);
+
+        // Update status sewa
+        $sewa->update([
+            'status' => 'selesai',
+            'tanggal_kembali_aktual' => $tanggalKembali,
+            'denda' => $totalDenda
+        ]);
+
+        // Kembalikan stok
+        try {
+            if (method_exists($sewa->produk, 'updateStokSewa')) {
+                $sewa->produk->updateStokSewa($sewa->jumlah_hari, 'masuk');
+            } else {
+                $sewa->produk->increment('stok_tersedia', $sewa->jumlah_hari);
+            }
+        } catch (\Exception $e) {
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengembalian berhasil diajukan. Menunggu verifikasi admin.',
+            'data' => [
+                'pengembalian_id' => $pengembalian->id,
+                'keterlambatan' => $keterlambatan,
+                'total_denda' => $totalDenda,
+                'formatted_denda' => 'Rp ' . number_format($totalDenda, 0, ',', '.')
+            ],
+            'redirect' => route('user.sewa.index', $sewa->id)
+        ]);
     }
 
     public function calculateDenda(Request $request)
@@ -239,15 +214,6 @@ class SewaController extends Controller
                 'tanggal_kembali' => 'required|date',
                 'kondisi_alat' => 'required|in:baik,rusak_ringan,rusak_berat,hilang'
             ]);
-
-            $sewa = Sewa::with('produk')->find($request->sewa_id);
-
-            // VALIDASI HARGA PRODUK
-            if ($sewa && $sewa->produk && is_null($sewa->produk->harga_beli)) {
-
-                // Coba ambil harga dari field alternatif
-                $hargaAlternatif = $sewa->produk->harga_sewa ?? $sewa->produk->harga ?? 0;
-            }
 
             $sewa = Sewa::with('produk')->findOrFail($request->sewa_id);
 
@@ -263,36 +229,44 @@ class SewaController extends Controller
                 ], 400);
             }
 
-            // PERBAIKAN 1: Gunakan metode yang benar untuk keterlambatan
+            // Hitung keterlambatan (hari)
             if ($tanggalKembali->gt($tanggalKembaliRencana)) {
                 $keterlambatan = $tanggalKembaliRencana->diffInDays($tanggalKembali);
             } else {
                 $keterlambatan = 0;
             }
 
-            // Hitung denda keterlambatan
+            // =========================
+            // DENDA KETERLAMBATAN (SESUAI RULE BARU)
+            // - Hari 1-2 telat: TIDAK kena denda
+            // - Mulai hari ke-3: kena denda 20% / hari
+            // =========================
+            $mulaiDendaHariKe = 3;
+            $hariKenaDenda = $keterlambatan >= $mulaiDendaHariKe
+                ? ($keterlambatan - ($mulaiDendaHariKe - 1)) // telat 3 => 1, telat 4 => 2, dst
+                : 0;
+
             $tarifDenda = ($sewa->total_harga * 0.20);
+            $dendaKeterlambatan = $hariKenaDenda * $tarifDenda;
 
-            $dendaKeterlambatan = $keterlambatan * ($sewa->total_harga * 0.20);
-
-            // PERBAIKAN 2: Handle harga_beli yang null
+            // =========================
+            // HANDLE harga_beli null/0
+            // =========================
             $hargaProduk = $sewa->produk->harga_beli;
 
-            // Jika harga_beli null, gunakan harga alternatif
             if (is_null($hargaProduk) || $hargaProduk == 0) {
-
-                // Coba field alternatif berdasarkan struktur database umum
                 if (isset($sewa->produk->harga_sewa) && $sewa->produk->harga_sewa > 0) {
                     $hargaProduk = $sewa->produk->harga_sewa;
                 } elseif (isset($sewa->produk->harga) && $sewa->produk->harga > 0) {
                     $hargaProduk = $sewa->produk->harga;
                 } else {
-                    // Default harga jika tidak ada
-                    $hargaProduk = 1000000; // Rp 1.000.000 default
+                    $hargaProduk = 1000000; // default
                 }
             }
 
-            // Hitung denda kerusakan
+            // =========================
+            // DENDA KERUSAKAN
+            // =========================
             $dendaKerusakan = 0;
 
             if ($request->kondisi_alat !== 'baik') {
@@ -315,6 +289,11 @@ class SewaController extends Controller
                 'success' => true,
                 'data' => [
                     'keterlambatan_hari' => $keterlambatan,
+
+                    // tambahan agar UI bisa jelasin denda mulai hari ke-3
+                    'mulai_denda_hari_ke' => $mulaiDendaHariKe,
+                    'hari_kena_denda' => $hariKenaDenda,
+
                     'tarif_denda_per_hari' => $tarifDenda,
                     'denda_keterlambatan' => $dendaKeterlambatan,
                     'denda_kerusakan' => $dendaKerusakan,
@@ -350,6 +329,7 @@ class SewaController extends Controller
             ], 500);
         }
     }
+
 
     public function extend(Request $request, $id)
     {

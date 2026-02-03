@@ -144,6 +144,8 @@
                             PELANGGAN</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">PRODUK
                         </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Bundle
+                        </th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">PERIODE
                         </th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">TOTAL
@@ -200,23 +202,24 @@
                                             <i class="fas fa-box text-gray-400 text-sm"></i>
                                         </div>
                                     @endif
-                                    @php
-                                        $detail = $sewa->transaksi?->detailTransaksis
-                                            ?->where('produk_id', $sewa->produk_id)
-                                            ->first();
-                                    @endphp
 
                                     <div class="text-sm font-medium text-gray-900">
                                         {{ $sewa->produk->nama }}
                                     </div>
+                                </div>
+                            </td>
+                            <td>
+                                @php
+                                    $detail = $sewa->transaksi?->detailTransaksis
+                                        ?->where('produk_id', $sewa->produk_id)
+                                        ->first();
+                                @endphp
 
-                                    <div class="text-xs text-gray-500">
-                                        Size:
-                                        {{ $detail?->size ?? ($detail?->variant?->nama ?? '-') }}
-                                        • {{ $sewa->durasi }} hari
-                                        • {{ $sewa->jumlah_hari }} unit
-                                    </div>
-
+                                <div class="text-xs text-gray-500">
+                                    Size:
+                                    {{ $detail?->size ?? ($detail?->variant?->nama ?? '-') }}
+                                    • {{ $sewa->durasi }} hari
+                                    • {{ $sewa->jumlah_hari }} unit
                                 </div>
                             </td>
                             <!-- Periode -->
