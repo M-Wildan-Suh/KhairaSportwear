@@ -231,6 +231,9 @@
                                         Customer</th>
                                     <th
                                         class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Type</th>
+                                    <th
+                                        class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Items</th>
                                     <th
                                         class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -274,6 +277,11 @@
                                                         </div>
                                                     @endif
                                                 </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-3 py-2 whitespace-nowrap">
+                                            <div class="text-xs text-gray-900 capitalize">
+                                                {{ $transaction->tipe }}
                                             </div>
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap">
