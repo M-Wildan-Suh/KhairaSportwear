@@ -283,51 +283,23 @@ class TransaksiController extends Controller
 
         DB::beginTransaction();
 
-        try {
-            $oldStatus = $transaction->status;
-            $newStatus = $request->status;
+        $oldStatus = $transaction->status;
+        $newStatus = $request->status;
 
-            // ================= LOGIKA PERUBAHAN STATUS PENJUALAN =================
+        // ================= LOGIKA PERUBAHAN STATUS PENJUALAN =================
 
-            // 1. Jika status berubah ke DIBAYAR (Verifikasi pembayaran)
-            if ($newStatus == 'dibayar' && $oldStatus != 'dibayar') {
-                // Set tanggal pembayaran dan verifikasi
-                if (!$transaction->tanggal_pembayaran) {
-                    $transaction->tanggal_pembayaran = now();
-                    // $validated['tanggal_pembayaran'] = now();
-                }
-
-                $validated['verifikasi_oleh'] = auth()->id();
-                $validated['tanggal_verifikasi'] = now();
-
-                $sewa = Sewa::find($transaction->sewa->id);
-
-                if ($sewa) {
-                    $sewa->status = 'aktif';
-                    $sewa->save();
-                }
-
-                // Hanya kurangi stok jika sebelumnya PENDING
-                if ($oldStatus == 'pending') {
-                    foreach ($transaction->detailTransaksis as $detail) {
-                        if ($detail->produk) {
-                            $detail->produk->decrement('stok_total', $detail->quantity);
-
-                            $detail->bundle?->decrement('stok', $detail->quantity);
-                        }
-                    }
-                }
+        // 1. Jika status berubah ke DIBAYAR (Verifikasi pembayaran)
+        if ($newStatus == 'dibayar' && $oldStatus != 'dibayar') {
+            // Set tanggal pembayaran dan verifikasi
+            if (!$transaction->tanggal_pembayaran) {
+                $transaction->tanggal_pembayaran = now();
+                // $validated['tanggal_pembayaran'] = now();
             }
 
-            // 2. Jika status berubah ke DIKIRIM
-            if ($newStatus == 'dikirim' && $oldStatus != 'dikirim') {
-                $validated['tanggal_pengiriman'] = $request->tanggal_pengiriman ?? now();
-            }
+            $validated['verifikasi_oleh'] = auth()->id();
+            $validated['tanggal_verifikasi'] = now();
 
-            // 3. Jika status berubah ke SELESAI
-            if ($newStatus == 'selesai' && $oldStatus != 'selesai') {
-                $validated['completed_at'] = now();
-
+            if ($transaction->tipe === 'penyewaan') {
                 $sewa = Sewa::find($transaction->sewa->id);
 
                 if ($sewa) {
@@ -336,90 +308,111 @@ class TransaksiController extends Controller
                 }
             }
 
-            // 4. Jika status berubah ke DIBATALKAN
-            if ($newStatus == 'dibatalkan' && $oldStatus != 'dibatalkan') {
 
-                $sewa = Sewa::find($transaction->sewa->id);
+            // Hanya kurangi stok jika sebelumnya PENDING
+            if ($oldStatus == 'pending') {
+                foreach ($transaction->detailTransaksis as $detail) {
+                    if ($detail->produk) {
+                        $detail->produk->decrement('stok_total', $detail->quantity);
 
-                if ($sewa) {
-                    $sewa->status = 'aktif';
-                    $sewa->save();
-                }
-                // Kembalikan stok jika sebelumnya sudah dibayar atau diproses
-                if (in_array($oldStatus, ['dibayar', 'diproses', 'dikirim'])) {
-                    foreach ($transaction->detailTransaksis as $detail) {
-                        if ($detail->produk) {
-                            $detail->produk->increment('stok', $detail->quantity);
-                        }
+                        $detail->bundle?->decrement('stok', $detail->quantity);
                     }
                 }
             }
-
-            // 5. Jika status berubah dari DIBATALKAN ke status lain
-            if ($oldStatus == 'dibatalkan' && $newStatus != 'dibatalkan') {
-
-                $sewa = Sewa::find($transaction->sewa->id);
-
-                if ($sewa) {
-                    $sewa->status = 'aktif';
-                    $sewa->save();
-                }
-                // Kurangi stok lagi untuk status yang membutuhkan stok
-                if (in_array($newStatus, ['dibayar', 'diproses', 'dikirim'])) {
-                    foreach ($transaction->detailTransaksis as $detail) {
-                        if ($detail->produk) {
-                            $detail->produk->decrement('stok', $detail->quantity);
-
-                            // Log stok keluar
-                            \App\Models\StokLog::create([
-                                'produk_id' => $detail->produk->id,
-                                'user_id' => auth()->id(),
-                                'tipe' => 'keluar',
-                                'quantity' => $detail->quantity,
-                                'stok_sebelum' => $detail->produk->stok + $detail->quantity,
-                                'stok_sesudah' => $detail->produk->stok,
-                                'keterangan' => "Reaktivasi transaksi {$transaction->kode_transaksi}",
-                                'referensi_id' => $transaction->id,
-                                'referensi_tipe' => Transaksi::class,
-                            ]);
-                        }
-                    }
-
-                    // Jika berubah ke DIBAYAR, set tanggal pembayaran
-                    if ($newStatus == 'dibayar') {
-                        $validated['tanggal_pembayaran'] = now();
-                        $validated['verifikasi_oleh'] = auth()->id();
-                        $validated['tanggal_verifikasi'] = now();
-                    }
-                }
-            }
-
-            // Update transaction
-            $transaction->update($validated);
-
-            DB::commit();
-
-            // Create notification for user
-            if ($oldStatus != $newStatus) {
-                $this->createStatusNotification($transaction, $oldStatus);
-            }
-
-            return redirect()->route('admin.transaksi.index')->with('success', 'Transaksi berhasil diperbarui.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            \Log::error('Failed to update transaction:', [
-                'id' => $id,
-                'old_status' => $oldStatus,
-                'new_status' => $request->status,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return redirect()->back()
-                ->with('error', 'Gagal memperbarui transaksi: ' . $e->getMessage())
-                ->withInput();
         }
+
+        // 2. Jika status berubah ke DIKIRIM
+        if ($newStatus == 'dikirim' && $oldStatus != 'dikirim') {
+            $validated['tanggal_pengiriman'] = $request->tanggal_pengiriman ?? now();
+        }
+
+        // 3. Jika status berubah ke SELESAI
+        if ($newStatus == 'selesai' && $oldStatus != 'selesai') {
+            $validated['completed_at'] = now();
+
+            if ($transaction->tipe === 'penyewaan') {
+                $sewa = Sewa::find($transaction->sewa->id);
+
+                if ($sewa) {
+                    $sewa->status = 'aktif';
+                    $sewa->save();
+                }
+            }
+        }
+
+        // 4. Jika status berubah ke DIBATALKAN
+        if ($newStatus == 'dibatalkan' && $oldStatus != 'dibatalkan') {
+
+            if ($transaction->tipe === 'penyewaan') {
+                $sewa = Sewa::find($transaction->sewa->id);
+
+                if ($sewa) {
+                    $sewa->status = 'aktif';
+                    $sewa->save();
+                }
+            }
+            // Kembalikan stok jika sebelumnya sudah dibayar atau diproses
+            if (in_array($oldStatus, ['dibayar', 'diproses', 'dikirim'])) {
+                foreach ($transaction->detailTransaksis as $detail) {
+                    if ($detail->produk) {
+                        $detail->produk->increment('stok', $detail->quantity);
+                    }
+                }
+            }
+        }
+
+        // 5. Jika status berubah dari DIBATALKAN ke status lain
+        if ($oldStatus == 'dibatalkan' && $newStatus != 'dibatalkan') {
+
+            if ($transaction->tipe === 'penyewaan') {
+                $sewa = Sewa::find($transaction->sewa->id);
+
+                if ($sewa) {
+                    $sewa->status = 'aktif';
+                    $sewa->save();
+                }
+            }
+            // Kurangi stok lagi untuk status yang membutuhkan stok
+            if (in_array($newStatus, ['dibayar', 'diproses', 'dikirim'])) {
+                foreach ($transaction->detailTransaksis as $detail) {
+                    if ($detail->produk) {
+                        $detail->produk->decrement('stok', $detail->quantity);
+
+                        // Log stok keluar
+                        \App\Models\StokLog::create([
+                            'produk_id' => $detail->produk->id,
+                            'user_id' => auth()->id(),
+                            'tipe' => 'keluar',
+                            'quantity' => $detail->quantity,
+                            'stok_sebelum' => $detail->produk->stok + $detail->quantity,
+                            'stok_sesudah' => $detail->produk->stok,
+                            'keterangan' => "Reaktivasi transaksi {$transaction->kode_transaksi}",
+                            'referensi_id' => $transaction->id,
+                            'referensi_tipe' => Transaksi::class,
+                        ]);
+                    }
+                }
+
+                // Jika berubah ke DIBAYAR, set tanggal pembayaran
+                if ($newStatus == 'dibayar') {
+                    $validated['tanggal_pembayaran'] = now();
+                    $validated['verifikasi_oleh'] = auth()->id();
+                    $validated['tanggal_verifikasi'] = now();
+                }
+            }
+        }
+
+        // Update transaction
+        $transaction->update($validated);
+
+        DB::commit();
+
+        // Create notification for user
+        if ($oldStatus != $newStatus) {
+            $this->createStatusNotification($transaction, $oldStatus);
+        }
+
+        return redirect()->route('admin.transaksi.index')->with('success', 'Transaksi berhasil diperbarui.');
     }
 
     /**

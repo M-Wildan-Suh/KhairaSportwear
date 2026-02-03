@@ -205,7 +205,7 @@
 
                                                         <!-- Price -->
                                                         <div class="text-right">
-                                                            <p class="text-sm text-gray-600 mb-1">
+                                                            <p class="text-sm text-gray-600 mb-1" id="item-{{$item->id}}">
                                                                 @if ($item->tipe === 'jual')
                                                                     @ Rp
                                                                     {{ number_format($item->produk->harga_beli, 0, ',', '.') }}
@@ -214,7 +214,7 @@
                                                                     {{ number_format($item->harga, 0, ',', '.') }}/{{ $item->opsi_sewa['durasi'] == 'harian' ? 'Hari' : ($item->opsi_sewa['durasi'] == 'mingguan' ? 'Minggu' : 'Bulan') }}
                                                                 @endif
                                                             </p>
-                                                            <p class="text-xl font-bold text-primary">
+                                                            <p class="text-xl font-bold text-primary" id="">
                                                                 Rp {{ number_format($item->subtotal, 0, ',', '.') }}
                                                             </p>
                                                         </div>
