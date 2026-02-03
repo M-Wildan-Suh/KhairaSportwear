@@ -187,8 +187,7 @@
                                                             <p class="text-sm font-medium text-gray-700 mb-2">Jumlah</p>
                                                             <div class="flex items-center">
                                                                 <button onclick="updateQuantity({{ $item->id }}, -1)"
-                                                                    class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-l-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                    {{ $item->quantity <= 1 ? 'disabled' : '' }}>
+                                                                    class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-l-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                                                     <i class="fas fa-minus text-gray-600"></i>
                                                                 </button>
                                                                 <input type="number" value="{{ $item->quantity }}"
@@ -205,7 +204,8 @@
 
                                                         <!-- Price -->
                                                         <div class="text-right">
-                                                            <p class="text-sm text-gray-600 mb-1" id="item-{{$item->id}}">
+                                                            <p class="text-sm text-gray-600 mb-1"
+                                                                id="item-price-{{ $item->id }}">
                                                                 @if ($item->tipe === 'jual')
                                                                     @ Rp
                                                                     {{ number_format($item->produk->harga_beli, 0, ',', '.') }}
@@ -214,7 +214,9 @@
                                                                     {{ number_format($item->harga, 0, ',', '.') }}/{{ $item->opsi_sewa['durasi'] == 'harian' ? 'Hari' : ($item->opsi_sewa['durasi'] == 'mingguan' ? 'Minggu' : 'Bulan') }}
                                                                 @endif
                                                             </p>
-                                                            <p class="text-xl font-bold text-primary" id="">
+
+                                                            <p class="text-xl font-bold text-primary"
+                                                                id="item-subtotal-{{ $item->id }}">
                                                                 Rp {{ number_format($item->subtotal, 0, ',', '.') }}
                                                             </p>
                                                         </div>
@@ -449,15 +451,31 @@
             }
         });
 
+        function setButtonsState(itemElement, qty) {
+            const input = itemElement.querySelector('input[type="number"]');
+            const min = parseInt(input.min || "1");
+            const max = parseInt(input.max || "999999");
+
+            const btnMinus = itemElement.querySelector('[data-action="minus"]');
+            const btnPlus = itemElement.querySelector('[data-action="plus"]');
+
+            if (btnMinus) btnMinus.disabled = qty <= min;
+            if (btnPlus) btnPlus.disabled = qty >= max;
+        }
+
         // Update quantity with buttons
         function updateQuantity(itemId, change) {
             const itemElement = document.querySelector(`.cart-item[data-id="${itemId}"]`);
+            if (!itemElement) return;
+
             const quantityInput = itemElement.querySelector('input[type="number"]');
-            let currentQuantity = parseInt(quantityInput.value);
-            const maxQuantity = parseInt(quantityInput.max);
+            const currentQuantity = parseInt(quantityInput.value || "1");
+            const maxQuantity = parseInt(quantityInput.max || "999999");
+            const minQuantity = parseInt(quantityInput.min || "1");
 
             let newQuantity = currentQuantity + change;
-            if (newQuantity < 1) newQuantity = 1;
+            if (newQuantity < minQuantity) newQuantity = minQuantity;
+
             if (newQuantity > maxQuantity) {
                 Swal.fire({
                     icon: 'warning',
@@ -467,17 +485,27 @@
                 });
                 return;
             }
+
+            // Optimistic UI (optional): update input dulu biar responsif
+            quantityInput.value = newQuantity;
+            setButtonsState(itemElement, newQuantity);
 
             updateCartItem(itemId, newQuantity);
         }
 
         // Update quantity with input
         function updateQuantityInput(itemId, value) {
-            const newQuantity = parseInt(value);
-            if (isNaN(newQuantity) || newQuantity < 1) return;
-
             const itemElement = document.querySelector(`.cart-item[data-id="${itemId}"]`);
-            const maxQuantity = parseInt(itemElement.querySelector('input[type="number"]').max);
+            if (!itemElement) return;
+
+            const input = itemElement.querySelector('input[type="number"]');
+            const maxQuantity = parseInt(input.max || "999999");
+            const minQuantity = parseInt(input.min || "1");
+
+            let newQuantity = parseInt(value);
+            if (isNaN(newQuantity)) return;
+
+            if (newQuantity < minQuantity) newQuantity = minQuantity;
 
             if (newQuantity > maxQuantity) {
                 Swal.fire({
@@ -486,14 +514,26 @@
                     text: `Stok tersedia: ${maxQuantity} unit`,
                     confirmButtonColor: '#2B6CB0'
                 });
+                // balikin ke max biar gak ngaco
+                input.value = maxQuantity;
+                setButtonsState(itemElement, maxQuantity);
                 return;
             }
+
+            input.value = newQuantity;
+            setButtonsState(itemElement, newQuantity);
 
             updateCartItem(itemId, newQuantity);
         }
 
         // Update cart item via AJAX
         async function updateCartItem(itemId, quantity) {
+            const itemElement = document.querySelector(`.cart-item[data-id="${itemId}"]`);
+            if (!itemElement) return;
+
+            const input = itemElement.querySelector('input[type="number"]');
+            const checkbox = itemElement.querySelector('.cart-checkbox');
+
             try {
                 const response = await fetch(`/user/keranjang/${itemId}`, {
                     method: 'PUT',
@@ -509,16 +549,28 @@
 
                 const data = await response.json();
 
-                if (!data.success) throw new Error(data.message);
+                // kalau server balikin 400/500, success bisa false atau response.ok false
+                if (!response.ok || !data.success) throw new Error(data.message || 'Gagal update');
 
-                // update input value saja
-                const itemElement = document.querySelector(`.cart-item[data-id="${itemId}"]`);
-                const input = itemElement.querySelector('input[type="number"]');
                 input.value = quantity;
 
-                const checkbox = itemElement.querySelector('.cart-checkbox');
-                checkbox.dataset.subtotal = data.item_subtotal;
-                recalculateSummary();
+                const itemSubtotalEl = document.getElementById(`item-subtotal-${itemId}`);
+                if (itemSubtotalEl) {
+                    itemSubtotalEl.textContent = `Rp ${data.item_subtotal}`;
+                }
+
+                if (checkbox) checkbox.dataset.subtotal = data.item_subtotal;
+
+                const summarySubtotal = document.getElementById('summary-subtotal');
+                const summaryTax = document.getElementById('summary-tax');
+                const summaryTotal = document.getElementById('summary-total');
+
+                if (summarySubtotal) summarySubtotal.textContent = `Rp ${data.subtotal}`;
+                if (summaryTax) summaryTax.textContent = `Rp ${data.tax}`;
+                if (summaryTotal) summaryTotal.textContent = `Rp ${data.total}`;
+
+                // 5) kalau kamu tetap butuh recalculateSummary karena ringkasan tergantung checkbox item tercentang:
+                // recalculateSummary();
 
             } catch (error) {
                 Swal.fire({
@@ -526,8 +578,11 @@
                     title: 'Gagal',
                     text: error.message
                 });
+                // rollback tampilan input (optional)
+                // input.value = input.getAttribute('data-last') ?? input.value;
             }
         }
+
 
 
         // Remove item from cart

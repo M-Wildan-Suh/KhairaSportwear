@@ -159,10 +159,18 @@ class KeranjangController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Keranjang berhasil diperbarui',
+
+            // formatted untuk tampilan
             'subtotal' => number_format($subtotal, 0, ',', '.'),
             'tax' => number_format($tax, 0, ',', '.'),
             'total' => number_format($total, 0, ',', '.'),
-            'item_subtotal' => number_format($keranjang->subtotal, 0, ',', '.')
+            'item_subtotal' => number_format($keranjang->subtotal, 0, ',', '.'),
+
+            // raw untuk kalkulasi client (checkbox summary)
+            'subtotal_raw' => (int) $subtotal,
+            'tax_raw' => (int) round($tax),
+            'total_raw' => (int) round($total),
+            'item_subtotal_raw' => (int) $keranjang->subtotal,
         ]);
     }
 

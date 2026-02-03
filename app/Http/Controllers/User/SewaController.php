@@ -39,7 +39,14 @@ class SewaController extends Controller
     public function aktif()
     {
         $sewas = auth()->user()->sewas()
-            ->with('produk')
+            ->with(['produk', 'pengembalian'])
+            ->where('status', '!=', 'dibatalkan')
+            ->where(function ($q) {
+                $q->whereDoesntHave('pengembalian')
+                    ->orWhereHas('pengembalian', function ($q) {
+                        $q->where('status', '!=', 'selesai');
+                    });
+            })
             ->orderBy('tanggal_kembali_rencana')
             ->paginate(10);
 
@@ -100,7 +107,7 @@ class SewaController extends Controller
                 ];
             });
 
-        
+
         $sewa = Sewa::with('produk')
             ->where('status', 'aktif')
             ->find($id);
@@ -125,13 +132,9 @@ class SewaController extends Controller
         } else {
             $keterlambatan = 0;
         }
-        
-        $mulaiDendaHariKe = 3;
 
-        // Hitung hari yang benar-benar kena denda
-        $hariKenaDenda = $keterlambatan >= $mulaiDendaHariKe
-            ? ($keterlambatan - ($mulaiDendaHariKe - 1)) // telat 3 => 1, telat 4 => 2
-            : 0;
+        $mulaiDendaHariKe = 1;
+        $hariKenaDenda = $keterlambatan > 0 ? $keterlambatan : 0;
 
         $tarifDenda = ($sewa->total_harga * 0.20);
         $dendaKeterlambatan = $hariKenaDenda * $tarifDenda;
@@ -236,22 +239,12 @@ class SewaController extends Controller
                 $keterlambatan = 0;
             }
 
-            // =========================
-            // DENDA KETERLAMBATAN (SESUAI RULE BARU)
-            // - Hari 1-2 telat: TIDAK kena denda
-            // - Mulai hari ke-3: kena denda 20% / hari
-            // =========================
-            $mulaiDendaHariKe = 3;
-            $hariKenaDenda = $keterlambatan >= $mulaiDendaHariKe
-                ? ($keterlambatan - ($mulaiDendaHariKe - 1)) // telat 3 => 1, telat 4 => 2, dst
-                : 0;
+            $mulaiDendaHariKe = 1;
+            $hariKenaDenda = $keterlambatan > 0 ? $keterlambatan : 0;
 
             $tarifDenda = ($sewa->total_harga * 0.20);
             $dendaKeterlambatan = $hariKenaDenda * $tarifDenda;
 
-            // =========================
-            // HANDLE harga_beli null/0
-            // =========================
             $hargaProduk = $sewa->produk->harga_beli;
 
             if (is_null($hargaProduk) || $hargaProduk == 0) {
@@ -264,9 +257,6 @@ class SewaController extends Controller
                 }
             }
 
-            // =========================
-            // DENDA KERUSAKAN
-            // =========================
             $dendaKerusakan = 0;
 
             if ($request->kondisi_alat !== 'baik') {
@@ -310,13 +300,6 @@ class SewaController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            \Log::debug('=== DEBUG CALCULATE DENDA END - ERROR ===');
-            \Log::debug('Error Details:', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
 
             return response()->json([
                 'success' => false,

@@ -215,22 +215,15 @@
                             @if ($produk)
                                 @php
                                     $durasi = $sewa->jumlah_hari ?? 1;
-                                    $hargaPerHari = $produk->harga_sewa ?? ($produk->harga ?? 0);
+                                    $hargaPerHari = $produk->harga_sewa_harian ?? ($produk->harga ?? 0);
                                     $subtotal = $hargaPerHari * $durasi;
                                     $totalHarga += $subtotal;
                                 @endphp
                                 <div class="border border-gray-200 rounded-lg p-4 mb-4 transition-colors">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 mr-4">
-                                            @if ($produk->foto ?? false)
-                                                <img src="{{ Storage::url($produk->foto) }}" alt="{{ $produk->nama }}"
-                                                    class="w-16 h-16 rounded-lg object-cover">
-                                            @else
-                                                <div
-                                                    class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                    <i class="fas fa-box text-gray-400 text-xl"></i>
-                                                </div>
-                                            @endif
+                                            <img src="{{ $produk->gambarurl }}" alt="{{ $produk->nama }}"
+                                                class="w-16 h-16 rounded-lg object-cover">
                                         </div>
                                         <div class="flex-grow">
                                             <h4 class="font-semibold text-white">{{ $produk->nama }}</h4>
@@ -241,7 +234,7 @@
                                             <div class="flex flex-wrap gap-3 text-sm text-gray-500">
                                                 <span class="flex items-center">
                                                     <i class="fas fa-tag mr-1"></i>
-                                                    Rp {{ number_format($hargaPerHari, 0, ',', '.') }}/hari
+                                                    Rp {{ number_format($produk->harga_sewa_harian, 0, ',', '.') }}/hari
                                                 </span>
                                                 <span class="flex items-center">
                                                     <i class="fas fa-calendar-alt mr-1"></i>
@@ -256,62 +249,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            @endif
-
-                            @if ($transaksiItems->count() > 0)
-                                @foreach ($transaksiItems as $item)
-                                    @php
-                                        $itemProduk = $item->produk ?? $produk;
-                                        $durasi = $sewa->jumlah_hari ?? 1;
-                                        $hargaPerHari =
-                                            $item->harga ?? ($itemProduk->harga_sewa ?? ($itemProduk->harga ?? 0));
-                                        $quantity = $item->quantity ?? 1;
-                                        $subtotal = $hargaPerHari * $durasi * $quantity;
-                                        $totalHarga += $subtotal;
-                                    @endphp
-                                    <div class="border border-gray-200 rounded-lg p-4 mb-4 transition-colors">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 mr-4">
-                                                @if ($itemProduk->foto ?? false)
-                                                    <img src="{{ Storage::url($itemProduk->foto) }}"
-                                                        alt="{{ $itemProduk->nama }}"
-                                                        class="w-16 h-16 rounded-lg object-cover">
-                                                @else
-                                                    <div
-                                                        class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                        <i class="fas fa-box text-white text-xl"></i>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                            <div class="flex-grow">
-                                                <h4 class="font-semibold text-white">{{ $itemProduk->nama }}</h4>
-                                                <p class="text-sm text-gray-600 mb-2">
-                                                    {{ $itemProduk->kode_produk ?? 'Tidak ada kode' }} •
-                                                    Kategori: {{ $itemProduk->kategori->nama ?? '-' }}
-                                                </p>
-                                                <div class="flex flex-wrap gap-3 text-sm text-gray-500">
-                                                    <span class="flex items-center">
-                                                        <i class="fas fa-tag mr-1"></i>
-                                                        Rp {{ number_format($hargaPerHari, 0, ',', '.') }}/hari
-                                                    </span>
-                                                    <span class="flex items-center">
-                                                        <i class="fas fa-calendar-alt mr-1"></i>
-                                                        {{ $durasi }} hari
-                                                    </span>
-                                                    <span class="flex items-center">
-                                                        <i class="fas fa-layer-group mr-1"></i>
-                                                        {{ $quantity }} item
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="flex-shrink-0 text-right">
-                                                <p class="font-bold text-green-600">
-                                                    Rp {{ number_format($subtotal, 0, ',', '.') }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
                             @endif
 
                             <!-- Summary -->

@@ -43,21 +43,11 @@
                             $hariTerlambat = $sisaHari < 0 ? abs($sisaHari) : 0;
                             $isOverdue = $sisaHari < 0;
 
-                            // ==========================
-                            // LOGIC DENDA
-                            // Denda dihitung mulai hari ke-3 keterlambatan (hari 1-2 = 0)
-                            // telat 3 hari => kena denda 1 hari
-                            // telat 4 hari => kena denda 2 hari
-                            // ==========================
-                            $mulaiDendaHariKe = 3;
-
-                            $hariKenaDenda =
-                                $hariTerlambat >= $mulaiDendaHariKe ? $hariTerlambat - ($mulaiDendaHariKe - 1) : 0;
+                            $hariKenaDenda = $isOverdue ? $hariTerlambat : 0;
 
                             $tarifDendaPerHari = $sewa->total_harga * 0.2;
                             $estimasiDenda = $hariKenaDenda * $tarifDendaPerHari;
 
-                            // Flag UI: denda muncul hanya jika telat >= 3 hari
                             $isDendaActive = $hariKenaDenda > 0;
                         @endphp
 
@@ -80,8 +70,6 @@
                                             </h4>
                                             <p class="text-sm text-red-700 mb-2">
                                                 Sudah terlambat <strong>{{ $hariTerlambat }} hari</strong>.
-                                                Denda dihitung mulai hari ke-3 (kena denda <strong>{{ $hariKenaDenda }}
-                                                    hari</strong>).
                                             </p>
                                             <div class="bg-red-100 rounded-lg px-3 py-2 inline-flex items-center gap-2">
                                                 <i class="fas fa-money-bill-wave text-red-600"></i>
@@ -277,7 +265,7 @@
                                         class="flex-1 min-w-[120px] px-4 py-2 border border-gray-800 text-gray-800 font-medium rounded-lg hover:bg-gray-800/5 transition-colors text-center">
                                         <i class="fas fa-eye mr-2"></i> Struk
                                     </a>
-                                    
+
                                     <button onclick="showExtendModal('{{ $sewa->id }}')"
                                         class="flex-1 min-w-[120px] px-4 py-2 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
                                         <i class="fas fa-plus mr-2"></i> Perpanjang
@@ -582,11 +570,11 @@
 
             // Loading
             fineCalculationDiv.innerHTML = `
-        <div class="text-center py-8">
-            <div class="w-8 h-8 border-4 border-gray-800 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="text-gray-600">Menghitung denda...</p>
-        </div>
-    `;
+                <div class="text-center py-8">
+                    <div class="w-8 h-8 border-4 border-gray-800 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p class="text-gray-600">Menghitung denda...</p>
+                </div>
+            `;
 
             try {
                 const response = await fetch("{{ route('user.sewa.calculate-denda') }}", {
@@ -612,24 +600,19 @@
                 const fines = result.data;
                 let fineHtml = '';
 
-                // ==========================
-                // JIKA ADA DENDA
-                // ==========================
                 if (fines.total_denda > 0) {
                     fineHtml = `
                 <div class="space-y-3">
             `;
 
-                    // DENDA KETERLAMBATAN (hanya jika hari kena denda > 0)
-                    if (fines.hari_kena_denda > 0) {
+                    // DENDA KETERLAMBATAN (langsung aktif jika telat > 0)
+                    if (fines.keterlambatan_hari > 0) {
                         fineHtml += `
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600">Keterlambatan:</span>
                         <span class="font-medium">
                             ${fines.keterlambatan_hari} hari
-                            <span class="text-xs text-gray-500">
-                                (denda mulai hari ke-${fines.mulai_denda_hari_ke})
-                            </span>
+                            <span class="text-xs text-red-600">(denda aktif)</span>
                         </span>
                     </div>
 
@@ -644,17 +627,6 @@
                         <span class="text-gray-600">Denda Keterlambatan:</span>
                         <span class="text-red-600 font-medium">
                             ${fines.formatted.denda_keterlambatan}
-                        </span>
-                    </div>
-                `;
-                    } else if (fines.keterlambatan_hari > 0) {
-                        // Telat tapi belum kena denda
-                        fineHtml += `
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Keterlambatan:</span>
-                        <span class="font-medium">
-                            ${fines.keterlambatan_hari} hari
-                            <span class="text-xs text-green-600">(belum kena denda)</span>
                         </span>
                     </div>
                 `;
@@ -695,11 +667,9 @@
                         <i class="fas fa-check-circle text-green-600 text-xl"></i>
                     </div>
                     <p class="text-green-600 font-medium">Tidak ada denda</p>
-
                     ${fines.keterlambatan_hari > 0 ? `
                             <p class="text-sm text-gray-500 mt-1">
                                 Terlambat ${fines.keterlambatan_hari} hari
-                                (denda mulai hari ke-${fines.mulai_denda_hari_ke})
                             </p>
                         ` : ''}
                 </div>
@@ -720,6 +690,7 @@
         `;
             }
         }
+
 
 
         // Form submission untuk pengembalian

@@ -196,335 +196,185 @@
 
 <!-- Add this JavaScript section to your main file -->
 <script>
-    // Inisialisasi data produk untuk modal
-    const productData = {
-        id: {{ $produk->id }},
-        nama: "{{ $produk->nama }}",
-        kategori: "{{ $produk->kategori->nama }}",
-        gambar: "{{ $produk->gambar_url }}",
-        harga_harian: {{ $produk->harga_sewa_harian ?? 0 }},
-        harga_mingguan: {{ $produk->harga_sewa_mingguan ?? 0 }},
-        harga_bulanan: {{ $produk->harga_sewa_bulanan ?? 0 }}
+
+function showRentalModal(btn) {
+    const modal = document.getElementById('rentalModal');
+    const rentalForm = document.getElementById('rentalForm');
+    if (!modal || !rentalForm) return;
+
+    // Ambil data dari tombol yg diklik
+    const productId = btn?.dataset?.produkId;
+    const stok = parseInt(btn?.dataset?.stok) || 0;
+
+    if (!productId) {
+        Swal?.fire?.({
+            icon: 'error',
+            title: 'Gagal',
+            text: 'Produk tidak valid.',
+            confirmButtonColor: '#2B6CB0'
+        });
+        return;
+    }
+
+    if (stok <= 0) {
+        Swal?.fire?.({
+            icon: 'warning',
+            title: 'Stok Habis',
+            text: 'Maaf, produk ini sedang tidak tersedia untuk disewa.',
+            confirmButtonColor: '#2B6CB0'
+        });
+        return;
+    }
+
+    // Set hidden product_id di modal (PENTING!)
+    const productIdInput = rentalForm.querySelector('#product_id');
+    if (productIdInput) productIdInput.value = productId;
+
+    // Set currentProductData (harga) dari dataset tombol
+    window.currentProductData = {
+        harga_harian: parseInt(btn?.dataset?.harian) || 0,
+        harga_mingguan: parseInt(btn?.dataset?.mingguan) || 0,
+        harga_bulanan: parseInt(btn?.dataset?.bulanan) || 0
     };
 
-    // Simpan data produk di window object untuk diakses oleh sewa-modal.js
-    window.currentProductData = productData;
+    // Update UI info produk di modal (optional tapi enak)
+    const img = document.getElementById('modalProductImage');
+    if (img) img.src = btn?.dataset?.gambar || '';
 
-    // Fungsi untuk membuka modal
-    function showRentalModal() {
-        // Cek stok tersedia
-        @if ($produk->stok_tersedia <= 0)
-            Swal.fire({
-                icon: 'warning',
-                title: 'Stok Habis',
-                text: 'Maaf, produk ini sedang tidak tersedia untuk disewa.',
-                confirmButtonColor: '#2B6CB0'
-            });
-            return;
-        @endif
+    const name = document.getElementById('modalProductName');
+    if (name) name.textContent = btn?.dataset?.nama || '';
 
-        // Cek apakah produk bisa disewa
-        @if (!in_array($produk->tipe, ['sewa', 'both']))
-            Swal.fire({
-                icon: 'info',
-                title: 'Tidak Tersedia',
-                text: 'Produk ini hanya tersedia untuk dijual.',
-                confirmButtonColor: '#2B6CB0'
-            });
-            return;
-        @endif
+    const cat = document.getElementById('modalProductCategory');
+    if (cat) cat.textContent = btn?.dataset?.kategori || '';
 
-        // Set tanggal minimum (besok)
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    // Update harga display header (optional)
+    const dailyEl = document.getElementById('modalDailyPrice');
+    if (dailyEl) dailyEl.textContent = `Rp ${(window.currentProductData.harga_harian || 0).toLocaleString('id-ID')}`;
 
-        const tanggalMulaiInput = document.getElementById('tanggal_mulai');
-        if (tanggalMulaiInput) {
-            tanggalMulaiInput.min = tomorrowStr;
-            tanggalMulaiInput.value = tomorrowStr;
-        }
+    const weeklyEl = document.getElementById('modalWeeklyPrice');
+    if (weeklyEl) weeklyEl.textContent = `Rp ${(window.currentProductData.harga_mingguan || 0).toLocaleString('id-ID')}`;
 
-        // Reset dan pilih durasi default yang tersedia
-        const rentalForm = document.getElementById('rentalForm');
-        const durasiOptions = document.querySelectorAll('input[name="durasi"]');
-        const jumlahHariInput = document.getElementById('jumlah_hari');
+    const monthlyEl = document.getElementById('modalMonthlyPrice');
+    if (monthlyEl) monthlyEl.textContent = `Rp ${(window.currentProductData.harga_bulanan || 0).toLocaleString('id-ID')}`;
 
-        if (rentalForm) rentalForm.reset();
-        if (jumlahHariInput) jumlahHariInput.value = 1;
+    // Reset form
+    rentalForm.reset();
 
-        // Pilih durasi pertama yang tersedia
-        let firstAvailableDuration = null;
-        durasiOptions.forEach(option => {
-            if (!firstAvailableDuration) {
-                firstAvailableDuration = option;
-                option.checked = true;
-            }
-        });
-
-        const quantity = parseInt(document.getElementById('quantity')?.value) || 1;
-
-        // Update harga awal
-        updateRentalPrice();
-
-        // Tampilkan modal
-        const modal = document.getElementById('rentalModal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-        }
+    // Set qty max sesuai stok + reset qty jadi 1
+    const qtyInput = rentalForm.querySelector('#quantity');
+    if (qtyInput) {
+        qtyInput.max = stok;
+        qtyInput.value = 1;
     }
 
-    // Fungsi untuk menutup modal
-    function closeRentalModal() {
-        const modal = document.getElementById('rentalModal');
-        if (modal) {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }
+    // Set tanggal minimum (besok)
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const tanggalMulaiInput = rentalForm.querySelector('#tanggal_mulai');
+    if (tanggalMulaiInput) {
+        tanggalMulaiInput.min = tomorrowStr;
+        tanggalMulaiInput.value = tomorrowStr;
     }
 
-    // Fungsi update harga sewa
-    function updateRentalPrice(resetDays = false) {
-        const selectedDuration = document.querySelector('input[name="durasi"]:checked');
-        const jumlahHariInput = document.getElementById('jumlah_hari');
-        const quantity = parseInt(document.getElementById('quantity')?.value) || 1;
-        
+    // Set jumlah hari default
+    const jumlahHariInput = rentalForm.querySelector('#jumlah_hari');
+    if (jumlahHariInput) jumlahHariInput.value = 1;
 
-        if (!selectedDuration || !window.currentProductData || !jumlahHariInput) return;
-
-        const duration = selectedDuration.value;
-        let days = parseInt(jumlahHariInput.value) || 1;
-
-        if (resetDays) {
-            if (duration === 'harian') days = 1;
-            if (duration === 'mingguan') days = 7;
-            if (duration === 'bulanan') days = 30;
+    // Pilih durasi pertama yang tersedia dalam modal
+    const durasiOptions = rentalForm.querySelectorAll('input[name="durasi"]');
+    let first = null;
+    durasiOptions.forEach(opt => {
+        if (!first) {
+            first = opt;
+            opt.checked = true;
         }
-
-        if (!resetDays) {
-            switch (duration) {
-                case 'mingguan':
-                    if (days < 7) days = 7;
-                    days = Math.ceil(days / 7) * 7;
-                    break;
-                case 'bulanan':
-                    if (days < 30) days = 30;
-                    days = Math.ceil(days / 30) * 30;
-                    break;
-                default:
-                    if (days < 1) days = 1;
-            }
-        }
-
-        jumlahHariInput.value = days;
-
-        const {
-            harga_harian,
-            harga_mingguan,
-            harga_bulanan
-        } = window.currentProductData;
-
-        let pricePerDay = 0;
-        let totalPrice = 0;
-        let displayText = "";
-
-        switch (duration) {
-            case 'harian':
-                pricePerDay = harga_harian;
-                totalPrice = pricePerDay * days *quantity;
-                displayText = `${days} hari`;
-                break;
-
-            case 'mingguan':
-                const weeks = days / 7;
-                pricePerDay = Math.round(harga_mingguan / 7);
-                totalPrice = harga_mingguan * weeks *quantity;
-                displayText = `${weeks} minggu (${days} hari)`;
-                break;
-
-            case 'bulanan':
-                const months = days / 30;
-                pricePerDay = Math.round(harga_bulanan / 30);
-                totalPrice = harga_bulanan * months *quantity;
-                displayText = `${months} bulan (${days} hari)`;
-                break;
-        }
-
-        document.getElementById('pricePerDay').textContent =
-            duration === 'harian' ?
-            `Rp ${pricePerDay.toLocaleString('id-ID')}/hari` :
-            `~Rp ${pricePerDay.toLocaleString('id-ID')}/hari`;
-
-        document.getElementById('daysCount').textContent = displayText;
-        document.getElementById('totalPrice').textContent =
-            `Rp ${totalPrice.toLocaleString('id-ID')}`;
-    }
-
-
-    // Event Listeners untuk modal
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('input[name="durasi"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                updateRentalPrice(true);
-            });
-        });
-
-
-        // Event: Jumlah hari berubah
-        document.getElementById('jumlah_hari')?.addEventListener('input', function() {
-            updateRentalPrice(false);
-        });
-
-
-        // Event: Submit form
-        const rentalForm = document.getElementById('rentalForm');
-        if (rentalForm) {
-            rentalForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const quantity = parseInt(document.getElementById('quantity').value) || 1;
-                const durasi = document.querySelector('input[name="durasi"]:checked')?.value;
-                const jumlahHari = parseInt(document.getElementById('jumlah_hari').value) || 1;
-                const tanggalMulai = document.getElementById('tanggal_mulai').value;
-                const catatan = document.querySelector('textarea[name="catatan"]').value;
-                const submitBtn = document.getElementById('submitRentalBtn');
-
-                if (!submitBtn) return;
-
-                const originalContent = submitBtn.innerHTML;
-
-                // Tampilkan loading
-                submitBtn.innerHTML = `
-                <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Memproses...</span>
-            `;
-                submitBtn.disabled = true;
-
-                try {
-                    const response = await fetch('/user/keranjang', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            product_id: {{ $produk->id }},
-                            type: 'sewa',
-                            quantity: quantity,
-                            options: {
-                                durasi: durasi,
-                                jumlah_hari: jumlahHari,
-                                tanggal_mulai: tanggalMulai,
-                                catatan: catatan
-                            }
-                        })
-                    });
-
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Tutup modal
-                        closeRentalModal();
-
-                        // Update cart badge
-                        if (typeof window.updateCartCount === 'function') {
-                            window.updateCartCount(data.cart_count);
-                        } else {
-                            window.dispatchEvent(new CustomEvent('cartUpdated', {
-                                detail: {
-                                    count: data.cart_count
-                                }
-                            }));
-                        }
-
-                        // Tampilkan pesan sukses
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: data.message || 'Produk telah ditambahkan ke keranjang',
-                            timer: 2000,
-                            showConfirmButton: false,
-                            toast: true,
-                            position: 'top-end'
-                        });
-                    } else {
-                        throw new Error(data.message || 'Terjadi kesalahan');
-                    }
-                } catch (error) {
-                    console.error('Submit error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: error.message ||
-                            'Terjadi kesalahan saat menambahkan ke keranjang',
-                        confirmButtonColor: '#2B6CB0'
-                    });
-                } finally {
-                    submitBtn.innerHTML = originalContent;
-                    submitBtn.disabled = false;
-                }
-            });
-        }
-
-        // Close modal on background click
-        const modal = document.getElementById('rentalModal');
-        if (modal) {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeRentalModal();
-                }
-            });
-        }
-
-        // Close modal on escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                const modal = document.getElementById('rentalModal');
-                if (modal && !modal.classList.contains('hidden')) {
-                    closeRentalModal();
-                }
-            }
-        });
-
-        // Update visual selection for duration options
-        document.querySelectorAll('input[name="durasi"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                document.querySelectorAll('.duration-option').forEach(option => {
-                    const container = option.querySelector('div');
-                    if (container) {
-                        const isChecked = option.querySelector('input').checked;
-                        if (isChecked) {
-                            container.classList.add('border-primary', 'bg-primary/5');
-                            container.classList.remove('border-gray-200');
-                        } else {
-                            container.classList.remove('border-primary',
-                                'bg-primary/5');
-                            container.classList.add('border-gray-200');
-                        }
-                    }
-                });
-            });
-        });
-
-        // Trigger initial update untuk durasi yang terpilih
-        document.querySelectorAll('input[name="durasi"]:checked').forEach(radio => {
-            radio.dispatchEvent(new Event('change'));
-        });
     });
 
-    function changeRentalQty(delta) {
-        const qtyInput = document.getElementById('quantity');
-        let qty = parseInt(qtyInput.value) || 1;
-        const max = parseInt(qtyInput.max) || 1;
+    // Update harga awal
+    updateRentalPrice(true);
 
-        qty += delta;
-        if (qty < 1) qty = 1;
-        if (qty > max) qty = max;
+    // Show modal
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
 
-        qtyInput.value = qty;
-        updateRentalPrice();
+    // Trigger update visual durasi terpilih
+    updateDurationVisual();
+}
+
+function closeRentalModal() {
+    const modal = document.getElementById('rentalModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
     }
-</script>
+}
+
+function updateRentalPrice(resetDays = false) {
+    const rentalForm = document.getElementById('rentalForm');
+    if (!rentalForm) return;
+
+    const selectedDuration = rentalForm.querySelector('input[name="durasi"]:checked');
+    const jumlahHariInput = rentalForm.querySelector('#jumlah_hari');
+    const qtyInput = rentalForm.querySelector('#quantity');
+    const quantity = parseInt(qtyInput?.value) || 1;
+
+    if (!selectedDuration || !window.currentProductData || !jumlahHariInput) return;
+
+    const duration = selectedDuration.value;
+    let days = parseInt(jumlahHariInput.value) || 1;
+
+    if (resetDays) {
+        if (duration === 'harian') days = 1;
+        if (duration === 'mingguan') days = 7;
+        if (duration === 'bulanan') days = 30;
+    }
+
+    if (!resetDays) {
+        switch (duration) {
+            case 'mingguan':
+                if (days < 7) days = 7;
+                days = Math.ceil(days / 7) * 7;
+                break;
+            case 'bulanan':
+                if (days < 30) days = 30;
+                days = Math.ceil(days / 30) * 30;
+                break;
+            default:
+                if (days < 1) days = 1;
+        }
+    }
+
+    jumlahHariInput.value = days;
+
+    const { harga_harian, harga_mingguan, harga_bulanan } = window.currentProductData;
+
+    let pricePerDay = 0;
+    let totalPrice = 0;
+    let displayText = "";
+
+    switch (duration) {
+        case 'harian':
+            pricePerDay = harga_harian;
+            totalPrice = pricePerDay * days * quantity;
+            displayText = `${days} hari`;
+            break;
+
+        case 'mingguan':
+            const weeks = days / 7;
+            pricePerDay = Math.round(harga_mingguan / 7);
+            totalPrice = harga_mingguan * weeks * quantity;
+            displayText = `${weeks} minggu (${days} hari)`;
+            break;
+
+        case 'bulanan':
+            const months = days / 30;
+            pricePerDay = Math.round(harga_bulanan / 30);
+            totalPrice = harga_bulanan * months * quantity;
+            displayText = `${months} bulan (${days} hari)`;
+            break;
+    }
+
+    const pricePerDayEl = rentalForm.querySelect
+
