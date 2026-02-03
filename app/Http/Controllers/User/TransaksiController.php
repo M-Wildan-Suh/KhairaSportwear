@@ -160,22 +160,6 @@ class TransaksiController extends Controller
 
     public function store(Request $request)
     {
-        \Log::info('=== TRANSACTION STORE START ===');
-        \Log::info('Request Data:', $request->all());
-        \Log::info('User ID: ' . auth()->id());
-        \Log::info('User Name: ' . auth()->user()->name);
-
-        // Log semua input termasuk file
-        \Log::info('All Inputs:', [
-            'metode_pembayaran' => $request->metode_pembayaran,
-            'catatan' => $request->catatan,
-            'alamat_pengiriman' => $request->alamat_pengiriman,
-            'nama_bank' => $request->nama_bank,
-            'no_rekening' => $request->no_rekening,
-            'atas_nama' => $request->atas_nama,
-            'has_file' => $request->hasFile('bukti_pembayaran')
-        ]);
-
         $request->validate([
             'metode_pembayaran' => 'required|in:transfer_bank,tunai,qris',
             'catatan' => 'nullable|string|max:500',
@@ -199,70 +183,15 @@ class TransaksiController extends Controller
             })
             ->get();
 
-        \Log::info('Cart items retrieved:', [
-            'count' => $keranjangs->count(),
-            'items' => $keranjangs->map(function ($item) {
-                // Debug detail untuk setiap produk
-                $opsiDecoded = null;
-                if (is_string($item->opsi_sewa)) {
-                    $opsiDecoded = json_decode($item->opsi_sewa, true);
-                    $jsonError = json_last_error_msg();
-                } else {
-                    $opsiDecoded = $item->opsi_sewa;
-                    $jsonError = 'N/A';
-                }
-
-                return [
-                    'id' => $item->id,
-                    'produk_id' => $item->produk_id,
-                    'produk_nama' => $item->produk->nama,
-                    'tipe' => $item->tipe,
-                    'quantity' => $item->quantity,
-                    'harga' => $item->harga,
-                    'subtotal' => $item->subtotal,
-                    'stok_tersedia' => $item->produk->stok_tersedia,
-                    'stok_disewa' => $item->produk->stok_tersedia, // Gunakan stok_disewa langsung
-                    'stok_total' => $item->produk->stok_total,
-                    'opsi_sewa' => $item->opsi_sewa,
-                    'opsi_sewa_decoded' => $opsiDecoded,
-                    'json_error' => $jsonError
-                ];
-            })->toArray()
-        ]);
-
         if ($keranjangs->isEmpty()) {
-            \Log::warning('Cart is empty for user: ' . $user->id);
-            return response()->json([
-                'success' => false,
-                'message' => 'Keranjang Anda kosong.'
-            ], 400);
         }
 
-        // Validasi stok dengan debugging detail
-        \Log::info('=== STOCK VALIDATION ===');
         foreach ($keranjangs as $item) {
             $stokTersedia = $item->produk->stok_tersedia;
-            $stokSewa = $item->produk->stok_tersedia; // Gunakan stok_disewa dari database
-
-            \Log::info('Validating item: ' . $item->produk->nama, [
-                'product_id' => $item->produk_id,
-                'product_name' => $item->produk->nama,
-                'tipe' => $item->tipe,
-                'quantity' => $item->quantity,
-                'stok_tersedia' => $stokTersedia,
-                'stok_disewa' => $stokSewa,
-                'comparison_jual' => $item->tipe === 'jual' ? ($stokTersedia . ' >= ' . $item->quantity . ' = ' . ($stokTersedia >= $item->quantity ? 'PASS' : 'FAIL')) : 'N/A',
-                'comparison_sewa' => $item->tipe === 'sewa' ? ($stokSewa . ' >= ' . $item->quantity . ' = ' . ($stokSewa >= $item->quantity ? 'PASS' : 'FAIL')) : 'N/A'
-            ]);
+            $stokSewa = $item->produk->stok_tersedia;
 
             if ($item->tipe === 'jual') {
                 if ($stokTersedia < $item->quantity) {
-                    \Log::error('Stock validation failed for sale item', [
-                        'product' => $item->produk->nama,
-                        'required' => $item->quantity,
-                        'available' => $stokTersedia,
-                        'deficit' => $item->quantity - $stokTersedia
-                    ]);
 
                     return response()->json([
                         'success' => false,
@@ -532,9 +461,9 @@ class TransaksiController extends Controller
 
                 $item->produk->updateStok($item->quantity, 'keluar');
 
-                \Log::info('Sale stock updated:', [
-                    'current_stock' => $item->produk->fresh()->stok_tersedia
-                ]);
+                if ($item->bundle) {
+                    $item->bundle->decrement('stok', $item->quantity);
+                }
             } else {
                 // Update stok untuk penyewaan - GUNAKAN stok_disewa
                 $oldStockSewa = $item->produk->stok_tersedia;
@@ -553,6 +482,10 @@ class TransaksiController extends Controller
 
                 // Update stok menggunakan method yang benar
                 $item->produk->updateStokSewa($item->quantity, 'keluar');
+
+                if ($item->bundle) {
+                    $item->bundle->decrement('stok', $item->quantity);
+                }
 
                 $item->produk->refresh();
 

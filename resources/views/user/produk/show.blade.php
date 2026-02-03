@@ -208,7 +208,7 @@
                                                 @if ($produk->stok_tersedia > 0)
                                             <div
                                                 class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 rounded-lg hover:border-primary transition-all duration-200">
-                                                <span class="font-medium text-gray-700 capitalize">{{ $item->warna }} - {{$item->size}} - Stok : {{ $produk->stok_tersedia }}</span>
+                                                <span class="font-medium text-gray-700 capitalize">{{ $item->warna }} - {{$item->size}} - Stok : {{ $item->stok }}</span>
                                             </div>
                                             @endif
                                         </label>
@@ -1265,7 +1265,7 @@
         // Fungsi add to cart untuk produk jual dengan warna dan size
         async function addToCart(type, checkout = false) {
             const quantity = document.getElementById('quantity').value;
-            const bundle = document.getElementById('bundle').value || null;
+            const bundle = document.querySelector('input[name="bundle"]:checked')?.value ?? null;
 
             // Validasi quantity
             if (quantity < 1 || quantity > {{ $produk->stok_tersedia }}) {
@@ -1277,7 +1277,7 @@
                 product_id: {{ $produk->id }},
                 type: type,
                 quantity: parseInt(quantity),
-                bundle: bundle,
+                bundle_id: bundle,
             };
 
             try {
