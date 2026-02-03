@@ -29,7 +29,7 @@ class LaporanController extends Controller
         $totalLaporan = Transaksi::all()->count();
 
         $salesThisMonth = Transaksi::where('tipe', 'penjualan')
-            ->where('status', 'selesai')
+            ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_bayar');
@@ -41,12 +41,12 @@ class LaporanController extends Controller
         $unpaidFinesTotal = Sewa::all()->sum('denda');
 
         $todaySales = Transaksi::where('tipe', 'penjualan')
-            ->where('status', 'selesai')
+            ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
             ->whereDate('created_at', today())
             ->sum('total_bayar');
 
         $weekSales = Transaksi::where('tipe', 'penjualan')
-            ->where('status', 'selesai')
+            ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
             ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
             ->sum('total_bayar');
 
@@ -103,7 +103,7 @@ class LaporanController extends Controller
 
         $query = Transaksi::with(['user', 'items.produk.kategori'])
             ->where('tipe', 'penjualan')
-            ->where('status', 'selesai')
+            ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
             ->whereBetween('created_at', [$startDate, $endDate]);
 
         if ($request->filled('kategori_id')) {
@@ -475,14 +475,14 @@ private function calculateFinancialAnalysis($sewas)
     $totalPenalties = $sewas->sum('denda');
     
     // Hitung tingkat pengembalian tepat waktu
-    $onTimeReturns = $sewas->where('status', 'selesai')
+    $onTimeReturns = $sewas->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
         ->filter(function ($sewa) {
             return Carbon::parse($sewa->tanggal_kembali_aktual)->lte(
                 Carbon::parse($sewa->tanggal_kembali_rencana)
             );
         })->count();
     
-    $completedRentals = $sewas->where('status', 'selesai')->count();
+    $completedRentals = $sewa->whereIn('status', ['dibayar', 'dikirim', 'selesai'])->count();
     $onTimeReturnRate = $completedRentals > 0 ? ($onTimeReturns / $completedRentals) * 100 : 0;
     
     return [
