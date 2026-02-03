@@ -58,12 +58,12 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="admin-card">
             <h4 class="text-sm font-medium text-gray-500 mb-2">Total Penjualan</h4>
-            <p class="text-2xl font-bold text-green-600">Rp {{ number_format($summary['total_amount'], 0, ',', '.') }}</p>
+            <p class="text-2xl font-bold text-green-600">Rp {{ number_format($salesThisMonth, 0, ',', '.') }}</p>
         </div>
         
         <div class="admin-card">
             <h4 class="text-sm font-medium text-gray-500 mb-2">Total Transaksi</h4>
-            <p class="text-2xl font-bold text-blue-600">{{ number_format($summary['total_transactions']) }}</p>
+            <p class="text-2xl font-bold text-blue-600">{{ number_format($transactions->count()) }}</p>
         </div>
         
         <div class="admin-card">

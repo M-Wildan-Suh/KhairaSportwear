@@ -29,7 +29,7 @@ class LaporanController extends Controller
         $totalLaporan = Transaksi::all()->count();
 
         $salesThisMonth = Transaksi::where('tipe', 'penjualan')
-            ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
+            // ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_bayar');
@@ -41,12 +41,12 @@ class LaporanController extends Controller
         $unpaidFinesTotal = Sewa::all()->sum('denda');
 
         $todaySales = Transaksi::where('tipe', 'penjualan')
-            ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
+            // ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
             ->whereDate('created_at', today())
             ->sum('total_bayar');
 
         $weekSales = Transaksi::where('tipe', 'penjualan')
-            ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
+            // ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
             ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
             ->sum('total_bayar');
 
@@ -102,9 +102,9 @@ class LaporanController extends Controller
         $endDate = $request->end_date ? Carbon::parse($request->end_date) : now();
 
         $query = Transaksi::with(['user', 'items.produk.kategori'])
-            ->where('tipe', 'penjualan')
-            ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
-            ->whereBetween('created_at', [$startDate, $endDate]);
+            ->where('tipe', 'penjualan');
+            // ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
+            // ->whereBetween('created_at', [$startDate, $endDate]);
 
         if ($request->filled('kategori_id')) {
             $query->whereHas('items.produk', function ($q) use ($request) {
@@ -115,6 +115,12 @@ class LaporanController extends Controller
         $transactions = $query->get();
 
         $summary = $this->calculateSalesSummary($transactions);
+
+        $salesThisMonth = Transaksi::where('tipe', 'penjualan')
+            // ->whereIn('status', ['dibayar', 'dikirim', 'selesai'])
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_bayar');
 
         $topProducts = $this->getTopProducts($startDate, $endDate, 'penjualan', $request->kategori_id);
 
@@ -127,6 +133,7 @@ class LaporanController extends Controller
         return view('admin.laporan.penjualan', compact(
             'transactions',
             'summary',
+            'salesThisMonth',
             'topProducts',
             'kategoris',
             'startDate',
