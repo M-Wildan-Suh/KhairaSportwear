@@ -15,6 +15,7 @@ class DetailTransaksi extends Model
         'size',
         'warna',
         'tipe_produk',
+        'bundle_id',
         'quantity',
         'harga_satuan',
         'subtotal',

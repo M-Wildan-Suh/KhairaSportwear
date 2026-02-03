@@ -262,6 +262,9 @@
                             <div class="flex items-center justify-between text-xs bg-white p-2 rounded border border-gray-200">
                                 <div class="flex-1">
                                     <p class="font-medium text-gray-900">{{ $item->produk->nama }}</p>
+                                    @if ($item->bundle)
+                                        <p class="font-medium text-gray-500">{{ $item->bundle->warna }} - {{$item->bundle->size}} - Stok : {{ $item->bundle->stok }}<</p>
+                                    @endif
                                     <p class="text-gray-500">
                                         {{ $item->quantity }} × Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}
                                     </p>

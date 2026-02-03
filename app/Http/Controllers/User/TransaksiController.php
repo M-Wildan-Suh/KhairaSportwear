@@ -205,13 +205,6 @@ class TransaksiController extends Controller
             } elseif ($item->tipe === 'sewa') {
                 // Validasi stok sewa - GUNAKAN stok_disewa
                 if ($stokSewa < $item->quantity) {
-                    \Log::error('Stock validation failed for rental item', [
-                        'product' => $item->produk->nama,
-                        'required' => $item->quantity,
-                        'available' => $stokSewa,
-                        'deficit' => $item->quantity - $stokSewa,
-                        'field_used' => 'stok_disewa'
-                    ]);
 
                     return response()->json([
                         'success' => false,
@@ -244,45 +237,26 @@ class TransaksiController extends Controller
             }
         }
 
-        \Log::info('=== STOCK VALIDATION PASSED ===');
-
         $checkedOutCartIds = $keranjangs->pluck('id')->toArray();
 
         DB::beginTransaction();
-        \Log::info('Transaction started');
 
         try {
             $hasJual = $keranjangs->where('tipe', 'jual')->isNotEmpty();
             $hasSewa = $keranjangs->where('tipe', 'sewa')->isNotEmpty();
             $transactionCodes = [];
 
-            \Log::info('Transaction types:', [
-                'has_jual' => $hasJual,
-                'has_sewa' => $hasSewa,
-                'jual_count' => $keranjangs->where('tipe', 'jual')->count(),
-                'sewa_count' => $keranjangs->where('tipe', 'sewa')->count()
-            ]);
-
             // Penjualan
             if ($hasJual) {
                 $jualItems = $keranjangs->where('tipe', 'jual');
-                \Log::info('Creating sales transaction with ' . $jualItems->count() . ' items');
 
                 $transaksiJual = $this->createTransactionForItems($user, $jualItems, 'penjualan', $request);
                 $transactionCodes[] = $transaksiJual->kode_transaksi;
-
-                \Log::info('Sales transaction created:', [
-                    'id' => $transaksiJual->id,
-                    'kode' => $transaksiJual->kode_transaksi,
-                    'total' => $transaksiJual->total_bayar,
-                    'status' => $transaksiJual->status
-                ]);
             }
 
             // Penyewaan
             if ($hasSewa) {
                 $sewaItems = $keranjangs->where('tipe', 'sewa');
-                \Log::info('Creating rental transaction with ' . $sewaItems->count() . ' items');
 
                 foreach ($sewaItems as $item) {
                     // Decode opsi sewa jika perlu
@@ -290,30 +264,10 @@ class TransaksiController extends Controller
                     if (is_string($opsi)) {
                         $opsi = json_decode($opsi, true);
                     }
-
-                    \Log::info('Rental item details:', [
-                        'produk_id' => $item->produk_id,
-                        'produk_nama' => $item->produk->nama,
-                        'quantity' => $item->quantity,
-                        'harga' => $item->harga,
-                        'stok_disewa_before' => $item->produk->stok_tersedia,
-                        'opsi_sewa_raw' => $item->opsi_sewa,
-                        'opsi_sewa_parsed' => $opsi,
-                        'has_tanggal_mulai' => isset($opsi['tanggal_mulai']),
-                        'jumlah_hari' => $opsi['jumlah_hari'] ?? 'N/A',
-                        'durasi' => $opsi['durasi'] ?? 'N/A'
-                    ]);
                 }
 
                 $transaksiSewa = $this->createTransactionForItems($user, $sewaItems, 'penyewaan', $request);
                 $transactionCodes[] = $transaksiSewa->kode_transaksi;
-
-                \Log::info('Rental transaction created:', [
-                    'id' => $transaksiSewa->id,
-                    'kode' => $transaksiSewa->kode_transaksi,
-                    'total' => $transaksiSewa->total_bayar,
-                    'status' => $transaksiSewa->status
-                ]);
             }
 
             // Kosongkan keranjang
@@ -321,19 +275,7 @@ class TransaksiController extends Controller
                 ->whereIn('id', $checkedOutCartIds)
                 ->delete();
 
-            \Log::info('Cart items deleted (checked out only):', [
-                'deleted_count' => $deleted,
-                'cart_ids' => $checkedOutCartIds
-            ]);
-
             DB::commit();
-            \Log::info('Transaction committed successfully');
-
-            \Log::info('Transaksi berhasil dibuat:', [
-                'transaction_codes' => $transactionCodes,
-                'user_id' => $user->id,
-                'total_transactions' => count($transactionCodes)
-            ]);
 
             // Notifikasi
             if (class_exists(\App\Models\Notifikasi::class)) {
@@ -344,7 +286,6 @@ class TransaksiController extends Controller
                     'transaksi',
                     route('user.transaksi.index')
                 );
-                \Log::info('Notification created');
             }
 
             return response()->json([
@@ -359,14 +300,6 @@ class TransaksiController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Gagal membuat transaksi:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'user_id' => auth()->id(),
-                'cart_count' => $keranjangs->count()
-            ]);
 
             return response()->json([
                 'success' => false,
@@ -385,19 +318,9 @@ class TransaksiController extends Controller
      */
     private function createTransactionForItems($user, $items, $tipe, $request)
     {
-        \Log::info('=== CREATE TRANSACTION FOR ITEMS ===');
-        \Log::info('Type: ' . $tipe);
-        \Log::info('Items count: ' . $items->count());
-
         $subtotal = $items->sum('subtotal');
         $tax = $subtotal * 0.11;
         $total = $subtotal + $tax;
-
-        \Log::info('Calculations:', [
-            'subtotal' => $subtotal,
-            'tax' => $tax,
-            'total' => $total
-        ]);
 
         $transaksi = Transaksi::create([
             'kode_transaksi' => Transaksi::generateKodeTransaksi(),
@@ -415,24 +338,7 @@ class TransaksiController extends Controller
             'alamat_pengiriman' => $tipe === 'penjualan' ? $request->alamat_pengiriman : null
         ]);
 
-        \Log::info('Transaction created:', [
-            'id' => $transaksi->id,
-            'kode' => $transaksi->kode_transaksi,
-            'user_id' => $transaksi->user_id,
-            'tipe' => $transaksi->tipe
-        ]);
-
         foreach ($items as $item) {
-            \Log::info('Creating detail for item:', [
-                'produk_id' => $item->produk_id,
-                'produk_nama' => $item->produk->nama,
-                'tipe_produk' => $item->tipe,
-                'quantity' => $item->quantity,
-                'harga_satuan' => $item->harga,
-                'subtotal' => $item->subtotal,
-                'opsi_sewa' => $item->opsi_sewa
-            ]);
-
             $detail = DetailTransaksi::create([
                 'transaksi_id' => $transaksi->id,
                 'produk_id' => $item->produk_id,
@@ -444,20 +350,9 @@ class TransaksiController extends Controller
                 'opsi_sewa' => $item->opsi_sewa
             ]);
 
-            \Log::info('Detail created:', [
-                'detail_id' => $detail->id,
-                'transaksi_id' => $detail->transaksi_id
-            ]);
-
             if ($tipe === 'penjualan') {
                 // Update stok untuk penjualan
                 $oldStock = $item->produk->stok_tersedia;
-                \Log::info('Updating sale stock for product:', [
-                    'produk_id' => $item->produk_id,
-                    'quantity' => $item->quantity,
-                    'old_stock' => $oldStock,
-                    'new_stock' => $oldStock - $item->quantity
-                ]);
 
                 $item->produk->updateStok($item->quantity, 'keluar');
 
@@ -468,14 +363,6 @@ class TransaksiController extends Controller
                 // Update stok untuk penyewaan - GUNAKAN stok_disewa
                 $oldStockSewa = $item->produk->stok_tersedia;
                 $oldStockTersedia = $item->produk->stok_tersedia;
-
-                \Log::info('Updating rental stock for product:', [
-                    'produk_id' => $item->produk_id,
-                    'produk_nama' => $item->produk->nama,
-                    'quantity' => $item->quantity,
-                    'old_stok_disewa' => $oldStockSewa,
-                    'old_stok_tersedia' => $oldStockTersedia
-                ]);
 
                 // Create sewa record
                 $sewa = $this->createSewaRecord($transaksi, $item);
@@ -488,13 +375,6 @@ class TransaksiController extends Controller
                 }
 
                 $item->produk->refresh();
-
-                \Log::info('Rental processing completed', [
-                    'sewa_id' => $sewa ? $sewa->id : null,
-                    'new_stok_disewa' => $item->produk->stok_tersedia,
-                    'new_stok_tersedia' => $item->produk->stok_tersedia,
-                    'stock_updated' => true
-                ]);
             }
         }
 

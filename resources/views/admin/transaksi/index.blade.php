@@ -278,12 +278,7 @@
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap">
                                             <div class="text-xs text-gray-900">
-                                                @foreach ($transaction->detailTransaksis as $item)
-                                                    {{ $transaction->items_count ?? 0 }} item
-                                                    {{ $item->produk->nama }}
-                                                    ({{ strtoupper($item->tipe_produk) }})
-                                                    Size: {{ $item->variant->nama ?? '-' }}
-                                                @endforeach
+                                                {{ $transaction->items_count ?? 0 }} item
                                             </div>
                                             @if ($transaction->note)
                                                 <div class="text-[10px] text-gray-500 truncate max-w-[100px]"

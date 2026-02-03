@@ -212,15 +212,19 @@
                                 @php
                                     $detail = $sewa->transaksi?->detailTransaksis
                                         ?->where('produk_id', $sewa->produk_id)
-                                        ->first();
+                                        ->first()->bundle;
                                 @endphp
+                                @if ($detail)
+                                    <div class="text-xs text-gray-500">
+                                        Size:
+                                        {{ $detail?->size ?? ($detail?->variant?->nama ?? '-') }}
+                                        • {{ $sewa->durasi }} hari
+                                        • {{ $sewa->jumlah_hari }} unit
+                                    </div>
+                                @else
+                                    <span class=" text-gray-50">-</span>
+                                @endif
 
-                                <div class="text-xs text-gray-500">
-                                    Size:
-                                    {{ $detail?->size ?? ($detail?->variant?->nama ?? '-') }}
-                                    • {{ $sewa->durasi }} hari
-                                    • {{ $sewa->jumlah_hari }} unit
-                                </div>
                             </td>
                             <!-- Periode -->
                             <td class="px-6 py-4">
