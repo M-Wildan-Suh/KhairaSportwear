@@ -187,13 +187,13 @@
                                 <i class="fas fa-phone text-gray-400"></i>
                             </div>
                             <input id="phone" 
-                                   type="tel" 
+                                   type="number" 
                                    name="phone" 
                                    value="{{ old('phone') }}" 
                                    required 
                                    autocomplete="tel"
                                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-indigo-500 input-focus transition duration-200"
-                                   placeholder="0812 3456 7890">
+                                   placeholder="08XXXXXXXXXX">
                         </div>
                         @error('phone')
                             <div class="mt-2 text-red-600 text-sm flex items-center">
