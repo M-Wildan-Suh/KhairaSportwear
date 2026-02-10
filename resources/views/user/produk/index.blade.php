@@ -175,7 +175,7 @@
                 <!-- Section Header -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8" data-aos="fade-up">
                     <div>
-                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Alat Tersedia untuk Disewa</h2>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Alat Tersedia untuk Dibeli</h2>
                         <p class="text-gray-600">Pilih dari koleksi alat olahraga premium kami</p>
                     </div>
                     <div class="mt-4 md:mt-0">
@@ -188,7 +188,10 @@
                 <!-- Products -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="productsGrid">
                     @forelse($produks as $produk)
-                        <div class="group" data-aos="fade-up" data-aos-delay="{{ $loop->index * 50 }}">
+                            <div class="group" 
+         data-category="{{ $produk->kategori->id }}" 
+         data-name="{{ strtolower($produk->nama) }}"
+         data-aos="fade-up">
                             <div
                                 class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col">
                                 <!-- Image Container -->
@@ -684,4 +687,90 @@
             });
         });
     </script>
+
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initSearch();
+});
+
+function initSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchProducts();
+            }, 300);
+        });
+    }
+    
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', searchProducts);
+    }
+}
+
+function searchProducts() {
+    const searchTerm = document.getElementById('searchInput')?.value.toLowerCase().trim() || '';
+    const categoryId = document.getElementById('categoryFilter')?.value || '';
+    
+    let visibleCount = 0;
+    
+    document.querySelectorAll('.group[data-category]').forEach(card => {
+        const productName = card.dataset.name || '';
+        const productCategory = card.dataset.category || '';
+        
+        const matchesSearch = !searchTerm || productName.includes(searchTerm);
+        const matchesCategory = !categoryId || productCategory === categoryId;
+        
+        if (matchesSearch && matchesCategory) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    updateProductCount(visibleCount);
+    showEmptyState(visibleCount === 0);
+}
+
+function updateProductCount(count) {
+    const countElement = document.getElementById('productCount');
+    if (countElement) {
+        countElement.textContent = count;
+    }
+}
+
+function showEmptyState(show) {
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) {
+        emptyState.style.display = show ? 'block' : 'none';
+    }
+}
+
+function clearFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    
+    if (searchInput) searchInput.value = '';
+    if (categoryFilter) categoryFilter.value = '';
+    
+    document.querySelectorAll('.group[data-category]').forEach(card => {
+        card.style.display = 'block';
+    });
+    
+    const totalProducts = document.querySelectorAll('.group[data-category]').length;
+    updateProductCount(totalProducts);
+    showEmptyState(false);
+}
+
+window.searchProducts = searchProducts;
+window.clearFilters = clearFilters;
+</script>
+
 @endpush

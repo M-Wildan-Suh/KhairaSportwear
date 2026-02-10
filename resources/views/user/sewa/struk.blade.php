@@ -23,7 +23,11 @@
             </div>
             <div class="flex justify-between">
                 <span class="text-gray-500">Tanggal</span>
-                <span class="font-medium">{{$data->transaksi->tanggal_pembayaran}}</span>
+                <span class="font-medium">
+                    {{ $data->transaksi->tanggal_pembayaran 
+                        ? $data->transaksi->tanggal_pembayaran->format('d/m/Y H:i')
+                        : $data->transaksi->created_at->format('d/m/Y H:i') }}
+                </span>
             </div>
             <div class="flex justify-between">
                 <span class="text-gray-500">Pelanggan</span>
@@ -62,11 +66,22 @@
             </div>
         </div>
 
-        <!-- Status -->
+        <!-- Status Pembayaran - DINAMIS -->
         <div class="text-center mb-4">
-            <span class="inline-block px-4 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
-                LUNAS
-            </span>
+            @if($data->transaksi->is_lunas)
+                <span class="inline-block px-4 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                    LUNAS
+                </span>
+            @else
+                <span class="inline-block px-4 py-1 rounded-full bg-red-100 text-red-700 text-sm font-medium">
+                    BELUM LUNAS
+                </span>
+                @if($data->transaksi->metode_pembayaran === 'tunai')
+                    <p class="text-xs text-gray-500 mt-2">
+                        Mohon lakukan pembayaran saat pengambilan/pengiriman barang
+                    </p>
+                @endif
+            @endif
         </div>
 
         <!-- Footer -->
