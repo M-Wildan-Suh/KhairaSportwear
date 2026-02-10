@@ -19,9 +19,40 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\KategoriController as AdminKategoriController; // Tambahkan ini
 use App\Http\Controllers\Admin\CheckoutController; // Tambahkan ini jika ada
+use App\Models\User;
+use Illuminate\Http\Request;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/aktivasi/ya/{id}', function(Request $request,$id){
+
+    if(!$request->hasValidSignature()){
+        abort(403,'Link tidak valid / expired');
+    }
+
+    $user = User::findOrFail($id);
+    $user->is_active = true;
+    $user->save();
+
+    return redirect('/login')->with('success','Akun berhasil diaktifkan, silakan login');
+
+})->name('aktivasi.ya');
+
+
+Route::get('/aktivasi/tidak/{id}', function(Request $request,$id){
+
+    if(!$request->hasValidSignature()){
+        abort(403);
+    }
+
+    $user = User::findOrFail($id);
+
+    // optional hapus akun
+    $user->delete();
+
+    return "Anda memilih tidak mengaktifkan akun.";
+})->name('aktivasi.tidak');
 
 // =======================
 // PRODUK PUBLIC (TANPA LOGIN)

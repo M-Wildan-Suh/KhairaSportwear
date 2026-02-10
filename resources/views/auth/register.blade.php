@@ -192,6 +192,7 @@
                                    value="{{ old('phone') }}" 
                                    required 
                                    autocomplete="tel"
+                                   oninput="if(this.value.length > 14) this.value = this.value.slice(0,14)"
                                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-indigo-500 input-focus transition duration-200"
                                    placeholder="08XXXXXXXXXX">
                         </div>

@@ -9,6 +9,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -31,7 +33,7 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:500'],
@@ -43,21 +45,43 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'address' => $request->address,
-            'role' => 'user', // Default role untuk user baru
+            'role' => 'user',
+            'is_active' => false // 🔥 default belum aktif
         ]);
 
         event(new Registered($user));
 
-        // Auth::login($user);
-
-        // Kirim notifikasi welcome
-        \App\Models\Notifikasi::createNotifikasi(
-            $user->id,
-            'Selamat Datang di SportWear!',
-            'Terima kasih telah bergabung dengan SportWear. Nikmati pengalaman berbelanja dan menyewa alat olahraga terbaik.',
-            'success'
+        // =============================
+        // BUAT LINK AKTIVASI YA / TIDAK
+        // =============================
+        $yesLink = URL::temporarySignedRoute(
+            'aktivasi.ya',
+            now()->addHours(24),
+            ['id' => $user->id]
         );
 
-        return redirect(route('login', absolute: false));
+        $noLink = URL::temporarySignedRoute(
+            'aktivasi.tidak',
+            now()->addHours(24),
+            ['id' => $user->id]
+        );
+
+        // =============================
+        // KIRIM EMAIL
+        // =============================
+        Mail::send('emails.aktivasi', compact('user', 'yesLink', 'noLink'), function ($m) use ($user) {
+            $m->to($user->email)->subject('Aktifkan Akun SportWear');
+        });
+
+        // notif welcome (opsional)
+        \App\Models\Notifikasi::createNotifikasi(
+            $user->id,
+            'Pendaftaran Berhasil',
+            'Silakan cek email untuk aktivasi akun Anda.',
+            'info'
+        );
+
+        return redirect(route('login'))
+            ->with('success', 'Registrasi berhasil! Cek email untuk aktivasi akun.');
     }
 }

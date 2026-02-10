@@ -22,41 +22,49 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-public function store(LoginRequest $request): RedirectResponse
-{
-    $request->authenticate();
-    $request->session()->regenerate();
+    public function store(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate();
+        $request->session()->regenerate();
 
-    $user = Auth::user();
+        $user = Auth::user();
 
-    // Notifikasi login
-    if (class_exists(\App\Models\Notifikasi::class)) {
-        \App\Models\Notifikasi::createNotifikasi(
-            $user->id,
-            'Login Berhasil',
-            'Anda berhasil login ke akun SportWear.',
-            'success'
-        );
+        if (!$user->is_active) {
+            Auth::logout();
+
+            return back()->withErrors([
+                'email' => 'Akun belum diaktifkan. Cek email.'
+            ]);
+        }
+
+        // Notifikasi login
+        if (class_exists(\App\Models\Notifikasi::class)) {
+            \App\Models\Notifikasi::createNotifikasi(
+                $user->id,
+                'Login Berhasil',
+                'Anda berhasil login ke akun SportWear.',
+                'success'
+            );
+        }
+
+        $request->session()->flash('login_success', 'Login Berhasil!');
+
+        // 🔑 AMBIL RETURN URL DARI MODAL
+        $returnUrl = $request->input('return');
+
+        // 🛡️ KEAMANAN: pastikan URL internal
+        if ($returnUrl && str_starts_with($returnUrl, url('/'))) {
+            return redirect()->to($returnUrl);
+        }
+
+        // Role admin
+        if ($user->isAdmin()) {
+            return redirect()->intended(route('admin.dashboard', false));
+        }
+
+        // Default user
+        return redirect()->intended(route('user.dashboard', false));
     }
-
-    $request->session()->flash('login_success', 'Login Berhasil!');
-
-    // 🔑 AMBIL RETURN URL DARI MODAL
-    $returnUrl = $request->input('return');
-
-    // 🛡️ KEAMANAN: pastikan URL internal
-    if ($returnUrl && str_starts_with($returnUrl, url('/'))) {
-        return redirect()->to($returnUrl);
-    }
-
-    // Role admin
-    if ($user->isAdmin()) {
-        return redirect()->intended(route('admin.dashboard', false));
-    }
-
-    // Default user
-    return redirect()->intended(route('user.dashboard', false));
-}
 
 
     /**
@@ -65,7 +73,7 @@ public function store(LoginRequest $request): RedirectResponse
     public function destroy(Request $request): RedirectResponse
     {
         $user = Auth::user();
-        
+
         // Kirim notifikasi logout jika user ada
         if ($user && class_exists(\App\Models\Notifikasi::class)) {
             \App\Models\Notifikasi::createNotifikasi(
@@ -78,7 +86,7 @@ public function store(LoginRequest $request): RedirectResponse
 
         // Tambahkan session flash untuk logout
         $request->session()->flash('logout_success', 'Anda telah berhasil logout.');
-        
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
