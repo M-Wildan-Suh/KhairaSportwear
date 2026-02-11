@@ -7,6 +7,8 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -32,8 +34,24 @@ class AuthenticatedSessionController extends Controller
         if (!$user->is_active) {
             Auth::logout();
 
+            $yesLink = URL::temporarySignedRoute(
+                'aktivasi.ya',
+                now()->addHours(24),
+                ['id' => $user->id]
+            );
+
+            $noLink = URL::temporarySignedRoute(
+                'aktivasi.tidak',
+                now()->addHours(24),
+                ['id' => $user->id]
+            );
+
+            Mail::send('emails.aktivasi', compact('user', 'yesLink', 'noLink'), function ($m) use ($user) {
+                $m->to($user->email)->subject('Aktivasi Ulang Akun SportWear');
+            });
+
             return back()->withErrors([
-                'email' => 'Akun belum diaktifkan. Cek email.'
+                'email' => 'Akun belum aktif. Link aktivasi sudah dikirim ulang ke email Anda.'
             ]);
         }
 
