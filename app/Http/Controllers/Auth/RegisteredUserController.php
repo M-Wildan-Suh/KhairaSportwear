@@ -46,7 +46,7 @@ class RegisteredUserController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
             'role' => 'user',
-            'is_active' => false // 🔥 default belum aktif
+            'is_active' => true // 🔥 default belum aktif
         ]);
 
         event(new Registered($user));
